@@ -6,9 +6,105 @@
 #endif
 
 #include "materialsystem/imaterialsystemhardwareconfig.h"
+#include "materialsystem/imaterialsystem.h"
+
+struct HWInfo_t : public MaterialAdapterInfo_t
+{
+	int m_nSamplerCount;
+	bool m_bHasSetDeviceGammaRamp;
+	bool m_bSupportsCompressedTextures;
+	VertexCompressionType_t m_VertexCompressionType;
+	bool m_bSupportsNormalMapCompression;
+
+	bool m_bSupportsVertexAndPixelShaders;
+	bool m_bSupportsPixelShaders_1_4;
+	bool m_bSupportsPixelShaders_2_0;
+	bool m_bSupportsPixelShaders_2_b;
+	bool m_bSupportsShaderModel_3_0;
+	bool m_bSupportsVertexShaders_2_0;
+
+	bool m_bSupportsStaticControlFlow;
+	int m_nMaximumAnisotropicLevel;
+	int m_nMaxTextureWidth;
+	int m_nMaxTextureHeight;
+	int m_nTextureMemorySize;
+	bool m_bSupportsOverbright;
+	bool m_bSupportsCubemaps;
+	bool m_bSupportsMipmappedCubemaps;
+	bool m_bSupportsNonPow2Textures;
+
+	int m_nTextureStageCount;
+	int m_nNumVertexShaderConstants;
+	int m_nNumPixelShaderConstants;
+	int m_nMaxNumLights;
+	bool m_bSupportsHardwareLighting;
+	int m_nMaxBlendMatrices;
+	int m_nMaxBlendMatrixIndices;
+	int m_nMaxTextureAspectRatio;
+	int m_nMaxVertexShaderBlendMatrices;
+	int m_nMaxUserClipPlanes;
+	bool m_bUseFastClipping;
+
+	int m_nDXSupportLevel;
+	const char *m_pShaderDLLName;
+
+	bool m_bPreferDynamicTextures;
+
+	bool m_bSupportsHDR;
+
+	bool m_bHasProjectedBumpEnv;
+	bool m_bSupportsSpheremapping;
+	bool m_bNeedsAAClamp;
+	bool m_bNeedsATICentroidHack;
+
+	bool m_bSupportsColorOnSecondStream;
+	bool m_bSupportsStaticPlusDynamicLighting;
+
+	bool m_bPreferReducedFillrate;
+
+	int	 m_nMaxDXSupportLevel;
+
+	bool m_bSpecifiesFogColorInLinearSpace;
+
+	bool m_bSupportsSRGB;
+	bool m_bFakeSRGBWrite;
+	bool m_bCanDoSRGBReadFromRTs;
+
+	bool m_bSupportsGLMixedSizeTargets;
+
+	int m_nVertexTextureCount;
+	int m_nMaxVertexTextureDimension;
+
+	int m_nMaxTextureDepth;
+
+	HDRType_t m_HDRType;
+
+	bool m_bSupportsStreamOffset;
+	bool m_bSupportsStreamOffsetActual;
+
+	int m_nMaxViewports;
+
+	int m_nShadowFilterMode;
+
+	int m_nNeedsShaderSRGBConversion;
+
+	bool m_bUsesSRGBCorrectBlending;
+
+	bool m_bHasFastVertexTextures;
+
+	bool m_bActuallySupportsPixelShaders_2_b;
+
+	HDRType_t m_MaxHDRMode;
+
+	bool m_bSupportsBorderColor;
+	bool m_bSupportsFetch4;
+};
 
 class CHardwareConfigDX11 : public IMaterialSystemHardwareConfig
 {
+public:
+	CHardwareConfigDX11();
+
 	virtual bool HasDestAlphaBuffer() const;
 	virtual bool HasStencilBuffer() const;
 	virtual int	 GetFrameBufferColorDepth() const;
@@ -17,11 +113,15 @@ class CHardwareConfigDX11 : public IMaterialSystemHardwareConfig
 	virtual bool SupportsCompressedTextures() const;
 	virtual VertexCompressionType_t SupportsCompressedVertices() const;
 	virtual bool SupportsNormalMapCompression() const;
+
 	virtual bool SupportsVertexAndPixelShaders() const;
 	virtual bool SupportsPixelShaders_1_4() const;
-	virtual bool SupportsStaticControlFlow() const;
 	virtual bool SupportsPixelShaders_2_0() const;
+	virtual bool SupportsPixelShaders_2_b() const;
+	virtual bool SupportsShaderModel_3_0() const;
 	virtual bool SupportsVertexShaders_2_0() const;
+
+	virtual bool SupportsStaticControlFlow() const;
 	virtual int  MaximumAnisotropicLevel() const;	// 0 means no anisotropic filtering
 	virtual int  MaxTextureWidth() const;
 	virtual int  MaxTextureHeight() const;
@@ -94,7 +194,6 @@ class CHardwareConfigDX11 : public IMaterialSystemHardwareConfig
 	virtual HDRType_t GetHDRType() const;
 	virtual HDRType_t GetHardwareHDRType() const;
 
-	virtual bool SupportsPixelShaders_2_b() const;
 	virtual bool SupportsStreamOffset() const;
 
 	virtual int StencilBufferBits() const;
@@ -108,7 +207,6 @@ class CHardwareConfigDX11 : public IMaterialSystemHardwareConfig
 
 	virtual bool UsesSRGBCorrectBlending() const;
 
-	virtual bool SupportsShaderModel_3_0() const;
 	virtual bool HasFastVertexTextures() const;
 	virtual int MaxHWMorphBatchCount() const;
 
@@ -125,6 +223,13 @@ class CHardwareConfigDX11 : public IMaterialSystemHardwareConfig
 
 	inline bool ShouldAlwaysUseShaderModel2bShaders() const { return IsOpenGL(); }
 	inline bool PlatformRequiresNonNullPixelShaders() const { return IsOpenGL(); }
+private:
+
+	void SetupHWInfo(int nDXLevel);
+
+	HWInfo_t m_HWInfo;
+
+	bool m_bHDREnabled;
 };
 
 #endif // HARDWARECONFIGDX11_H
