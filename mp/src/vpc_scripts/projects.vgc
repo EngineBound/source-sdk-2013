@@ -74,6 +74,11 @@ $Project "serverplugin_empty"
 	"utils\serverplugin_sample\serverplugin_empty.vpc" [$WIN32||$POSIX]
 }
 
+$Project "shaderapidx11"
+{
+    "materialsystem\shaderapidx11\shaderapidx11.vpc" [$WIN32]
+}
+
 $Project "tgadiff"
 {
 	"utils\tgadiff\tgadiff.vpc" [$WIN32]

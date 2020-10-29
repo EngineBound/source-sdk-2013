@@ -1,0 +1,37 @@
+//-----------------------------------------------------------------------------
+//	shaderapidx11.vpc
+//
+//	Project Script for DirectX11 shader API.
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro OUTBINDIR	"$SRCDIR\..\game\bin"
+$Macro OUTBINNAME	"shaderapidx11"
+$Macro GAMENAME "dml"
+
+$Include "$SRCDIR\vpc_scripts\source_dll_base.vpc"
+
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories		"$BASE,..\..\public\shaderapi"
+	}
+}
+
+$Project "ShaderApiDx11 (DML)"
+{
+	$Folder "Source Files"
+	{
+        $File	"shaderapidx11.h"
+        $File	"shaderapidx11.cpp"
+        $File	"shaderdevicemgrdx11.h"
+        $File	"shaderdevicemgrdx11.cpp"
+        $File	"hardwareconfigdx11.h"
+        $File	"hardwareconfigdx11.cpp"
+        $File	"shaderdevicedx11.h"
+        $File	"shaderdevicedx11.cpp"
+        $File	"shadershadowdx11.h"
+        $File	"shadershadowdx11.cpp"
+	}
+}
