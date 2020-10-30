@@ -1,4 +1,6 @@
 #include "shaderapidx11.h"
+#include "shaderapidx11_global.h"
+
 
 static CShaderAPIDX11 s_ShaderAPIDx11;
 CShaderAPIDX11 *g_pShaderAPIDx11 = &s_ShaderAPIDx11;
@@ -8,6 +10,15 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IShaderAPI,
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IDebugTextureInfo,
 	DEBUG_TEXTURE_INFO_VERSION, s_ShaderAPIDx11)
+
+// Globals
+IShaderUtil* g_pShaderUtil = 0;
+CShaderDeviceDX11 *g_pShaderDevice = 0;
+CShaderDeviceMgrDX11 *g_pShaderDeviceMgr = 0;
+CShaderAPIDX11 *g_pShaderAPI = 0;
+CShaderShadowDX11 *g_pShaderShadow = 0;
+
+CHardwareConfigDX11 *g_pHardwareConfig = 0;
 
 CShaderAPIDX11::CShaderAPIDX11()
 {

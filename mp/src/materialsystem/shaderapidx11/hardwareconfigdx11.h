@@ -45,8 +45,8 @@ struct HWInfo_t : public MaterialAdapterInfo_t
 	int m_nMaxUserClipPlanes;
 	bool m_bUseFastClipping;
 
-	int m_nDXSupportLevel;
-	const char *m_pShaderDLLName;
+	//int m_nDXSupportLevel;
+	char m_pShaderDLLName[32];
 
 	bool m_bPreferDynamicTextures;
 
@@ -62,7 +62,7 @@ struct HWInfo_t : public MaterialAdapterInfo_t
 
 	bool m_bPreferReducedFillrate;
 
-	int	 m_nMaxDXSupportLevel;
+	//int	 m_nMaxDXSupportLevel;
 
 	bool m_bSpecifiesFogColorInLinearSpace;
 
@@ -86,7 +86,7 @@ struct HWInfo_t : public MaterialAdapterInfo_t
 
 	int m_nShadowFilterMode;
 
-	int m_nNeedsShaderSRGBConversion;
+	bool m_bNeedsShaderSRGBConversion;
 
 	bool m_bUsesSRGBCorrectBlending;
 

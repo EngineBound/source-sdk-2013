@@ -74,7 +74,7 @@ bool CHardwareConfigDX11::SupportsNormalMapCompression() const
 
 bool CHardwareConfigDX11::SupportsVertexAndPixelShaders() const // DX80+
 {
-	if ((ShaderUtil()->GetConfig().dxSupportLevel != 0) && (GetDXSupportLevel() < 80))
+	if (GetDXSupportLevel() < 80)
 		return false;
 
 	return m_HWInfo.m_bSupportsVertexAndPixelShaders;
@@ -82,7 +82,7 @@ bool CHardwareConfigDX11::SupportsVertexAndPixelShaders() const // DX80+
 
 bool CHardwareConfigDX11::SupportsPixelShaders_1_4() const // DX81+
 {
-	if ((ShaderUtil()->GetConfig().dxSupportLevel != 0) && (GetDXSupportLevel() < 81))
+	if (GetDXSupportLevel() < 81)
 		return false;
 
 	return m_HWInfo.m_bSupportsPixelShaders_1_4;
@@ -90,7 +90,7 @@ bool CHardwareConfigDX11::SupportsPixelShaders_1_4() const // DX81+
 
 bool CHardwareConfigDX11::SupportsPixelShaders_2_0() const // DX90+
 {
-	if ((ShaderUtil()->GetConfig().dxSupportLevel != 0) && (GetDXSupportLevel() < 90))
+	if (GetDXSupportLevel() < 90)
 		return false;
 
 	return m_HWInfo.m_bSupportsPixelShaders_2_0;
@@ -98,7 +98,7 @@ bool CHardwareConfigDX11::SupportsPixelShaders_2_0() const // DX90+
 
 bool CHardwareConfigDX11::SupportsVertexShaders_2_0() const // DX90+
 {
-	if ((ShaderUtil()->GetConfig().dxSupportLevel != 0) && (GetDXSupportLevel() < 90))
+	if (GetDXSupportLevel() < 90)
 		return false;
 
 	return m_HWInfo.m_bSupportsVertexShaders_2_0;
@@ -106,7 +106,7 @@ bool CHardwareConfigDX11::SupportsVertexShaders_2_0() const // DX90+
 
 bool CHardwareConfigDX11::SupportsPixelShaders_2_b() const // DX90+
 {
-	if ((ShaderUtil()->GetConfig().dxSupportLevel != 0) && (GetDXSupportLevel() < 90))
+	if (GetDXSupportLevel() < 90)
 		return false;
 
 	return m_HWInfo.m_bSupportsPixelShaders_2_b;
@@ -114,7 +114,7 @@ bool CHardwareConfigDX11::SupportsPixelShaders_2_b() const // DX90+
 
 bool CHardwareConfigDX11::SupportsShaderModel_3_0() const // DX95+
 {
-	if ((ShaderUtil()->GetConfig().dxSupportLevel != 0) && (GetDXSupportLevel() < 95))
+	if (GetDXSupportLevel() < 95)
 		return false;
 
 	return m_HWInfo.m_bSupportsShaderModel_3_0;
@@ -192,16 +192,25 @@ int	 CHardwareConfigDX11::MaxNumLights() const
 
 bool CHardwareConfigDX11::SupportsHardwareLighting() const // DX70+
 {
+	if (GetDXSupportLevel() < 70)
+		return false;
+
 	return m_HWInfo.m_bSupportsHardwareLighting;
 }
 
 int	 CHardwareConfigDX11::MaxBlendMatrices() const // 1 for < DX70
 {
+	if (GetDXSupportLevel() < 70)
+		return 1;
+
 	return m_HWInfo.m_nMaxBlendMatrices;
 }
 
 int	 CHardwareConfigDX11::MaxBlendMatrixIndices() const // 1 for < DX70
 {
+	if (GetDXSupportLevel() < 70)
+		return 1;
+
 	return m_HWInfo.m_nMaxBlendMatrixIndices;
 }
 
@@ -212,6 +221,9 @@ int	 CHardwareConfigDX11::MaxTextureAspectRatio() const
 
 int	 CHardwareConfigDX11::MaxVertexShaderBlendMatrices() const // 1 for < DX70
 {
+	if (GetDXSupportLevel() < 70)
+		return 1;
+
 	return m_HWInfo.m_nMaxVertexShaderBlendMatrices;
 }
 
@@ -289,6 +301,9 @@ bool CHardwareConfigDX11::SupportsColorOnSecondStream() const
 
 bool CHardwareConfigDX11::SupportsStaticPlusDynamicLighting() const // DX80+ iff
 {
+	if (GetDXSupportLevel() < 80)
+		return false;
+
 	return m_HWInfo.m_bSupportsStaticPlusDynamicLighting;
 }
 
@@ -367,6 +382,9 @@ int  CHardwareConfigDX11::MaxTextureDepth() const
 
 HDRType_t CHardwareConfigDX11::GetHDRType() const // DX90+
 {
+	if (GetDXSupportLevel() < 90)
+		return HDR_TYPE_NONE;
+
 	return m_HWInfo.m_HDRType;
 }
 
@@ -378,6 +396,9 @@ HDRType_t CHardwareConfigDX11::GetHardwareHDRType() const
 
 bool CHardwareConfigDX11::SupportsStreamOffset() const // DX90+
 {
+	if (GetDXSupportLevel() < 90)
+		return false;
+
 	return m_HWInfo.m_bSupportsStreamOffset;
 }
 

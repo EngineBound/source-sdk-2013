@@ -1,15 +1,22 @@
-#ifndef HARDWARECONFIGDX11_H
-#define HARDWARECONFIGDX11_H
+#ifndef SHADERDEVICEDX11_H
+#define SHADERDEVICEDX11_H
 
 #ifdef _WIN32
 #pragma once
 #endif
 
 #include "IShaderDevice.h"
+#include <d3d11.h>
 
 class CShaderDeviceDX11 : public IShaderDevice
 {
 public:
+	CShaderDeviceDX11();
+	//~CShaderDeviceDX11();
+
+	bool Initialize(void *hWnd, int nAdapter, const ShaderDeviceInfo_t mode);
+	void Shutdown();
+
 	// Releases/reloads resources when other apps want some memory
 	virtual void ReleaseResources();
 	virtual void ReacquireResources();
@@ -96,6 +103,21 @@ public:
 #endif
 	virtual char *GetDisplayDeviceName();
 
+private:
+
+	int m_nCurrentAdapter;
+	bool m_bDeviceInitialized;
+
+	IDXGISwapChain *m_pDXGISwapChain;
+	IDXGIOutput *m_pDXGIOutput;
+	ID3D11Device *m_pDXGIDevice;
+	ID3D11DeviceContext* m_pDXGIDeviceContext;
+
+	void *m_CurrenthWnd;
+	int m_nWndWidth, m_nWndHeight;
+
+	friend class CShaderDeviceMgrDX11;
+
 };
 
-#endif // HARDWARECONFIGDX11_H
+#endif // SHADERDEVICEDX11_H

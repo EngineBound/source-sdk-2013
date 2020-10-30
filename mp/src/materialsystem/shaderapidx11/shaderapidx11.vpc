@@ -17,6 +17,11 @@ $Configuration
 	{
 		$AdditionalIncludeDirectories		"$BASE,..\..\public\shaderapi"
 	}
+    
+    	$Linker
+	{
+		$AdditionalDependencies				"$BASE d3d11.lib dxgi.lib"
+	}
 }
 
 $Project "ShaderApiDx11 (DML)"
@@ -33,5 +38,6 @@ $Project "ShaderApiDx11 (DML)"
         $File	"shaderdevicedx11.cpp"
         $File	"shadershadowdx11.h"
         $File	"shadershadowdx11.cpp"
+        $File   "shaderapidx11_global.h"
 	}
 }

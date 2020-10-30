@@ -1,5 +1,5 @@
-#ifndef HARDWARECONFIGDX11_H
-#define HARDWARECONFIGDX11_H
+#ifndef SHADERSHADOWDX11_H
+#define SHADERSHADOWDX11_H
 
 #ifdef _WIN32
 #pragma once
@@ -127,4 +127,4 @@ public:
 	virtual void BlendOpSeparateAlpha(ShaderBlendOp_t blendOp);
 };
 
-#endif //HARDWARECONFIGDX11_H
+#endif //SHADERSHADOWDX11_H
