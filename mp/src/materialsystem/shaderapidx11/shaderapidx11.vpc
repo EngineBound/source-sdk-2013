@@ -13,14 +13,22 @@ $Include "$SRCDIR\vpc_scripts\source_dll_base.vpc"
 
 $Configuration
 {
+    $General
+	{
+		$PlatformToolset "v120" // Minimum requirement for DX11
+	}
+
 	$Compiler
 	{
-		$AdditionalIncludeDirectories		"$BASE,..\..\public\shaderapi"
+		$AdditionalIncludeDirectories		"$BASE;..\..\public\shaderapi"
+        $PreprocessorDefinitions		"$BASE;SHADERAPIDX9;SHADER_DLL_EXPORT;strncpy=use_Q_strncpy_instead;_snprintf=use_Q_snprintf_instead"
+		$PreprocessorDefinitions		"$BASE;USE_ACTUAL_DX" [($WIN32||$X360) && !$GL]
+		$PreprocessorDefinitions		"$BASE;GL_GLEXT_PROTOTYPES;DX_TO_GL_ABSTRACTION" [$GL]
 	}
     
-    	$Linker
+    $Linker
 	{
-		$AdditionalDependencies				"$BASE d3d11.lib dxgi.lib"
+		$AdditionalDependencies				"$BASE d3d11.lib dxgi.lib dxguid.lib D3DCompiler.lib"
 	}
 }
 
@@ -39,5 +47,7 @@ $Project "ShaderApiDx11 (DML)"
         $File	"shadershadowdx11.h"
         $File	"shadershadowdx11.cpp"
         $File   "shaderapidx11_global.h"
+        $File   "vertexshaderdx11.h"
+        $File   "vertexshaderdx11.cpp"
 	}
 }
