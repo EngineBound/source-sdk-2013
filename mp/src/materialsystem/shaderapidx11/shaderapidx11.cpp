@@ -1,5 +1,7 @@
 #include "shaderapidx11.h"
 #include "shaderapidx11_global.h"
+#include "shaderdevicedx11.h"
+#include "ishaderutil.h"
 
 
 static CShaderAPIDX11 s_ShaderAPIDx11;
@@ -20,124 +22,149 @@ CShaderShadowDX11 *g_pShaderShadow = 0;
 
 CHardwareConfigDX11 *g_pHardwareConfig = 0;
 
+// This file requires shader states to function, write those first :))
+
 CShaderAPIDX11::CShaderAPIDX11()
 {
 	_ldtmp = LightDesc_t();
 	_vectmp = Vector(0, 0, 0);
 }
-
+	
+// Set nCount viewports to those in pViewports
 void CShaderAPIDX11::SetViewports(int nCount, const ShaderViewport_t* pViewports) 
 {
 	return;
 }
 
+// Get viewports up to nMax, stored in pViewports array and return num stored
 int CShaderAPIDX11::GetViewports(ShaderViewport_t* pViewports, int nMax) const
 {
 	return 0;
 }
 
+// Return system time
 double CShaderAPIDX11::CurrentTime() const
 {
-	return 0.0;
+	return Sys_FloatTime();
 }
 
+// Get dimensions of lightmap, REQUIRES SHADERUTIL TO BE INITIALIZED
 void CShaderAPIDX11::GetLightmapDimensions(int *w, int *h)
 {
-	return;
+	g_pShaderUtil->GetLightmapDimensions(w, h);
 }
 
+// Get fog mode
 MaterialFogMode_t CShaderAPIDX11::GetSceneFogMode()
 {
 	return MATERIAL_FOG_NONE;
 }
 
-
+// Get fog color of the scene
 void CShaderAPIDX11::GetSceneFogColor(unsigned char *rgb)
 {
 	return;
 }
 
 // stuff related to matrix stacks
+
+// Get current matrix 'mode', which matrix is being updated
 void CShaderAPIDX11::MatrixMode(MaterialMatrixMode_t matrixMode)
 {
 	return;
 }
 
+// Evidently, push and pop in this context don't mean what I thought they did
+
+// Push a matrix, meaning add an item and call constructor
 void CShaderAPIDX11::PushMatrix()
 {
 	return;
 }
 
+// Pop a matrix, meaning remove an item
 void CShaderAPIDX11::PopMatrix()
 {
 	return;
 }
 
+// Load m into current matrix, fulfilling the other end of push
 void CShaderAPIDX11::LoadMatrix(float *m)
 {
 	return;
 }
 
+// curMat = curMat x m
 void CShaderAPIDX11::MultMatrix(float *m)
 {
 	return;
 }
 
+// curMat = m x curMat
 void CShaderAPIDX11::MultMatrixLocal(float *m)
 {
 	return;
 }
 
+// dst = matrix in matrixMode slot, e.g. technically fulfilling other end of pop
 void CShaderAPIDX11::GetMatrix(MaterialMatrixMode_t matrixMode, float *dst)
 {
 	return;
 }
 
+// Set curMat to identity matrix
 void CShaderAPIDX11::LoadIdentity(void)
 {
 	return;
 }
 
+// Set curMat to camera2world matrix (Probably)
 void CShaderAPIDX11::LoadCameraToWorld(void)
 {
 	return;
 }
 
+// Set current matrix to ortho matrix given view 'cube' (Probably)
 void CShaderAPIDX11::Ortho(double left, double right, double bottom, double top, double zNear, double zFar)
 {
 	return;
 }
 
+// Set current matrix to perspective matrix given clip planes, aspect ratio and x angle
 void CShaderAPIDX11::PerspectiveX(double fovx, double aspect, double zNear, double zFar)
 {
 	return;
 }
 
+// Set current matrix to matrix given a subrect of the screen (Probably)
 void CShaderAPIDX11::PickMatrix(int x, int y, int width, int height)
 {
 	return;
 }
 
+// Rotate the current matrix by angle around axis x,y,z
 void CShaderAPIDX11::Rotate(float angle, float x, float y, float z)
 {
 	return;
 }
 
+// Translate current matrix by x,y,z in absolute coordinates (Probably)
 void CShaderAPIDX11::Translate(float x, float y, float z)
 {
 	return;
 }
 
+// Scale current matrix by x,y,z in absolute axes (Probably)
 void CShaderAPIDX11::Scale(float x, float y, float z)
 {
 	return;
 }
 
+// Scale current matrix by x,y,1 in absolute axes (probably)
 void CShaderAPIDX11::ScaleXY(float x, float y)
 {
 	return;
 }
-
 
 // Sets the color to modulate by
 void CShaderAPIDX11::Color3f(float r, float g, float b)
@@ -207,18 +234,19 @@ void CShaderAPIDX11::GetWorldSpaceCameraPosition(float* pPos) const
 	return;
 }
 
-
+// Number of bones for current rendered item? (maybe just everything but i doubt it)
 int CShaderAPIDX11::GetCurrentNumBones(void) const
 {
 	return 0;
 }
 
+// Doesn't do anything I think
 int CShaderAPIDX11::GetCurrentLightCombo(void) const
 {
 	return 0;
 }
 
-
+// Get fog type of scene
 MaterialFogMode_t CShaderAPIDX11::GetCurrentFogType(void) const
 {
 	return MATERIAL_FOG_NONE;
@@ -226,16 +254,20 @@ MaterialFogMode_t CShaderAPIDX11::GetCurrentFogType(void) const
 
 
 // fixme: move this to shadow state
+
+// Deprecated in dx11 I believe
 void CShaderAPIDX11::SetTextureTransformDimension(TextureStage_t textureStage, int dimension, bool projected)
 {
 	return;
 }
 
+// Deprecated in dx11 I believe
 void CShaderAPIDX11::DisableTextureTransform(TextureStage_t textureStage)
 {
 	return;
 }
 
+// Deprecated in dx11 I believe
 void CShaderAPIDX11::SetBumpEnvMatrix(TextureStage_t textureStage, float m00, float m01, float m10, float m11)
 {
 	return;
@@ -257,7 +289,7 @@ void CShaderAPIDX11::SetPixelShaderIndex(int pshIndex)
 // Get the dimensions of the back buffer.
 void CShaderAPIDX11::GetBackBufferDimensions(int& width, int& height) const
 {
-	return;
+	g_pShaderDeviceDx11->GetBackBufferDimensions(width, height);
 }
 
 
@@ -270,12 +302,13 @@ int CShaderAPIDX11::GetMaxLights(void) const
 	return 0;
 }
 
+// Get light at lightNum
 const LightDesc_t& CShaderAPIDX11::GetLight(int lightNum) const
 {
 	return _ldtmp;
 }
 
-
+// Set fogparams erm... awkwerd...
 void CShaderAPIDX11::SetPixelShaderFogParams(int reg)
 {
 	return;
@@ -288,16 +321,17 @@ void CShaderAPIDX11::SetVertexShaderStateAmbientLightCube()
 	return;
 }
 
+// Set register pshReg to ambient lightcube, or black if bForceToBlack
 void CShaderAPIDX11::SetPixelShaderStateAmbientLightCube(int pshReg, bool bForceToBlack/* = false*/)
 {
 	return;
 }
 
+// Set pshReg to pshReg + 5 to light data. 4 lights max in default functionality.
 void CShaderAPIDX11::CommitPixelShaderLighting(int pshReg)
 {
 	return;
 }
-
 
 // Use this to get the mesh builder that allows us to modify vertex data
 CMeshBuilder* CShaderAPIDX11::GetVertexModifyBuilder()
@@ -305,19 +339,22 @@ CMeshBuilder* CShaderAPIDX11::GetVertexModifyBuilder()
 	return (CMeshBuilder *)0;
 }
 
+// Currently using flashlight? (Probably)
 bool CShaderAPIDX11::InFlashlightMode() const
 {
-	return false;
+	return ShaderUtil()->InFlashlightMode();
 }
 
+// Get flashlight state and set worldToTexture to the flashlight's worldToTexture matrix
 const FlashlightState_t &CShaderAPIDX11::GetFlashlightState(VMatrix &worldToTexture) const
 {
 	return (FlashlightState_t &)worldToTexture;
 }
 
+
 bool CShaderAPIDX11::InEditorMode() const
 {
-	return false;
+	return ShaderUtil()->InEditorMode();
 }
 
 
@@ -328,65 +365,68 @@ MorphFormat_t CShaderAPIDX11::GetBoundMorphFormat()
 }
 
 
-// Binds a standard texture
+// Binds a standard texture at id to sampler
 void CShaderAPIDX11::BindStandardTexture(Sampler_t sampler, StandardTextureId_t id)
 {
 	return;
 }
 
-
+// Gets rendertarget at nRenderTargetID
 ITexture *CShaderAPIDX11::GetRenderTargetEx(int nRenderTargetID)
 {
-	return (ITexture *)0;
+	return ShaderUtil()->GetRenderTargetEx(nRenderTargetID);
 }
 
-
+// Set tonemapping scale to scale
 void CShaderAPIDX11::SetToneMappingScaleLinear(const Vector &scale)
 {
 	return;
 }
 
+// Return tonemapping scale
 const Vector &CShaderAPIDX11::GetToneMappingScaleLinear(void) const
 {
 	return _vectmp;
 }
 
+// Get lightmap scale
 float CShaderAPIDX11::GetLightMapScaleFactor(void) const
 {
 	return 0.f;
 }
 
-
+// Load matrix m into bone at boneIndex
 void CShaderAPIDX11::LoadBoneMatrix(int boneIndex, const float *m)
 {
 	return;
 }
 
-
+// Create perspective matrix given offset, fov and aspect
 void CShaderAPIDX11::PerspectiveOffCenterX(double fovx, double aspect, double zNear, double zFar, double bottom, double top, double left, double right)
 {
 	return;
 }
 
-
+// Gets max dxlevel and actual dxlevel, puts em in you know where
 void CShaderAPIDX11::GetDXLevelDefaults(uint &max_dxlevel, uint &recommended_dxlevel)
 {
-	return;
+	//max_dxlevel = g_pHardwareConfig->GetInfo().m_nMaxDXSupportLevel;
+	//recommended_dxlevel = g_pHardwareConfig->GetInfo().m_nDXSupportLevel;
 }
 
-
+// Get flashlight state, world2texture mat and flashlightdepthtexture
 const FlashlightState_t &CShaderAPIDX11::GetFlashlightStateEx(VMatrix &worldToTexture, ITexture **pFlashlightDepthTexture) const
 {
 	return (FlashlightState_t &)worldToTexture;
 }
 
-
+// Calculate luminance of lightcube
 float CShaderAPIDX11::GetAmbientLightCubeLuminance()
 {
 	return 0.f;
 }
 
-
+// Get lightstate and put it in state
 void CShaderAPIDX11::GetDX9LightState(LightState_t *state) const
 {
 	return;
@@ -397,7 +437,7 @@ int CShaderAPIDX11::GetPixelFogCombo() //0 is either range fog, or no fog simula
 	return 0;
 }
 
-
+// Bind vertex texture to texture at slot id
 void CShaderAPIDX11::BindStandardVertexTexture(VertexTextureSampler_t sampler, StandardTextureId_t id)
 {
 	return;
@@ -411,32 +451,35 @@ bool CShaderAPIDX11::IsHWMorphingEnabled() const
 }
 
 
+// Get dimensions of standard texture 'id'
 void CShaderAPIDX11::GetStandardTextureDimensions(int *pWidth, int *pHeight, StandardTextureId_t id)
 {
 	return;
 }
 
-
+// Set vertex shader constant var to pVec (BOOLEAN)
 void CShaderAPIDX11::SetBooleanVertexShaderConstant(int var, BOOL const* pVec, int numBools/* = 1*/, bool bForce/* = false*/)
 {
 	return;
 }
 
+// Set vertex shader constant var to pVec (INT)
 void CShaderAPIDX11::SetIntegerVertexShaderConstant(int var, int const* pVec, int numIntVecs/* = 1*/, bool bForce/* = false*/)
 {
 	return;
 }
 
+// Set pixel shader constant var to pVec (BOOLEAN)
 void CShaderAPIDX11::SetBooleanPixelShaderConstant(int var, BOOL const* pVec, int numBools/* = 1*/, bool bForce/* = false*/)
 {
 	return;
 }
 
+// Set pixel shader constant var to pVec (INT)
 void CShaderAPIDX11::SetIntegerPixelShaderConstant(int var, int const* pVec, int numIntVecs/* = 1*/, bool bForce/* = false*/)
 {
 	return;
 }
-
 
 //Are we in a configuration that needs access to depth data through the alpha channel later?
 bool CShaderAPIDX11::ShouldWriteDepthToDestAlpha(void) const
@@ -485,7 +528,7 @@ void CShaderAPIDX11::MarkUnusedVertexFields(unsigned int nFlags, int nTexCoordCo
 }
 
 
-
+// run all the commands in buffer pCmdBuffer
 void CShaderAPIDX11::ExecuteCommandBuffer(uint8 *pCmdBuffer)
 {
 	return;
@@ -505,7 +548,7 @@ void CShaderAPIDX11::GetCurrentColorCorrection(ShaderColorCorrectionInfo_t* pInf
 	return;
 }
 
-
+// Set pshReg to nearz and farz vals
 void CShaderAPIDX11::SetPSNearAndFarZ(int pshReg)
 {
 	return;
@@ -518,11 +561,13 @@ void CShaderAPIDX11::ClearBuffers(bool bClearColor, bool bClearDepth, bool bClea
 	return;
 }
 
+// Set clearcolor to rgb val
 void CShaderAPIDX11::ClearColor3ub(unsigned char r, unsigned char g, unsigned char b)
 {
 	return;
 }
 
+// Set clearcolor to rgba val
 void CShaderAPIDX11::ClearColor4ub(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
 	return;
@@ -563,7 +608,7 @@ bool CShaderAPIDX11::SetMode(void* hwnd, int nAdapter, const ShaderDeviceInfo_t 
 	return false;
 }
 
-
+// Change video mode to that described in info
 void CShaderAPIDX11::ChangeVideoMode(const ShaderDeviceInfo_t &info)
 {
 	return;
@@ -576,23 +621,25 @@ StateSnapshot_t	CShaderAPIDX11::TakeSnapshot()
 	return StateSnapshot_t();
 }
 
-
+// Filter for downscaling??
 void CShaderAPIDX11::TexMinFilter(ShaderTexFilterMode_t texFilterMode)
 {
 	return;
 }
 
+// Filter for upscaling??
 void CShaderAPIDX11::TexMagFilter(ShaderTexFilterMode_t texFilterMode)
 {
 	return;
 }
 
+// How to deal with > range coordinates
 void CShaderAPIDX11::TexWrap(ShaderTexCoordComponent_t coord, ShaderTexWrapMode_t wrapMode)
 {
 	return;
 }
 
-
+// Copy rendertarget 0 to textureHandle
 void CShaderAPIDX11::CopyRenderTargetToTexture(ShaderAPITextureHandle_t textureHandle)
 {
 	return;
@@ -630,21 +677,25 @@ IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t ver
 
 
 // Methods to ask about particular state snapshots
+// Does the state snapshot use translucency
 bool CShaderAPIDX11::IsTranslucent(StateSnapshot_t id) const
 {
 	return false;
 }
 
+// Does the state snapshot use alpha testing
 bool CShaderAPIDX11::IsAlphaTested(StateSnapshot_t id) const
 {
 	return false;
 }
 
+// Does the state snapshot use vertex and pixel shaders
 bool CShaderAPIDX11::UsesVertexAndPixelShaders(StateSnapshot_t id) const
 {
 	return false;
 }
 
+// Does the state snapshot need to write to depth
 bool CShaderAPIDX11::IsDepthWriteEnabled(StateSnapshot_t id) const
 {
 	return false;
@@ -699,12 +750,13 @@ void CShaderAPIDX11::SetLightingOrigin(Vector vLightingOrigin)
 	return;
 }
 
-
+// Set ambient light to r,g,b
 void CShaderAPIDX11::SetAmbientLight(float r, float g, float b)
 {
 	return;
 }
 
+// Set ambient light cube to that described in cube
 void CShaderAPIDX11::SetAmbientLightCube(Vector4D cube[6])
 {
 	return;
@@ -739,23 +791,25 @@ void CShaderAPIDX11::OverrideDepthEnable(bool bEnable, bool bDepthEnable)
 	return;
 }
 
-
+// Does as it says on the tin
 void CShaderAPIDX11::SetHeightClipZ(float z)
 {
 	return;
 }
 
+// How do things render in relation to heightclip z
 void CShaderAPIDX11::SetHeightClipMode(enum MaterialHeightClipMode_t heightClipMode)
 {
 	return;
 }
 
-
+// Set clipping plane at index to plane specified in pPlane
 void CShaderAPIDX11::SetClipPlane(int index, const float *pPlane)
 {
 	return;
 }
 
+// Enable clipping plane at index
 void CShaderAPIDX11::EnableClipPlane(int index, bool bEnable)
 {
 	return;
@@ -775,6 +829,7 @@ ImageFormat CShaderAPIDX11::GetNearestSupportedFormat(ImageFormat fmt, bool bFil
 	return IMAGE_FORMAT_A8;
 }
 
+// Get nearest format usable for render targets to fmt
 ImageFormat CShaderAPIDX11::GetNearestRenderTargetFormat(ImageFormat fmt) const
 {
 	return IMAGE_FORMAT_A8;
@@ -805,13 +860,13 @@ ShaderAPITextureHandle_t CShaderAPIDX11::CreateTexture(
 	return ShaderAPITextureHandle_t();
 }
 
-
+// Delete texture at textureHandle
 void CShaderAPIDX11::DeleteTexture(ShaderAPITextureHandle_t textureHandle)
 {
 	return;
 }
 
-
+// Create a depth texture
 ShaderAPITextureHandle_t CShaderAPIDX11::CreateDepthTexture(
 	ImageFormat renderTargetFormat,
 	int width,
@@ -822,15 +877,18 @@ ShaderAPITextureHandle_t CShaderAPIDX11::CreateDepthTexture(
 	return ShaderAPITextureHandle_t();
 }
 
-
+// Is the texture at textureHandle a texture? Redundant????
 bool CShaderAPIDX11::IsTexture(ShaderAPITextureHandle_t textureHandle)
 {
 	return false;
 }
 
+// Is this a texture from praised video game franchise Resident Evil?
 bool CShaderAPIDX11::IsTextureResident(ShaderAPITextureHandle_t textureHandle)
 {
-	return false;
+	// I actually have no idea what this means but let's settle at yes, it is.
+	
+	return true;
 }
 
 
@@ -842,7 +900,7 @@ void CShaderAPIDX11::ModifyTexture(ShaderAPITextureHandle_t textureHandle)
 	return;
 }
 
-
+// Erm, X360, who cares
 void CShaderAPIDX11::TexImage2D(
 	int level,
 	int cubeFaceID,
@@ -857,7 +915,7 @@ void CShaderAPIDX11::TexImage2D(
 	return;
 }
 
-
+// Erm, X360, who cares
 void CShaderAPIDX11::TexSubImage2D(
 	int level,
 	int cubeFaceID,
@@ -874,6 +932,7 @@ void CShaderAPIDX11::TexSubImage2D(
 	return;
 }
 
+// Get teximage from vtf texture at iVTFFrame
 void CShaderAPIDX11::TexImageFromVTF(IVTFTexture* pVTF, int iVTFFrame)
 {
 	return;
@@ -890,6 +949,7 @@ bool CShaderAPIDX11::TexLock(int level, int cubeFaceID, int xOffset, int yOffset
 	return false;
 }
 
+// Unlock the poor texture already
 void CShaderAPIDX11::TexUnlock()
 {
 	return;
@@ -926,29 +986,32 @@ void CShaderAPIDX11::ClearBuffersObeyStencil(bool bClearColor, bool bClearDepth)
 	return;
 }
 
+// Read pixels to data
 void CShaderAPIDX11::ReadPixels(int x, int y, int width, int height, unsigned char *data, ImageFormat dstFormat)
 {
 	return;
 }
 
+// Read pixels to data but rect moment
 void CShaderAPIDX11::ReadPixels(Rect_t *pSrcRect, Rect_t *pDstRect, unsigned char *data, ImageFormat dstFormat, int nDstStride)
 {
 	return;
 }
 
-
+// Flush hardware
 void CShaderAPIDX11::FlushHardware()
 {
 	return;
 }
 
 
-// Use this to begin and end the frame
+// Use this to begin the frame
 void CShaderAPIDX11::BeginFrame()
 {
 	return;
 }
 
+//  Use this to end the frame
 void CShaderAPIDX11::EndFrame()
 {
 	return;
@@ -1000,17 +1063,19 @@ void CShaderAPIDX11::ClearSnapshots()
 	return;
 }
 
-
+// Where fog starts
 void CShaderAPIDX11::FogStart(float fStart)
 {
 	return;
 }
 
+// Where fog ends
 void CShaderAPIDX11::FogEnd(float fEnd)
 {
 	return;
 }
 
+// Z of fog
 void CShaderAPIDX11::SetFogZ(float fogZ)
 {
 	return;
@@ -1022,6 +1087,7 @@ void CShaderAPIDX11::SceneFogColor3ub(unsigned char r, unsigned char g, unsigned
 	return;
 }
 
+// Fog mode of scene
 void CShaderAPIDX11::SceneFogMode(MaterialFogMode_t fogMode)
 {
 	return;
@@ -1047,6 +1113,7 @@ int CShaderAPIDX11::GetCurrentDynamicVBSize(void)
 	return 0;
 }
 
+// Delete the darn things
 void CShaderAPIDX11::DestroyVertexBuffers(bool bExitingLevel/* = false*/)
 {
 	return;
@@ -1123,12 +1190,11 @@ int CShaderAPIDX11::OcclusionQuery_GetNumPixelsRendered(ShaderAPIOcclusionQuery_
 	return 0;
 }
 
-
+// Set flashlight state given state and w2t matrix
 void CShaderAPIDX11::SetFlashlightState(const FlashlightState_t &state, const VMatrix &worldToTexture)
 {
 	return;
 }
-
 
 void CShaderAPIDX11::ClearVertexAndPixelShaderRefCounts()
 {
@@ -1185,12 +1251,13 @@ void CShaderAPIDX11::SetRenderTargetEx(int nRenderTargetID,
 	return;
 }
 
-
+// Copy render target to pDstRect of textureHandle given id, and pSrcRect
 void CShaderAPIDX11::CopyRenderTargetToTextureEx(ShaderAPITextureHandle_t textureHandle, int nRenderTargetID, Rect_t *pSrcRect/* = NULL*/, Rect_t *pDstRect/* = NULL*/)
 {
 	return;
 }
 
+// Copy textureHandle to pDstRect of rendertarget given id, and pSrcRect
 void CShaderAPIDX11::CopyTextureToRenderTargetEx(int nRenderTargetID, ShaderAPITextureHandle_t textureHandle, Rect_t *pSrcRect/* = NULL*/, Rect_t *pDstRect/* = NULL*/)
 {
 	return;
@@ -1203,7 +1270,7 @@ void CShaderAPIDX11::HandleDeviceLost()
 	return;
 }
 
-
+// Make framebuffer linear color space
 void CShaderAPIDX11::EnableLinearColorSpaceFrameBuffer(bool bEnable)
 {
 	return;
@@ -1219,43 +1286,50 @@ void CShaderAPIDX11::SetFullScreenTextureHandle(ShaderAPITextureHandle_t h)
 
 // Rendering parameters control special drawing modes withing the material system, shader
 // system, shaders, and engine. renderparm.h has their definitions.
+
+// Set rendering parameter parm_number to value
 void CShaderAPIDX11::SetFloatRenderingParameter(int parm_number, float value)
 {
 	return;
 }
 
+// Set rendering parameter parm_number to value
 void CShaderAPIDX11::SetIntRenderingParameter(int parm_number, int value)
 {
 	return;
 }
 
+// Set rendering parameter parm_number to value
 void CShaderAPIDX11::SetVectorRenderingParameter(int parm_number, Vector const &value)
 {
 	return;
 }
 
-
+// Set rendering parameter parm_number to value
 float CShaderAPIDX11::GetFloatRenderingParameter(int parm_number) const
 {
 	return 0.f;
 }
 
+// Get rendering parameter parm_number
 int CShaderAPIDX11::GetIntRenderingParameter(int parm_number) const
 {
 	return 0;
 }
 
+// Get rendering parameter parm_number
 Vector CShaderAPIDX11::GetVectorRenderingParameter(int parm_number) const
 {
 	return Vector(0, 0, 0);
 }
 
-
+// Set clip plane for fast clipping
 void CShaderAPIDX11::SetFastClipPlane(const float *pPlane)
 {
 	return;
 }
 
+// Should fast clip be used?
 void CShaderAPIDX11::EnableFastClip(bool bEnable)
 {
 	return;
@@ -1280,6 +1354,7 @@ int CShaderAPIDX11::GetMaxVerticesToRender(IMaterial *pMaterial)
 	return 0;
 }
 
+// Get maximum indices to render for a specific mesh
 int CShaderAPIDX11::GetMaxIndicesToRender()
 {
 	return 0;
@@ -1287,31 +1362,38 @@ int CShaderAPIDX11::GetMaxIndicesToRender()
 
 
 // stencil methods
+
+// Should stencil be used?
 void CShaderAPIDX11::SetStencilEnable(bool onoff)
 {
 	return;
 }
 
+// Set operation to do when stencil fails?
 void CShaderAPIDX11::SetStencilFailOperation(StencilOperation_t op)
 {
 	return;
 }
 
+// Set operation to do when stencil fails on z stuff?
 void CShaderAPIDX11::SetStencilZFailOperation(StencilOperation_t op)
 {
 	return;
 }
 
+// Set operation to do when stencil passes?
 void CShaderAPIDX11::SetStencilPassOperation(StencilOperation_t op)
 {
 	return;
 }
 
+// Set function to compare stencil
 void CShaderAPIDX11::SetStencilCompareFunction(StencilComparisonFunction_t cmpfn)
 {
 	return;
 }
 
+// Set stencil reference value? I need to read up on this
 void CShaderAPIDX11::SetStencilReferenceValue(int ref)
 {
 	return;
@@ -1327,6 +1409,7 @@ void CShaderAPIDX11::SetStencilWriteMask(uint32 msk)
 	return;
 }
 
+// Clear stencil buffer in rect to value
 void CShaderAPIDX11::ClearStencilBufferRectangle(int xmin, int ymin, int xmax, int ymax, int value)
 {
 	return;
@@ -1339,24 +1422,25 @@ void CShaderAPIDX11::DisableAllLocalLights()
 	return;
 }
 
+// Compare snapshot0 to snapshot1 and return some int that shows difference
 int CShaderAPIDX11::CompareSnapshots(StateSnapshot_t snapshot0, StateSnapshot_t snapshot1)
 {
 	return 0;
 }
 
-
+// Get mesh for flexing
 IMesh *CShaderAPIDX11::GetFlexMesh()
 {
 	return (IMesh *)0;
 }
 
-
+// Set flashlight state to one given by state, w2t, and texture pointer
 void CShaderAPIDX11::SetFlashlightStateEx(const FlashlightState_t &state, const VMatrix &worldToTexture, ITexture *pFlashlightDepthTexture)
 {
 	return;
 }
 
-
+// Check if nMSAAMode is supported
 bool CShaderAPIDX11::SupportsMSAAMode(int nMSAAMode)
 {
 	return false;
@@ -1501,18 +1585,19 @@ void CShaderAPIDX11::ShaderUnlock()
 	return;
 }
 
-
+// Get shadowmap format
 ImageFormat CShaderAPIDX11::GetShadowDepthTextureFormat(void)
 {
 	return IMAGE_FORMAT_A8;
 }
 
-
+// Fetch4 is an ATI technology (or AMD)
 bool CShaderAPIDX11::SupportsFetch4(void)
 {
 	return false;
 }
 
+// Set shadow biases to those specified
 void CShaderAPIDX11::SetShadowDepthBiasFactors(float fShadowSlopeScaleDepthBias, float fShadowDepthBias)
 {
 	return;
