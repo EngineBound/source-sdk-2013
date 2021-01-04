@@ -21,7 +21,7 @@ CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDx11 = &s_ShaderDeviceMgrDx11;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceMgrDX11, IShaderDeviceMgr,
 	SHADER_DEVICE_MGR_INTERFACE_VERSION, s_ShaderDeviceMgrDx11)
 
-
+// Initialize device manager with dummy values
 CShaderDeviceMgrDX11::CShaderDeviceMgrDX11()
 {
 	m_pDXGIFactory = NULL;
@@ -39,13 +39,12 @@ bool CShaderDeviceMgrDX11::Connect(CreateInterfaceFn factory)
 	return true;
 }
 
+// Disconnect the shader device manager from the other systems
 void CShaderDeviceMgrDX11::Disconnect()
 {
 	m_pDXGIFactory->Release();
 
 	DisconnectTier1Libraries();
-
-	return;
 }
 
 
@@ -80,6 +79,7 @@ InitReturnVal_t CShaderDeviceMgrDX11::Init()
 	return INIT_OK;
 }
 
+// Setup HWInfo_t with default values
 bool CShaderDeviceMgrDX11::PopulateHWInfo(HWInfo_t *pHWInfo, IDXGIAdapter *pAdapter, IDXGIOutput *pOutput)
 {
 	DXGI_ADAPTER_DESC desc;
@@ -191,6 +191,8 @@ bool CShaderDeviceMgrDX11::PopulateHWInfo(HWInfo_t *pHWInfo, IDXGIAdapter *pAdap
 
 	return true;
 }
+
+// Get adapter given an id
 IDXGIAdapter *CShaderDeviceMgrDX11::GetAdapter(int nAdapter) const
 {
 	IDXGIAdapter *pAdapter;
@@ -202,6 +204,7 @@ IDXGIAdapter *CShaderDeviceMgrDX11::GetAdapter(int nAdapter) const
 
 }
 
+// Get output of adapter given an id
 IDXGIOutput *CShaderDeviceMgrDX11::GetAdapterOutput(int nAdapter) const
 {
 	IDXGIAdapter *pAdapter = GetAdapter(nAdapter);
@@ -227,6 +230,7 @@ IDXGIOutput *CShaderDeviceMgrDX11::GetAdapterOutput(int nAdapter) const
 	return NULL;
 }
 
+// Shutdown the device manager
 void CShaderDeviceMgrDX11::Shutdown()
 {
 	if (g_pShaderDevice)
@@ -366,6 +370,7 @@ CreateInterfaceFn CShaderDeviceMgrDX11::SetMode(void *hWnd, int nAdapter, const 
 	return CreateShaderInterface;
 }
 
+// Get shader interface given the name
 void *CShaderDeviceMgrDX11::CreateShaderInterface(const char *pName, int *pReturnCode)
 {
 	if (pReturnCode)
@@ -386,7 +391,6 @@ void *CShaderDeviceMgrDX11::CreateShaderInterface(const char *pName, int *pRetur
 	return NULL;
 }
 
-
 // Installs a callback to get called 
 void CShaderDeviceMgrDX11::AddModeChangeCallback(ShaderModeChangeCallbackFunc_t func) // Call when mode is changed
 {
@@ -396,6 +400,7 @@ void CShaderDeviceMgrDX11::AddModeChangeCallback(ShaderModeChangeCallbackFunc_t 
 	m_vpModeChangeCallbacks.AddToTail(func);
 }
 
+// Remove callback installed with AddModeChangeCallback
 void CShaderDeviceMgrDX11::RemoveModeChangeCallback(ShaderModeChangeCallbackFunc_t func)
 {
 	m_vpModeChangeCallbacks.FindAndRemove(func);
