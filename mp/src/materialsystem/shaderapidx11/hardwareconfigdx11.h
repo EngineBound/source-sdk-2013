@@ -98,6 +98,10 @@ struct HWInfo_t : public MaterialAdapterInfo_t
 
 	bool m_bSupportsBorderColor;
 	bool m_bSupportsFetch4;
+
+	float m_flMinGammaControlPoint;
+	float m_flMaxGammaControlPoint;
+	float m_nGammaControlPointCount;
 };
 
 class CHardwareConfigDX11 : public IMaterialSystemHardwareConfig
@@ -223,6 +227,8 @@ public:
 
 	inline bool ShouldAlwaysUseShaderModel2bShaders() const { return IsOpenGL(); }
 	inline bool PlatformRequiresNonNullPixelShaders() const { return IsOpenGL(); }
+
+	const HWInfo_t& GetInfo() const { return m_HWInfo; }
 private:
 
 	void SetupHWInfo(int nDXLevel);

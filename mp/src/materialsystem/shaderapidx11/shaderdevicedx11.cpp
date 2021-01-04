@@ -23,6 +23,7 @@ ID3D11Device *g_pD3DDevice = NULL;
 ID3D11DeviceContext *g_pD3DDeviceContext = NULL;
 IDXGISwapChain *g_pD3DSwapChain = NULL;
 
+// Initialize shaderdevice vars to dummy values
 CShaderDeviceDX11::CShaderDeviceDX11()
 {
 	m_nCurrentAdapter = -1;
@@ -38,22 +39,28 @@ CShaderDeviceDX11::CShaderDeviceDX11()
 	m_nWndHeight = -1;
 }
 
+// Initialize the device properly, given the window, adapter id and device mode.
 bool CShaderDeviceDX11::Initialize(void *hWnd, int nAdapter, const ShaderDeviceInfo_t mode)
 {
+	// Development only
 	Msg("Initializing shader device :}\n");
 
+	// Don't initialize if already done
 	if (m_bDeviceInitialized)
 		return false;
 
+	// Get adapter from device manager
 	IDXGIAdapter *pAdapter = g_pShaderDeviceMgrDx11->GetAdapter(nAdapter);
 	if (!pAdapter)
 		return false;
 
+	// Get output of adapter, and declare m_pDXGIOutput as a new reference of the output.
 	m_pDXGIOutput = g_pShaderDeviceMgrDx11->GetAdapterOutput(nAdapter);
 	if (!m_pDXGIOutput)
 		return false;
 	m_pDXGIOutput->AddRef();
 
+	// Set up swapchain, weird that there isn't just a method for this, unless there is
 	DXGI_SWAP_CHAIN_DESC swapDesc;
 	V_memset(&swapDesc, 0, sizeof(swapDesc));
 	swapDesc.BufferDesc.Width = mode.m_DisplayMode.m_nWidth;
@@ -72,6 +79,7 @@ bool CShaderDeviceDX11::Initialize(void *hWnd, int nAdapter, const ShaderDeviceI
 
 	UINT nDeviceFlags = 0;
 
+	// Create the device and the swap-chain. Astounding.
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(pAdapter, D3D_DRIVER_TYPE_UNKNOWN,
 		NULL, nDeviceFlags, NULL, 0, D3D11_SDK_VERSION, &swapDesc, &m_pDXGISwapChain,
 		&m_pDXGIDevice, NULL, &m_pDXGIDeviceContext);
@@ -79,10 +87,12 @@ bool CShaderDeviceDX11::Initialize(void *hWnd, int nAdapter, const ShaderDeviceI
 	if (FAILED(hr))
 		return false;
 
+	// Update global variables to updated member pointers
 	g_pD3DDevice = m_pDXGIDevice;
 	g_pD3DDeviceContext = m_pDXGIDeviceContext;
 	g_pD3DSwapChain = m_pDXGISwapChain;
 
+	// Set member variables
 	m_CurrenthWnd = hWnd;
 	m_nCurrentAdapter = nAdapter;
 
@@ -94,6 +104,7 @@ bool CShaderDeviceDX11::Initialize(void *hWnd, int nAdapter, const ShaderDeviceI
 
 void CShaderDeviceDX11::Shutdown()
 {
+	// Nullify member pointers
 	RELEASE_AND_NULLIFY_P(m_pDXGIDeviceContext);
 	RELEASE_AND_NULLIFY_P(m_pDXGIDevice);
 	RELEASE_AND_NULLIFY_P(m_pDXGISwapChain);
@@ -118,16 +129,15 @@ void CShaderDeviceDX11::ReacquireResources()
 // returns the backbuffer format and dimensions
 ImageFormat CShaderDeviceDX11::GetBackBufferFormat() const
 {
-	return IMAGE_FORMAT_RGBA8888; // IMPORTANT: CHANGE LATER
+	return IMAGE_FORMAT_RGB888; // IMPORTANT: CHANGE LATER
 }
 
 void CShaderDeviceDX11::GetBackBufferDimensions(int& width, int& height) const
 {
-	// IMPORTANT: CHANGE LATER
-	width = 1024;
-	height = 768;
-
-	return;
+	DXGI_SWAP_CHAIN_DESC desc;
+	m_pDXGISwapChain->GetDesc(&desc);
+	width = desc.BufferDesc.Width;
+	height = desc.BufferDesc.Height;
 }
 
 
@@ -141,14 +151,14 @@ int CShaderDeviceDX11::GetCurrentAdapter() const
 // Are we using graphics?
 bool CShaderDeviceDX11::IsUsingGraphics() const
 {
-	return false;
+	return m_bDeviceInitialized;
 }
 
 
 // Use this to spew information about the 3D layer 
 void CShaderDeviceDX11::SpewDriverInfo() const
 {
-	Msg("Lole\n");
+	Msg("Lole Driver DX11\n");
 
 	return;
 }
@@ -157,7 +167,7 @@ void CShaderDeviceDX11::SpewDriverInfo() const
 // What's the bit depth of the stencil buffer?
 int CShaderDeviceDX11::StencilBufferBits() const
 {
-	return 0; // IMPORTANT: CHANGE LATER
+	return 0; // IMPORTANT: CHANGE IF WE WANT STENCIL BUFFER
 }
 
 
@@ -168,7 +178,7 @@ bool CShaderDeviceDX11::IsAAEnabled() const
 }
 
 
-// Does a page flip
+// Does a page flip, AKA shows the next frame
 void CShaderDeviceDX11::Present()
 {
 	g_pShaderAPIDx11->FlushBufferedPrimitives();
@@ -184,16 +194,59 @@ void CShaderDeviceDX11::Present()
 // Returns the window size
 void CShaderDeviceDX11::GetWindowSize(int &nWidth, int &nHeight) const
 {
-	return;
+	// If window minimized (iconic), width = height = 0 :))
+	if (!IsIconic((HWND)m_CurrenthWnd))
+	{
+		RECT rect;
+		GetClientRect((HWND)m_CurrenthWnd, &rect);
+		nWidth = rect.right - rect.left;
+		nHeight = rect.bottom - rect.top;
+	}
+	else
+	{
+		nWidth = nHeight = 0;
+	}
 }
 
 
 // Gamma ramp control
 void CShaderDeviceDX11::SetHardwareGammaRamp(float fGamma, float fGammaTVRangeMin, float fGammaTVRangeMax, float fGammaTVExponent, bool bTVEnabled)
 {
-	return;
+	Assert(m_pDXGIOutput);
+	if (!m_pDXGIOutput)
+		return;
+
+	// Store hw gamma vals
+	float flMin = g_pHardwareConfig->GetInfo().m_flMinGammaControlPoint;
+	float flMax = g_pHardwareConfig->GetInfo().m_flMaxGammaControlPoint;
+	int nGammaCount = g_pHardwareConfig->GetInfo().m_nGammaControlPointCount;
+
+	// Create gamma ramp
+	DXGI_GAMMA_CONTROL gammaControl;
+	gammaControl.Scale.Red = gammaControl.Scale.Green = gammaControl.Scale.Red = 1.f;
+	gammaControl.Offset.Red = gammaControl.Offset.Green = gammaControl.Offset.Red = 0.f;
+	float flGammaDiff = 1.0f / (nGammaCount - 1);
+
+	for (int i = 0; i < nGammaCount; i++)
+	{
+		float flGammaPos = i * flGammaDiff;
+		float flCorrection = pow(flGammaPos, fGamma / 2.2f); // TODO: Update with mat_monitorgamma?
+		flCorrection = clamp(flCorrection, flMin, flMax);
+
+		gammaControl.GammaCurve[i].Red = flCorrection;
+		gammaControl.GammaCurve[i].Green = flCorrection;
+		gammaControl.GammaCurve[i].Blue = flCorrection;
+	}
+
+	// Set to created ramp
+	HRESULT hr = m_pDXGIOutput->SetGammaControl(&gammaControl);
+	if (FAILED(hr))
+	{
+		Warning("CShaderDeviceDx11::SetHardwareGammaRamp: Unable to set gamma controls!\n");
+	}
 }
 
+// next 2 functions are related to child windows, not used in base source
 
 // Creates/ destroys a child window
 bool CShaderDeviceDX11::AddView(void* hWnd)
@@ -201,11 +254,15 @@ bool CShaderDeviceDX11::AddView(void* hWnd)
 	if (!m_pDXGIDevice)
 		return false;
 
-	return false;
+	// Just do it i guess
+	return true;
 }
 
+// Remove child window
 void CShaderDeviceDX11::RemoveView(void* hWnd)
 {
+	// WHY JUST DO NOTHING
+
 	return;
 }
 
@@ -213,13 +270,22 @@ void CShaderDeviceDX11::RemoveView(void* hWnd)
 // Activates a view
 void CShaderDeviceDX11::SetView(void* hWnd)
 {
-	return;
+	ShaderViewport_t viewport;
+	g_pShaderAPI->GetViewports(&viewport, 1);
+	
+	// Get window
+	m_CurrenthWnd = (HWND)hWnd;
+	GetWindowSize(m_nWndWidth, m_nWndHeight);
+
+	// Set viewport
+	g_pShaderAPI->SetViewports(1, &viewport);
 }
 
 
 // Shader compilation
 IShaderBuffer* CShaderDeviceDX11::CompileShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
+	// Don't worry about this FOR NOW CHANGE CHANGE CHANGE CHANGE
 	return (IShaderBuffer *)0;
 }
 

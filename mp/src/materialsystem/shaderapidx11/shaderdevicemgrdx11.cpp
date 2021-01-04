@@ -185,6 +185,10 @@ bool CShaderDeviceMgrDX11::PopulateHWInfo(HWInfo_t *pHWInfo, IDXGIAdapter *pAdap
 	pHWInfo->m_bSupportsBorderColor = true;
 	pHWInfo->m_bSupportsFetch4 = (desc.VendorId == VENDORID_ATI);
 
+	pHWInfo->m_flMinGammaControlPoint = 0.0f;
+	pHWInfo->m_flMaxGammaControlPoint = 65535.0f;
+	pHWInfo->m_nGammaControlPointCount = 256;
+
 	return true;
 }
 IDXGIAdapter *CShaderDeviceMgrDX11::GetAdapter(int nAdapter) const
