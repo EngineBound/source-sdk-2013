@@ -2,25 +2,19 @@
 #include "shaderapidx11_global.h"
 #include "shaderdevicedx11.h"
 #include "ishaderutil.h"
+#include "hardwareconfigdx11.h"
+
+#include "mathlib/mathlib.h"
 
 
-static CShaderAPIDX11 s_ShaderAPIDx11;
-CShaderAPIDX11 *g_pShaderAPIDx11 = &s_ShaderAPIDx11;
+static CShaderAPIDX11 s_ShaderAPIDX11;
+CShaderAPIDX11 *g_pShaderAPIDX11 = &s_ShaderAPIDX11;
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IShaderAPI,
-	SHADERAPI_INTERFACE_VERSION, s_ShaderAPIDx11)
+	SHADERAPI_INTERFACE_VERSION, s_ShaderAPIDX11)
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IDebugTextureInfo,
-	DEBUG_TEXTURE_INFO_VERSION, s_ShaderAPIDx11)
-
-// Globals
-IShaderUtil* g_pShaderUtil = 0;
-CShaderDeviceDX11 *g_pShaderDevice = 0;
-CShaderDeviceMgrDX11 *g_pShaderDeviceMgr = 0;
-CShaderAPIDX11 *g_pShaderAPI = 0;
-CShaderShadowDX11 *g_pShaderShadow = 0;
-
-CHardwareConfigDX11 *g_pHardwareConfig = 0;
+	DEBUG_TEXTURE_INFO_VERSION, s_ShaderAPIDX11)
 
 // This file requires shader states to function, write those first :))
 
@@ -48,10 +42,13 @@ double CShaderAPIDX11::CurrentTime() const
 	return Sys_FloatTime();
 }
 
+// REMOVE LATER
+IShaderUtil *g_pShaderUtil = 0;
+
 // Get dimensions of lightmap, REQUIRES SHADERUTIL TO BE INITIALIZED
 void CShaderAPIDX11::GetLightmapDimensions(int *w, int *h)
 {
-	g_pShaderUtil->GetLightmapDimensions(w, h);
+	//g_pShaderUtil->GetLightmapDimensions(w, h);
 }
 
 // Get fog mode
@@ -289,7 +286,7 @@ void CShaderAPIDX11::SetPixelShaderIndex(int pshIndex)
 // Get the dimensions of the back buffer.
 void CShaderAPIDX11::GetBackBufferDimensions(int& width, int& height) const
 {
-	g_pShaderDeviceDx11->GetBackBufferDimensions(width, height);
+	g_pShaderDeviceDX11->GetBackBufferDimensions(width, height);
 }
 
 
@@ -1370,46 +1367,52 @@ void CShaderAPIDX11::SetStencilEnable(bool onoff)
 }
 
 // Set operation to do when stencil fails?
+// Probably means when a pixel is not in the stencil
 void CShaderAPIDX11::SetStencilFailOperation(StencilOperation_t op)
 {
 	return;
 }
 
 // Set operation to do when stencil fails on z stuff?
+// Probably means when a pixel is fails compare function but is still in stencil
 void CShaderAPIDX11::SetStencilZFailOperation(StencilOperation_t op)
 {
 	return;
 }
 
 // Set operation to do when stencil passes?
+// Probably means when a pixel passes compare function
 void CShaderAPIDX11::SetStencilPassOperation(StencilOperation_t op)
 {
 	return;
 }
 
-// Set function to compare stencil
+// Set function to compare stencil, will dictate fail, zfail and pass
 void CShaderAPIDX11::SetStencilCompareFunction(StencilComparisonFunction_t cmpfn)
 {
 	return;
 }
 
 // Set stencil reference value? I need to read up on this
+// May be z value
 void CShaderAPIDX11::SetStencilReferenceValue(int ref)
 {
 	return;
 }
 
+// Set mask to be used before operations
 void CShaderAPIDX11::SetStencilTestMask(uint32 msk)
 {
 	return;
 }
 
+// Set mask to be used when writing
 void CShaderAPIDX11::SetStencilWriteMask(uint32 msk)
 {
 	return;
 }
 
-// Clear stencil buffer in rect to value
+// Set stencil buffer in rect to value
 void CShaderAPIDX11::ClearStencilBufferRectangle(int xmin, int ymin, int xmax, int ymax, int value)
 {
 	return;
@@ -1510,6 +1513,7 @@ void CShaderAPIDX11::EnableVSync_360(bool bEnable) //360 allows us to bypass vsy
 
 #endif
 
+// X360 specific functionality, just false outside of this
 bool CShaderAPIDX11::OwnGPUResources(bool bEnable)
 {
 	return false;
@@ -1541,11 +1545,16 @@ void CShaderAPIDX11::SetPIXMarker(unsigned long color, const char *szName)
 
 
 // Enables and disables for Alpha To Coverage
+
+// Alpha to coverage is an MSAA technique that allows for (usually) cleaner results than alphatests with antialiasing
+// Enable AlphaToCoverage
 void CShaderAPIDX11::EnableAlphaToCoverage()
 {
 	return;
 }
 
+// Alpha to coverage is an MSAA technique that allows for (usually) cleaner results than alphatests with antialiasing
+// Disable AlphaToCoverage
 void CShaderAPIDX11::DisableAlphaToCoverage()
 {
 	return;
@@ -1558,28 +1567,32 @@ void CShaderAPIDX11::ComputeVertexDescription(unsigned char* pBuffer, VertexForm
 	return;
 }
 
-
+// Does the card support shadowmaps through depth textures?
 bool CShaderAPIDX11::SupportsShadowDepthTextures(void)
 {
+	//return g_pHardwareConfig->GetInfo().something;
 	return false;
 }
 
-
+// Not used right now, for mutex stuff
 void CShaderAPIDX11::SetDisallowAccess(bool)
 {
 	return;
 }
 
+// Not used right now, for mutex stuff
 void CShaderAPIDX11::EnableShaderShaderMutex(bool)
 {
 	return;
 }
 
+// Not used right now, for mutex stuff
 void CShaderAPIDX11::ShaderLock()
 {
 	return;
 }
 
+// Not used right now, for mutex stuff
 void CShaderAPIDX11::ShaderUnlock()
 {
 	return;
@@ -1604,17 +1617,21 @@ void CShaderAPIDX11::SetShadowDepthBiasFactors(float fShadowSlopeScaleDepthBias,
 }
 
 
-// ------------ New Vertex/Index Buffer interface ----------------------------
+// Bind pVertexBuffer to buffer at nStreamID nOffsetInBytes bytes down the stream or 
+// nFirstVertex vertices down the stream if nOffsetInBytes < 0 of format fmt
 void CShaderAPIDX11::BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffer, int nOffsetInBytes, int nFirstVertex, int nVertexCount, VertexFormat_t fmt, int nRepetitions/* = 1*/)
 {
 	return;
 }
 
+// Bind pIndexBuffer to buffer nOffsetInBytes bytes down the stream
 void CShaderAPIDX11::BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBytes)
 {
 	return;
 }
 
+// The classic moment:
+// Draws a primitive of type primitiveType from nFirstIndex to nFirstIndex + nIndexCount - 1
 void CShaderAPIDX11::Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount)
 {
 	return;
@@ -1626,7 +1643,7 @@ void CShaderAPIDX11::PerformFullScreenStencilOperation(void)
 	return;
 }
 
-
+// Sets render rect (scissor test) and if it should be used
 void CShaderAPIDX11::SetScissorRect(const int nLeft, const int nTop, const int nRight, const int nBottom, const bool bEnableScissor)
 {
 	return;
@@ -1650,12 +1667,18 @@ void CShaderAPIDX11::InvalidateDelayedShaderConstants(void)
 // Gamma<->Linear conversions according to the video hardware we're running on
 float CShaderAPIDX11::GammaToLinear_HardwareSpecific(float fGamma) const
 {
-	return 0.f;
+// 	if (IsPC() || IsX360())
+// 		return SrgbGammaToLinear(fGamma);
+
+	return pow(fGamma, 2.2f);
 }
 
 float CShaderAPIDX11::LinearToGamma_HardwareSpecific(float fLinear) const
 {
-	return 0.f;
+// 	if (IsPC() || IsX360())
+// 		return SrgbLinearToGamma(fLinear);
+
+	return pow(fLinear, (1.0f / 2.2f));
 }
 
 
@@ -1665,13 +1688,13 @@ void CShaderAPIDX11::SetLinearToGammaConversionTextures(ShaderAPITextureHandle_t
 	return;
 }
 
-
+// Format for null textures
 ImageFormat CShaderAPIDX11::GetNullTextureFormat(void)
 {
 	return IMAGE_FORMAT_A8;
 }
 
-
+// Bind textureHandle to nSampler
 void CShaderAPIDX11::BindVertexTexture(VertexTextureSampler_t nSampler, ShaderAPITextureHandle_t textureHandle)
 {
 	return;
@@ -1691,7 +1714,7 @@ void CShaderAPIDX11::SetFlexWeights(int nFirstWeight, int nCount, const MorphWei
 	return;
 }
 
-
+// Set max density of fog
 void CShaderAPIDX11::FogMaxDensity(float flMaxDensity)
 {
 	return;
@@ -1715,12 +1738,13 @@ void CShaderAPIDX11::CreateTextures(
 	return;
 }
 
-
+// Does nothing Lole
 void CShaderAPIDX11::AcquireThreadOwnership()
 {
 	return;
 }
 
+// Equally does nothing lole
 void CShaderAPIDX11::ReleaseThreadOwnership()
 {
 	return;
@@ -1729,7 +1753,7 @@ void CShaderAPIDX11::ReleaseThreadOwnership()
 
 bool CShaderAPIDX11::SupportsNormalMapCompression() const
 {
-	return false;
+	return g_pHardwareConfigDX11->GetInfo().m_bSupportsNormalMapCompression;
 }
 
 

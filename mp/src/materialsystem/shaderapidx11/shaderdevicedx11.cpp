@@ -10,14 +10,14 @@
 	var = NULL; \
 	}
 
-extern CShaderAPIDX11 *g_pShaderAPIDx11;
-extern CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDx11;
+extern CShaderAPIDX11 *g_pShaderAPIDX11;
+extern CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11;
 
-static CShaderDeviceDX11 s_ShaderDeviceDx11;
-CShaderDeviceDX11 *g_pShaderDeviceDx11 = &s_ShaderDeviceDx11;
+static CShaderDeviceDX11 s_ShaderDeviceDX11;
+CShaderDeviceDX11 *g_pShaderDeviceDX11 = &s_ShaderDeviceDX11;
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceDX11, IShaderDevice,
-	SHADER_DEVICE_INTERFACE_VERSION, s_ShaderDeviceDx11)
+	SHADER_DEVICE_INTERFACE_VERSION, s_ShaderDeviceDX11)
 
 ID3D11Device *g_pD3DDevice = NULL;
 ID3D11DeviceContext *g_pD3DDeviceContext = NULL;
@@ -50,12 +50,12 @@ bool CShaderDeviceDX11::Initialize(void *hWnd, int nAdapter, const ShaderDeviceI
 		return false;
 
 	// Get adapter from device manager
-	IDXGIAdapter *pAdapter = g_pShaderDeviceMgrDx11->GetAdapter(nAdapter);
+	IDXGIAdapter *pAdapter = g_pShaderDeviceMgrDX11->GetAdapter(nAdapter);
 	if (!pAdapter)
 		return false;
 
 	// Get output of adapter, and declare m_pDXGIOutput as a new reference of the output.
-	m_pDXGIOutput = g_pShaderDeviceMgrDx11->GetAdapterOutput(nAdapter);
+	m_pDXGIOutput = g_pShaderDeviceMgrDX11->GetAdapterOutput(nAdapter);
 	if (!m_pDXGIOutput)
 		return false;
 	m_pDXGIOutput->AddRef();
@@ -181,7 +181,7 @@ bool CShaderDeviceDX11::IsAAEnabled() const
 // Does a page flip, AKA shows the next frame
 void CShaderDeviceDX11::Present()
 {
-	g_pShaderAPIDx11->FlushBufferedPrimitives();
+	g_pShaderAPIDX11->FlushBufferedPrimitives();
 
 	HRESULT hr = m_pDXGISwapChain->Present(0, 0);
 	if (FAILED(hr))
@@ -217,9 +217,9 @@ void CShaderDeviceDX11::SetHardwareGammaRamp(float fGamma, float fGammaTVRangeMi
 		return;
 
 	// Store hw gamma vals
-	float flMin = g_pHardwareConfig->GetInfo().m_flMinGammaControlPoint;
-	float flMax = g_pHardwareConfig->GetInfo().m_flMaxGammaControlPoint;
-	int nGammaCount = g_pHardwareConfig->GetInfo().m_nGammaControlPointCount;
+	float flMin = g_pHardwareConfigDX11->GetInfo().m_flMinGammaControlPoint;
+	float flMax = g_pHardwareConfigDX11->GetInfo().m_flMaxGammaControlPoint;
+	int nGammaCount = g_pHardwareConfigDX11->GetInfo().m_nGammaControlPointCount;
 
 	// Create gamma ramp
 	DXGI_GAMMA_CONTROL gammaControl;
@@ -242,7 +242,7 @@ void CShaderDeviceDX11::SetHardwareGammaRamp(float fGamma, float fGammaTVRangeMi
 	HRESULT hr = m_pDXGIOutput->SetGammaControl(&gammaControl);
 	if (FAILED(hr))
 	{
-		Warning("CShaderDeviceDx11::SetHardwareGammaRamp: Unable to set gamma controls!\n");
+		Warning("CShaderDeviceDX11::SetHardwareGammaRamp: Unable to set gamma controls!\n");
 	}
 }
 
@@ -271,14 +271,14 @@ void CShaderDeviceDX11::RemoveView(void* hWnd)
 void CShaderDeviceDX11::SetView(void* hWnd)
 {
 	ShaderViewport_t viewport;
-	g_pShaderAPI->GetViewports(&viewport, 1);
+	g_pShaderAPIDX11->GetViewports(&viewport, 1);
 	
 	// Get window
 	m_CurrenthWnd = (HWND)hWnd;
 	GetWindowSize(m_nWndWidth, m_nWndHeight);
 
 	// Set viewport
-	g_pShaderAPI->SetViewports(1, &viewport);
+	g_pShaderAPIDX11->SetViewports(1, &viewport);
 }
 
 

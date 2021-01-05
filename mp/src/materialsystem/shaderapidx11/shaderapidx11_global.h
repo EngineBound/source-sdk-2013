@@ -21,11 +21,11 @@ inline IShaderUtil* ShaderUtil()
 	return g_pShaderUtil;
 }
 
-extern CShaderDeviceDX11 *g_pShaderDevice;
-extern CShaderDeviceMgrDX11 *g_pShaderDeviceMgr;
-extern CShaderAPIDX11 *g_pShaderAPI;
-extern CShaderShadowDX11 *g_pShaderShadow;
-extern CHardwareConfigDX11 *g_pHardwareConfig;
+extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
+extern CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11;
+extern CShaderAPIDX11 *g_pShaderAPIDX11;
+extern CShaderShadowDX11 *g_pShaderShadowDX11;
+extern CHardwareConfigDX11 *g_pHardwareConfigDX11;
 
 
 

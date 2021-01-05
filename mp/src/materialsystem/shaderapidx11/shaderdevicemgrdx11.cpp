@@ -11,15 +11,15 @@
 // MUST BE LAST FILE AND WHATEVER
 #include "memdbgon.h"
 
-extern CShaderDeviceDX11 *g_pShaderDeviceDx11;
-extern CShaderAPIDX11 *g_pShaderAPIDx11;
-extern CShaderShadowDX11*g_pShaderShadowDx11;
+extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
+extern CShaderAPIDX11 *g_pShaderAPIDX11;
+extern CShaderShadowDX11*g_pShaderShadowDX11;
 
-static CShaderDeviceMgrDX11 s_ShaderDeviceMgrDx11;
-CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDx11 = &s_ShaderDeviceMgrDx11;
+static CShaderDeviceMgrDX11 s_ShaderDeviceMgrDX11;
+CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11 = &s_ShaderDeviceMgrDX11;
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceMgrDX11, IShaderDeviceMgr,
-	SHADER_DEVICE_MGR_INTERFACE_VERSION, s_ShaderDeviceMgrDx11)
+	SHADER_DEVICE_MGR_INTERFACE_VERSION, s_ShaderDeviceMgrDX11)
 
 // Initialize device manager with dummy values
 CShaderDeviceMgrDX11::CShaderDeviceMgrDX11()
@@ -233,10 +233,10 @@ IDXGIOutput *CShaderDeviceMgrDX11::GetAdapterOutput(int nAdapter) const
 // Shutdown the device manager
 void CShaderDeviceMgrDX11::Shutdown()
 {
-	if (g_pShaderDevice)
+	if (g_pShaderDeviceDX11)
 	{
-		g_pShaderDevice->Shutdown();
-		g_pShaderDevice = NULL;
+		g_pShaderDeviceDX11->Shutdown();
+		g_pShaderDeviceDX11 = NULL;
 	}
 }
 
@@ -328,8 +328,7 @@ void CShaderDeviceMgrDX11::GetCurrentModeInfo(ShaderDisplayMode_t* pInfo, int nA
 // Initialization, shutdown
 bool CShaderDeviceMgrDX11::SetAdapter(int nAdapter, int nFlags)
 {
-	g_pShaderDevice = g_pShaderDeviceDx11;
-	g_pShaderDeviceDx11->m_nCurrentAdapter = nAdapter;
+	g_pShaderDeviceDX11->m_nCurrentAdapter = nAdapter;
 
 	return false;
 }
@@ -351,21 +350,14 @@ CreateInterfaceFn CShaderDeviceMgrDX11::SetMode(void *hWnd, int nAdapter, const 
 		return NULL;
 	}
 
-	if (g_pShaderDevice)
+	if (g_pShaderDeviceDX11)
 	{
-		g_pShaderDevice->Shutdown();
-		g_pShaderDevice = NULL;
+		g_pShaderDeviceDX11->Shutdown();
+		g_pShaderDeviceDX11 = NULL;
 	}
 
-	g_pShaderAPI = NULL;
-	g_pShaderShadow = NULL;
-
-	if (!g_pShaderDeviceDx11->Initialize(hWnd, nAdapter, mode))
+	if (!g_pShaderDeviceDX11->Initialize(hWnd, nAdapter, mode))
 		return NULL;
-
-	g_pShaderDevice = g_pShaderDeviceDx11;
-	g_pShaderAPI = g_pShaderAPIDx11;
-	g_pShaderShadow = g_pShaderShadowDx11;
 
 	return CreateShaderInterface;
 }
@@ -378,11 +370,11 @@ void *CShaderDeviceMgrDX11::CreateShaderInterface(const char *pName, int *pRetur
 		*pReturnCode = IFACE_OK;
 	}
 	if (!Q_stricmp(pName, SHADER_DEVICE_INTERFACE_VERSION))
-		return static_cast<IShaderDevice*>(g_pShaderDevice);
+		return static_cast<IShaderDevice*>(g_pShaderDeviceDX11);
 	if (!Q_stricmp(pName, SHADERAPI_INTERFACE_VERSION))
-		return static_cast<IShaderAPI*>(g_pShaderAPI);
+		return static_cast<IShaderAPI*>(g_pShaderAPIDX11);
 	if (!Q_stricmp(pName, SHADERSHADOW_INTERFACE_VERSION))
-		return static_cast<IShaderShadow*>(g_pShaderShadow);
+		return static_cast<IShaderShadow*>(g_pShaderShadowDX11);
 
 	if (pReturnCode)
 	{

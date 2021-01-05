@@ -121,6 +121,6 @@ private:
 };
 
 // Singleton
-extern CShaderDeviceDX11 *g_pShaderDeviceDx11;
+extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
 
 #endif // SHADERDEVICEDX11_H

@@ -8,11 +8,11 @@
 // LAST INCLUDE AND WHATEVER
 #include "memdbgon.h"
 
-static CHardwareConfigDX11 s_HardwareConfigDx11;
-CHardwareConfigDX11 *g_pHardwareConfigDx11 = &s_HardwareConfigDx11;
+static CHardwareConfigDX11 s_HardwareConfigDX11;
+CHardwareConfigDX11 *g_pHardwareConfigDX11 = &s_HardwareConfigDX11;
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CHardwareConfigDX11, IMaterialSystemHardwareConfig,
-	MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION, s_HardwareConfigDx11)
+	MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION, s_HardwareConfigDX11)
 
 
 	CHardwareConfigDX11::CHardwareConfigDX11()
@@ -30,11 +30,11 @@ void CHardwareConfigDX11::SetupHWInfo(int nDXLevel)
 // Does the destination buffer (back buffer) have an alpha channel?
 bool CHardwareConfigDX11::HasDestAlphaBuffer() const
 {
-	if (!g_pShaderDevice)
+	if (!g_pShaderDeviceDX11)
 		return false;
 
 	// Not exactly correct right now but it'll do for a bit
-	return (g_pShaderDevice->GetBackBufferFormat() == IMAGE_FORMAT_BGRA8888);
+	return (g_pShaderDeviceDX11->GetBackBufferFormat() == IMAGE_FORMAT_BGRA8888);
 }
 
 // Is there a stencil buffer?
@@ -46,10 +46,10 @@ bool CHardwareConfigDX11::HasStencilBuffer() const
 // Get the bit depth of the framebuffer
 int	 CHardwareConfigDX11::GetFrameBufferColorDepth() const
 {
-	if (!g_pShaderDevice)
+	if (!g_pShaderDeviceDX11)
 		return 0;
 
-	return ShaderUtil()->ImageFormatInfo(g_pShaderDevice->GetBackBufferFormat()).m_NumBytes;
+	return ShaderUtil()->ImageFormatInfo(g_pShaderDeviceDX11->GetBackBufferFormat()).m_NumBytes;
 }
 
 // Get the number of usable samplers (textures, sort of)
@@ -404,10 +404,10 @@ bool CHardwareConfigDX11::SupportsGLMixedSizeTargets() const
 // Is anti-aliasing enabled?
 bool CHardwareConfigDX11::IsAAEnabled() const	// Is antialiasing being used?
 {
-	if (!g_pShaderDevice)
+	if (!g_pShaderDeviceDX11)
 		return false;
 
-	return g_pShaderDevice->IsAAEnabled();
+	return g_pShaderDeviceDX11->IsAAEnabled();
 }
 
 
@@ -459,10 +459,10 @@ bool CHardwareConfigDX11::SupportsStreamOffset() const // DX90+
 // How many bits in the stencil buffer?
 int CHardwareConfigDX11::StencilBufferBits() const
 {
-	if (!g_pShaderDevice)
+	if (!g_pShaderDeviceDX11)
 		return 0;
 
-	return g_pShaderDevice->StencilBufferBits();
+	return g_pShaderDeviceDX11->StencilBufferBits();
 }
 
 // What is the maximum number of viewports?
