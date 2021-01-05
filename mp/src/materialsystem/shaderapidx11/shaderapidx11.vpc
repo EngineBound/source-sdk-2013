@@ -32,7 +32,7 @@ $Configuration
 	}
 }
 
-$Project "ShaderApiDx11 (DML)"
+$Project "ShaderApiDX11 (DML)"
 {
 	$Folder "Source Files"
 	{
@@ -49,5 +49,7 @@ $Project "ShaderApiDx11 (DML)"
         $File   "shaderapidx11_global.h"
         $File   "vertexshaderdx11.h"
         $File   "vertexshaderdx11.cpp"
+        $File   "shaderutildx11.h"
+        $File   "shaderutildx11.cpp"
 	}
 }
