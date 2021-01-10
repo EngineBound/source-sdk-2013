@@ -8,6 +8,7 @@
 #include <d3d11.h>
 #include "ishaderapi.h"
 #include "materialsystem/idebugtextureinfo.h"
+#include "meshdx11.h"
 
 class CShaderAPIDX11 : public IShaderAPI, public IDebugTextureInfo
 {
@@ -526,25 +527,6 @@ public:
 
 	virtual bool SupportsMSAAMode(int nMSAAMode);
 
-#if defined( _X360 )
-	virtual HXUIFONT OpenTrueTypeFont(const char *pFontname, int tall, int style);
-	virtual void CloseTrueTypeFont(HXUIFONT hFont);
-	virtual bool GetTrueTypeFontMetrics(HXUIFONT hFont, XUIFontMetrics *pFontMetrics, XUICharMetrics charMetrics[256]);
-	// Render a sequence of characters and extract the data into a buffer
-	// For each character, provide the width+height of the font texture subrect,
-	// an offset to apply when rendering the glyph, and an offset into a buffer to receive the RGBA data
-	virtual bool GetTrueTypeGlyphs(HXUIFONT hFont, int numChars, wchar_t *pWch, int *pOffsetX, int *pOffsetY, int *pWidth, int *pHeight, unsigned char *pRGBA, int *pRGBAOffset);
-	virtual ShaderAPITextureHandle_t CreateRenderTargetSurface(int width, int height, ImageFormat format, const char *pDebugName, const char *pTextureGroupName);
-	virtual void PersistDisplay();
-	virtual bool PostQueuedTexture(const void *pData, int nSize, ShaderAPITextureHandle_t *pHandles, int nHandles, int nWidth, int nHeight, int nDepth, int nMips, int *pRefCount);
-	virtual void *GetD3DDevice();
-
-	virtual void PushVertexShaderGPRAllocation(int iVertexShaderCount = 64);
-	virtual void PopVertexShaderGPRAllocation(void);
-
-	virtual void EnableVSync_360(bool bEnable); //360 allows us to bypass vsync blocking up to 60 fps without creating a new device
-#endif
-
 	virtual bool OwnGPUResources(bool bEnable);
 
 	//get fog distances entered with FogStart(), FogEnd(), and SetFogZ()
@@ -685,9 +667,10 @@ public:
 	// used during a frame. Returns the old state of debug texture rendering flag to use
 	// it for restoring the mode.
 	virtual bool SetDebugTextureRendering(bool bEnable);
-protected:
-	LightDesc_t _ldtmp;
-	Vector _vectmp;
+
+private:
+
+	CMeshDX11 m_Mesh;
 };
 
 #endif // SHADERAPIDX11_H

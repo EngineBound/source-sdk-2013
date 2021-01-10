@@ -16,12 +16,12 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IShaderAPI,
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IDebugTextureInfo,
 	DEBUG_TEXTURE_INFO_VERSION, s_ShaderAPIDX11)
 
+extern IShaderUtil *g_pShaderUtil;
+
 // This file requires shader states to function, write those first :))
 
-CShaderAPIDX11::CShaderAPIDX11()
+CShaderAPIDX11::CShaderAPIDX11() : m_Mesh(false)
 {
-	_ldtmp = LightDesc_t();
-	_vectmp = Vector(0, 0, 0);
 }
 	
 // Set nCount viewports to those in pViewports
@@ -33,7 +33,7 @@ void CShaderAPIDX11::SetViewports(int nCount, const ShaderViewport_t* pViewports
 // Get viewports up to nMax, stored in pViewports array and return num stored
 int CShaderAPIDX11::GetViewports(ShaderViewport_t* pViewports, int nMax) const
 {
-	return 0;
+	return 1;
 }
 
 // Return system time
@@ -42,13 +42,10 @@ double CShaderAPIDX11::CurrentTime() const
 	return Sys_FloatTime();
 }
 
-// REMOVE LATER
-IShaderUtil *g_pShaderUtil = 0;
-
 // Get dimensions of lightmap, REQUIRES SHADERUTIL TO BE INITIALIZED
 void CShaderAPIDX11::GetLightmapDimensions(int *w, int *h)
 {
-	//g_pShaderUtil->GetLightmapDimensions(w, h);
+	g_pShaderUtil->GetLightmapDimensions(w, h);
 }
 
 // Get fog mode
@@ -302,7 +299,8 @@ int CShaderAPIDX11::GetMaxLights(void) const
 // Get light at lightNum
 const LightDesc_t& CShaderAPIDX11::GetLight(int lightNum) const
 {
-	return _ldtmp;
+	static LightDesc_t tmp;
+	return tmp;
 }
 
 // Set fogparams erm... awkwerd...
@@ -333,25 +331,26 @@ void CShaderAPIDX11::CommitPixelShaderLighting(int pshReg)
 // Use this to get the mesh builder that allows us to modify vertex data
 CMeshBuilder* CShaderAPIDX11::GetVertexModifyBuilder()
 {
-	return (CMeshBuilder *)0;
+	return NULL;
 }
 
 // Currently using flashlight? (Probably)
 bool CShaderAPIDX11::InFlashlightMode() const
 {
-	return ShaderUtil()->InFlashlightMode();
+	return false;// ShaderUtil()->InFlashlightMode();
 }
 
 // Get flashlight state and set worldToTexture to the flashlight's worldToTexture matrix
 const FlashlightState_t &CShaderAPIDX11::GetFlashlightState(VMatrix &worldToTexture) const
 {
-	return (FlashlightState_t &)worldToTexture;
+	static FlashlightState_t tmp;
+	return tmp;
 }
 
 
 bool CShaderAPIDX11::InEditorMode() const
 {
-	return ShaderUtil()->InEditorMode();
+	return false;// ShaderUtil()->InEditorMode();
 }
 
 
@@ -371,7 +370,7 @@ void CShaderAPIDX11::BindStandardTexture(Sampler_t sampler, StandardTextureId_t 
 // Gets rendertarget at nRenderTargetID
 ITexture *CShaderAPIDX11::GetRenderTargetEx(int nRenderTargetID)
 {
-	return ShaderUtil()->GetRenderTargetEx(nRenderTargetID);
+	return NULL;// ShaderUtil()->GetRenderTargetEx(nRenderTargetID);
 }
 
 // Set tonemapping scale to scale
@@ -383,13 +382,14 @@ void CShaderAPIDX11::SetToneMappingScaleLinear(const Vector &scale)
 // Return tonemapping scale
 const Vector &CShaderAPIDX11::GetToneMappingScaleLinear(void) const
 {
-	return _vectmp;
+	static Vector tmp;
+	return tmp;
 }
 
 // Get lightmap scale
 float CShaderAPIDX11::GetLightMapScaleFactor(void) const
 {
-	return 0.f;
+	return 1.f;
 }
 
 // Load matrix m into bone at boneIndex
@@ -414,7 +414,8 @@ void CShaderAPIDX11::GetDXLevelDefaults(uint &max_dxlevel, uint &recommended_dxl
 // Get flashlight state, world2texture mat and flashlightdepthtexture
 const FlashlightState_t &CShaderAPIDX11::GetFlashlightStateEx(VMatrix &worldToTexture, ITexture **pFlashlightDepthTexture) const
 {
-	return (FlashlightState_t &)worldToTexture;
+	static FlashlightState_t tmp;
+	return tmp;
 }
 
 // Calculate luminance of lightcube
@@ -426,7 +427,10 @@ float CShaderAPIDX11::GetAmbientLightCubeLuminance()
 // Get lightstate and put it in state
 void CShaderAPIDX11::GetDX9LightState(LightState_t *state) const
 {
-	return;
+	state->m_nNumLights = 0;
+	state->m_bAmbientLight = false;
+	state->m_bStaticLightTexel = false;
+	state->m_bStaticLightVertex = false;
 }
 
 int CShaderAPIDX11::GetPixelFogCombo() //0 is either range fog, or no fog simulated with rigged range fog values. 1 is height fog
@@ -451,7 +455,7 @@ bool CShaderAPIDX11::IsHWMorphingEnabled() const
 // Get dimensions of standard texture 'id'
 void CShaderAPIDX11::GetStandardTextureDimensions(int *pWidth, int *pHeight, StandardTextureId_t id)
 {
-	return;
+	*pWidth = *pHeight = 0;
 }
 
 // Set vertex shader constant var to pVec (BOOLEAN)
@@ -512,6 +516,7 @@ int CShaderAPIDX11::GetPackedDeformationInformation(int nMaskOfUnderstoodDeforma
 	int nMaximumDeformations,
 	int *pNumDefsOut) const
 {
+	*pNumDefsOut = 0;
 	return 0;
 }
 
@@ -542,7 +547,9 @@ void CShaderAPIDX11::SetStandardTextureHandle(StandardTextureId_t nId, ShaderAPI
 // Interface for mat system to tell shaderapi about color correction
 void CShaderAPIDX11::GetCurrentColorCorrection(ShaderColorCorrectionInfo_t* pInfo)
 {
-	return;
+	pInfo->m_bIsEnabled = false;
+	pInfo->m_nLookupCount = 0;
+	pInfo->m_flDefaultWeight = 0.0f;
 }
 
 // Set pshReg to nearz and farz vals
@@ -602,7 +609,7 @@ void CShaderAPIDX11::SetRasterState(const ShaderRasterState_t& state)
 // Sets the mode...
 bool CShaderAPIDX11::SetMode(void* hwnd, int nAdapter, const ShaderDeviceInfo_t &info)
 {
-	return false;
+	return true;
 }
 
 // Change video mode to that described in info
@@ -663,53 +670,60 @@ void CShaderAPIDX11::FlushBufferedPrimitives()
 IMesh* CShaderAPIDX11::GetDynamicMesh(IMaterial* pMaterial, int nHWSkinBoneCount, bool bBuffered/* = true*/,
 	IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
-	return (IMesh *)0;
+	return &m_Mesh;
 }
 
 IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t vertexFormat, int nHWSkinBoneCount,
 	bool bBuffered/* = true*/, IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
-	return (IMesh *)0;
+	return &m_Mesh;
 }
 
+enum
+{
+	TRANSLUCENT = 0x1,
+	ALPHATESTED = 0x2,
+	VERTEX_AND_PIXEL_SHADERS = 0x4,
+	DEPTHWRITE = 0x8,
+};
 
 // Methods to ask about particular state snapshots
 // Does the state snapshot use translucency
 bool CShaderAPIDX11::IsTranslucent(StateSnapshot_t id) const
 {
-	return false;
+	return (id & TRANSLUCENT) != 0;
 }
 
 // Does the state snapshot use alpha testing
 bool CShaderAPIDX11::IsAlphaTested(StateSnapshot_t id) const
 {
-	return false;
+	return (id & ALPHATESTED) != 0;
 }
 
 // Does the state snapshot use vertex and pixel shaders
 bool CShaderAPIDX11::UsesVertexAndPixelShaders(StateSnapshot_t id) const
 {
-	return false;
+	return (id & VERTEX_AND_PIXEL_SHADERS) != 0;
 }
 
 // Does the state snapshot need to write to depth
 bool CShaderAPIDX11::IsDepthWriteEnabled(StateSnapshot_t id) const
 {
-	return false;
+	return (id & DEPTHWRITE) != 0;
 }
 
 
 // Gets the vertex format for a set of snapshot ids
 VertexFormat_t CShaderAPIDX11::ComputeVertexFormat(int numSnapshots, StateSnapshot_t* pIds) const
 {
-	return (VertexFormat_t)0;
+	return NULL;
 }
 
 
 // What fields in the vertex do we actually use?
 VertexFormat_t CShaderAPIDX11::ComputeVertexUsage(int numSnapshots, StateSnapshot_t* pIds) const
 {
-	return (VertexFormat_t)0;
+	return NULL;
 }
 
 
@@ -823,13 +837,13 @@ void CShaderAPIDX11::SetSkinningMatrices()
 // Returns the nearest supported format
 ImageFormat CShaderAPIDX11::GetNearestSupportedFormat(ImageFormat fmt, bool bFilteringRequired/* = true*/) const
 {
-	return IMAGE_FORMAT_A8;
+	return fmt;
 }
 
 // Get nearest format usable for render targets to fmt
 ImageFormat CShaderAPIDX11::GetNearestRenderTargetFormat(ImageFormat fmt) const
 {
-	return IMAGE_FORMAT_A8;
+	return fmt;
 }
 
 
@@ -854,7 +868,7 @@ ShaderAPITextureHandle_t CShaderAPIDX11::CreateTexture(
 	const char *pDebugName,
 	const char *pTextureGroupName)
 {
-	return ShaderAPITextureHandle_t();
+	return NULL;
 }
 
 // Delete texture at textureHandle
@@ -871,21 +885,21 @@ ShaderAPITextureHandle_t CShaderAPIDX11::CreateDepthTexture(
 	const char *pDebugName,
 	bool bTexture)
 {
-	return ShaderAPITextureHandle_t();
+	return NULL;
 }
 
 // Is the texture at textureHandle a texture? Redundant????
 bool CShaderAPIDX11::IsTexture(ShaderAPITextureHandle_t textureHandle)
 {
-	return false;
+	return true;
 }
 
 // Is this a texture from praised video game franchise Resident Evil?
 bool CShaderAPIDX11::IsTextureResident(ShaderAPITextureHandle_t textureHandle)
 {
-	// I actually have no idea what this means but let's settle at yes, it is.
+	// I actually have no idea what this means but let's settle at no, it is not.
 	
-	return true;
+	return false;
 }
 
 
@@ -1341,6 +1355,8 @@ void CShaderAPIDX11::EnableFastClip(bool bEnable)
 // the maximum possible vertices + indices that can be rendered in a single batch
 void CShaderAPIDX11::GetMaxToRender(IMesh *pMesh, bool bMaxUntilFlush, int *pMaxVerts, int *pMaxIndices)
 {
+	*pMaxVerts = 32768;
+	*pMaxIndices = 32768;
 	return;
 }
 
@@ -1348,13 +1364,13 @@ void CShaderAPIDX11::GetMaxToRender(IMesh *pMesh, bool bMaxUntilFlush, int *pMax
 // Returns the max number of vertices we can render for a given material
 int CShaderAPIDX11::GetMaxVerticesToRender(IMaterial *pMaterial)
 {
-	return 0;
+	return 32768;
 }
 
 // Get maximum indices to render for a specific mesh
 int CShaderAPIDX11::GetMaxIndicesToRender()
 {
-	return 0;
+	return 32768;
 }
 
 
@@ -1434,7 +1450,7 @@ int CShaderAPIDX11::CompareSnapshots(StateSnapshot_t snapshot0, StateSnapshot_t 
 // Get mesh for flexing
 IMesh *CShaderAPIDX11::GetFlexMesh()
 {
-	return (IMesh *)0;
+	return &m_Mesh;
 }
 
 // Set flashlight state to one given by state, w2t, and texture pointer
@@ -1448,70 +1464,6 @@ bool CShaderAPIDX11::SupportsMSAAMode(int nMSAAMode)
 {
 	return false;
 }
-
-
-#if defined( _X360 )
-HXUIFONT CShaderAPIDX11::OpenTrueTypeFont(const char *pFontname, int tall, int style)
-{
-	return (HXUIFONT)0;
-}
-
-void CShaderAPIDX11::CloseTrueTypeFont(HXUIFONT hFont)
-{
-	return;
-}
-
-bool CShaderAPIDX11::GetTrueTypeFontMetrics(HXUIFONT hFont, XUIFontMetrics *pFontMetrics, XUICharMetrics charMetrics[256])
-{
-	return false;
-}
-
-// Render a sequence of characters and extract the data into a buffer
-// For each character, provide the width+height of the font texture subrect,
-// an offset to apply when rendering the glyph, and an offset into a buffer to receive the RGBA data
-bool CShaderAPIDX11::GetTrueTypeGlyphs(HXUIFONT hFont, int numChars, wchar_t *pWch, int *pOffsetX, int *pOffsetY, int *pWidth, int *pHeight, unsigned char *pRGBA, int *pRGBAOffset)
-{
-	return false;
-}
-
-ShaderAPITextureHandle_t CShaderAPIDX11::CreateRenderTargetSurface(int width, int height, ImageFormat format, const char *pDebugName, const char *pTextureGroupName)
-{
-	return INVALID_SHADERAPI_TEXTURE_HANDLE;
-}
-
-void CShaderAPIDX11::PersistDisplay()
-{
-	return;
-}
-
-bool CShaderAPIDX11::PostQueuedTexture(const void CShaderAPIDX11::*pData, int nSize, ShaderAPITextureHandle_t *pHandles, int nHandles, int nWidth, int nHeight, int nDepth, int nMips, int *pRefCount)
-{
-	return false;
-}
-
-void *CShaderAPIDX11::GetD3DDevice()
-{
-	return;
-}
-
-
-void CShaderAPIDX11::PushVertexShaderGPRAllocation(int iVertexShaderCount = 64)
-{
-	return;
-}
-
-void CShaderAPIDX11::PopVertexShaderGPRAllocation(void)
-{
-	return;
-}
-
-
-void CShaderAPIDX11::EnableVSync_360(bool bEnable) //360 allows us to bypass vsync blocking up to 60 fps without creating a new device
-{
-	return;
-}
-
-#endif
 
 // X360 specific functionality, just false outside of this
 bool CShaderAPIDX11::OwnGPUResources(bool bEnable)
@@ -1601,7 +1553,7 @@ void CShaderAPIDX11::ShaderUnlock()
 // Get shadowmap format
 ImageFormat CShaderAPIDX11::GetShadowDepthTextureFormat(void)
 {
-	return IMAGE_FORMAT_A8;
+	return IMAGE_FORMAT_UNKNOWN;
 }
 
 // Fetch4 is an ATI technology (or AMD)
@@ -1670,7 +1622,8 @@ float CShaderAPIDX11::GammaToLinear_HardwareSpecific(float fGamma) const
 // 	if (IsPC() || IsX360())
 // 		return SrgbGammaToLinear(fGamma);
 
-	return pow(fGamma, 2.2f);
+	//return pow(fGamma, 2.2f);
+	return 0.0f;
 }
 
 float CShaderAPIDX11::LinearToGamma_HardwareSpecific(float fLinear) const
@@ -1678,7 +1631,8 @@ float CShaderAPIDX11::LinearToGamma_HardwareSpecific(float fLinear) const
 // 	if (IsPC() || IsX360())
 // 		return SrgbLinearToGamma(fLinear);
 
-	return pow(fLinear, (1.0f / 2.2f));
+	//return pow(fLinear, (1.0f / 2.2f));
+	return 0.0f;
 }
 
 
@@ -1691,7 +1645,7 @@ void CShaderAPIDX11::SetLinearToGammaConversionTextures(ShaderAPITextureHandle_t
 // Format for null textures
 ImageFormat CShaderAPIDX11::GetNullTextureFormat(void)
 {
-	return IMAGE_FORMAT_A8;
+	return IMAGE_FORMAT_RGBA8888;
 }
 
 // Bind textureHandle to nSampler
@@ -1735,7 +1689,8 @@ void CShaderAPIDX11::CreateTextures(
 	const char *pDebugName,
 	const char *pTextureGroupName)
 {
-	return;
+	for (int k = 0; k < count; ++k)
+		pHandles[k] = 0;
 }
 
 // Does nothing Lole
@@ -1851,7 +1806,7 @@ void CShaderAPIDX11::EnableGetAllTextures(bool bEnable)
 // It is required to enable debug texture list to get this.
 KeyValues* CShaderAPIDX11::GetDebugTextureList()
 {
-	return (KeyValues *)0;
+	return NULL;
 }
 
 

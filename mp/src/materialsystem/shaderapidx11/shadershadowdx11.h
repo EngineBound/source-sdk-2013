@@ -10,6 +10,9 @@
 class CShaderShadowDX11 : public IShaderShadow
 {
 public:
+	CShaderShadowDX11();
+	~CShaderShadowDX11();
+
 	// Sets the default *shadow* state
 	virtual void SetDefaultState();
 
@@ -125,6 +128,11 @@ public:
 	// More alpha blending state
 	virtual void BlendOp(ShaderBlendOp_t blendOp);
 	virtual void BlendOpSeparateAlpha(ShaderBlendOp_t blendOp);
+	
+	bool m_bIsTranslucent;
+	bool m_bIsAlphaTested;
+	bool m_bIsDepthWriteEnabled;
+	bool m_bUsesVertexAndPixelShaders;
 };
 
 #endif //SHADERSHADOWDX11_H

@@ -11,14 +11,15 @@
 static CHardwareConfigDX11 s_HardwareConfigDX11;
 CHardwareConfigDX11 *g_pHardwareConfigDX11 = &s_HardwareConfigDX11;
 
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CHardwareConfigDX11, IMaterialSystemHardwareConfig,
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CHardwareConfigDX11, IMaterialSystemHardwareConfigExtended,
 	MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION, s_HardwareConfigDX11)
 
 
-	CHardwareConfigDX11::CHardwareConfigDX11()
+CHardwareConfigDX11::CHardwareConfigDX11()
 {
 	Q_memset(&m_HWInfo, 0, sizeof(m_HWInfo));
 	m_bHDREnabled = false;
+	m_HWInfo.m_nMaxDXSupportLevel = 90;
 }
 
 // Sets up HWInfo_t struct (m_HWInfo) with system capabilities
@@ -281,9 +282,11 @@ int CHardwareConfigDX11::GetDXSupportLevel() const // Needs to consider dxconfig
 	return m_HWInfo.m_nDXSupportLevel;
 }
 
-// Get the shaderapi dll name, would be "shaderapidx11" probably
+// Get the shader dll name, would be "shaderapidx11" probably
 const char *CHardwareConfigDX11::GetShaderDLLName() const
 {
+	return NULL;
+
 	if (!(m_HWInfo.m_pShaderDLLName && m_HWInfo.m_pShaderDLLName[0]))
 		return "shaderapidx11";
 

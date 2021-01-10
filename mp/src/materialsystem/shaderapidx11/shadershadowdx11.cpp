@@ -7,10 +7,22 @@ CShaderShadowDX11 *g_pShaderShadowDX11 = &s_ShaderShadowDX11;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderShadowDX11, IShaderShadow,
 	SHADERSHADOW_INTERFACE_VERSION, s_ShaderShadowDX11)
 
+CShaderShadowDX11::CShaderShadowDX11() 
+{
+	SetDefaultState();
+}
+
+CShaderShadowDX11::~CShaderShadowDX11()
+{
+}
+
 // Sets the default *shadow* state
 void CShaderShadowDX11::SetDefaultState()
 {
-	return;
+	m_bIsTranslucent = false;
+	m_bIsAlphaTested = false;
+	m_bIsDepthWriteEnabled = true;
+	m_bUsesVertexAndPixelShaders = false;
 }
 
 // Methods related to depth buffering
@@ -21,7 +33,7 @@ void CShaderShadowDX11::DepthFunc(ShaderDepthFunc_t depthFunc)
 
 void CShaderShadowDX11::EnableDepthWrites(bool bEnable)
 {
-	return;
+	m_bIsDepthWriteEnabled = bEnable;
 }
 
 void CShaderShadowDX11::EnableDepthTest(bool bEnable)
@@ -94,7 +106,7 @@ void CShaderShadowDX11::EnableAlphaWrites(bool bEnable)
 // Methods related to alpha blending
 void CShaderShadowDX11::EnableBlending(bool bEnable)
 {
-	return;
+	m_bIsTranslucent = bEnable;
 }
 
 void CShaderShadowDX11::BlendFunc(ShaderBlendFactor_t srcFactor, ShaderBlendFactor_t dstFactor)
@@ -107,7 +119,7 @@ void CShaderShadowDX11::BlendFunc(ShaderBlendFactor_t srcFactor, ShaderBlendFact
 // Alpha testing
 void CShaderShadowDX11::EnableAlphaTest(bool bEnable)
 {
-	return;
+	m_bIsAlphaTested = bEnable;
 }
 
 void CShaderShadowDX11::AlphaFunc(ShaderAlphaFunc_t alphaFunc, float alphaRef /* [0-1] */)
@@ -151,12 +163,12 @@ void CShaderShadowDX11::VertexShaderVertexFormat(unsigned int nFlags,
 // Pixel and vertex shader methods
 void CShaderShadowDX11::SetVertexShader(const char* pFileName, int nStaticVshIndex)
 {
-	return;
+	m_bUsesVertexAndPixelShaders = (pFileName != NULL);
 }
 
 void CShaderShadowDX11::SetPixelShader(const char* pFileName, int nStaticPshIndex)
 {
-	return;
+	m_bUsesVertexAndPixelShaders = (pFileName != NULL);
 }
 
 

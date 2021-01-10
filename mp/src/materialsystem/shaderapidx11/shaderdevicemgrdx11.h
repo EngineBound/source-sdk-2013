@@ -58,8 +58,6 @@ public:
 	virtual void AddModeChangeCallback(ShaderModeChangeCallbackFunc_t func);
 	virtual void RemoveModeChangeCallback(ShaderModeChangeCallbackFunc_t func);
 
-	static void *CreateShaderInterface(const char *pName, int *pReturnCode);
-
 protected:
 	IDXGIAdapter *GetAdapter(int nAdapter) const;
 	IDXGIOutput *GetAdapterOutput(int nAdapter) const;

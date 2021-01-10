@@ -6,6 +6,7 @@
 #endif
 
 #include "IShaderDevice.h"
+#include "meshdx11.h"
 #include <d3d11.h>
 
 class CShaderDeviceDX11 : public IShaderDevice
@@ -117,6 +118,9 @@ private:
 	int m_nWndWidth, m_nWndHeight;
 
 	friend class CShaderDeviceMgrDX11;
+
+	CMeshDX11 m_Mesh;
+	CMeshDX11 m_DynamicMesh;
 
 };
 

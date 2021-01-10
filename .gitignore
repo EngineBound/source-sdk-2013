@@ -111,3 +111,4 @@ lib/public/vgui_controls.lib
 
 # Bin files
 mp/game/bin/
+*.lib

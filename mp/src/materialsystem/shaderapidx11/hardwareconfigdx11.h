@@ -104,7 +104,14 @@ struct HWInfo_t : public MaterialAdapterInfo_t
 	float m_nGammaControlPointCount;
 };
 
-class CHardwareConfigDX11 : public IMaterialSystemHardwareConfig
+class IMaterialSystemHardwareConfigExtended : public IMaterialSystemHardwareConfig
+{
+public:
+	// Required for the system to run
+	virtual const char *GetHWSpecificShaderDLLName() const = 0;
+};
+
+class CHardwareConfigDX11 : public IMaterialSystemHardwareConfigExtended
 {
 public:
 	CHardwareConfigDX11();
@@ -117,6 +124,10 @@ public:
 	virtual bool SupportsCompressedTextures() const;
 	virtual VertexCompressionType_t SupportsCompressedVertices() const;
 	virtual bool SupportsNormalMapCompression() const;
+
+	const char *GetHWSpecificShaderDLLName() const {
+		return 0;
+	}
 
 	virtual bool SupportsVertexAndPixelShaders() const;
 	virtual bool SupportsPixelShaders_1_4() const;
@@ -237,5 +248,6 @@ private:
 
 	bool m_bHDREnabled;
 };
+
 
 #endif // HARDWARECONFIGDX11_H
