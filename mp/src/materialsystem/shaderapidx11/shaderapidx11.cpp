@@ -1,6 +1,7 @@
 #include "shaderapidx11.h"
 #include "shaderapidx11_global.h"
 #include "shaderdevicedx11.h"
+#include "shaderdevicemgrdx11.h"
 #include "ishaderutil.h"
 #include "hardwareconfigdx11.h"
 
@@ -22,18 +23,49 @@ extern IShaderUtil *g_pShaderUtil;
 
 CShaderAPIDX11::CShaderAPIDX11() : m_Mesh(false)
 {
+	m_DynamicState = DynamicStateDX11();
+	m_ShaderState = ShaderStateDX11();
 }
 	
 // Set nCount viewports to those in pViewports
 void CShaderAPIDX11::SetViewports(int nCount, const ShaderViewport_t* pViewports) 
 {
-	return;
+	m_DynamicState.m_nNumViewports = min(nCount, MAX_DX11_VIEWPORTS);
+
+	for (int i = 0; i < m_DynamicState.m_nNumViewports; ++i)
+	{
+		Assert(pViewports[i].m_nVersion == SHADER_VIEWPORT_VERSION);
+
+		m_DynamicState.m_pViewports[i].TopLeftX = pViewports[i].m_nTopLeftX;
+		m_DynamicState.m_pViewports[i].TopLeftY = pViewports[i].m_nTopLeftY;
+		m_DynamicState.m_pViewports[i].Width = pViewports[i].m_nWidth;
+		m_DynamicState.m_pViewports[i].Height = pViewports[i].m_nHeight;
+		m_DynamicState.m_pViewports[i].MaxDepth = pViewports[i].m_flMaxZ;
+		m_DynamicState.m_pViewports[i].MinDepth = pViewports[i].m_flMinZ;
+	}
 }
 
 // Get viewports up to nMax, stored in pViewports array and return num stored
 int CShaderAPIDX11::GetViewports(ShaderViewport_t* pViewports, int nMax) const
 {
-	return 1;
+	int nCount = min(nMax, m_DynamicState.m_nNumViewports);
+
+	if (pViewports)
+	{
+		for (int i = 0; i < nCount; ++i)
+		{
+			const D3D11_VIEWPORT &viewport = m_DynamicState.m_pViewports[i];
+			pViewports[i].m_nVersion = SHADER_VIEWPORT_VERSION;
+			pViewports[i].m_nTopLeftX = viewport.TopLeftX;
+			pViewports[i].m_nTopLeftY = viewport.TopLeftY;
+			pViewports[i].m_nWidth = viewport.Width;
+			pViewports[i].m_nHeight = viewport.Height;
+			pViewports[i].m_flMaxZ = viewport.MaxDepth;
+			pViewports[i].m_flMinZ = viewport.MinDepth;
+		}
+	}
+
+	return nCount;
 }
 
 // Return system time
@@ -65,7 +97,8 @@ void CShaderAPIDX11::GetSceneFogColor(unsigned char *rgb)
 // Get current matrix 'mode', which matrix is being updated
 void CShaderAPIDX11::MatrixMode(MaterialMatrixMode_t matrixMode)
 {
-	return;
+	m_MatrixMode = matrixMode;
+	m_pCurMatrix = &m_ShaderState.m_pMatrixStacks[matrixMode].Top();
 }
 
 // Evidently, push and pop in this context don't mean what I thought they did
@@ -73,91 +106,123 @@ void CShaderAPIDX11::MatrixMode(MaterialMatrixMode_t matrixMode)
 // Push a matrix, meaning add an item and call constructor
 void CShaderAPIDX11::PushMatrix()
 {
-	return;
+	CUtlStack<DirectX::XMMATRIX> &targetStack = m_ShaderState.m_pMatrixStacks[m_MatrixMode];
+	targetStack.Push();
+	m_pCurMatrix = &targetStack.Top();
 }
 
 // Pop a matrix, meaning remove an item
 void CShaderAPIDX11::PopMatrix()
 {
-	return;
+	CUtlStack<DirectX::XMMATRIX> &targetStack = m_ShaderState.m_pMatrixStacks[m_MatrixMode];
+	targetStack.Pop();
+	m_pCurMatrix = &targetStack.Top();
 }
 
 // Load m into current matrix, fulfilling the other end of push
 void CShaderAPIDX11::LoadMatrix(float *m)
 {
-	return;
+	DirectX::XMFLOAT4X4 newMat(m);
+	*m_pCurMatrix = DirectX::XMLoadFloat4x4(&newMat);
 }
 
 // curMat = curMat x m
 void CShaderAPIDX11::MultMatrix(float *m)
 {
-	return;
+	DirectX::XMFLOAT4X4 newMat(m);
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(*m_pCurMatrix, DirectX::XMLoadFloat4x4(&newMat));
 }
 
 // curMat = m x curMat
 void CShaderAPIDX11::MultMatrixLocal(float *m)
 {
-	return;
+	DirectX::XMFLOAT4X4 newMat(m);
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&newMat), *m_pCurMatrix);
 }
 
 // dst = matrix in matrixMode slot, e.g. technically fulfilling other end of pop
 void CShaderAPIDX11::GetMatrix(MaterialMatrixMode_t matrixMode, float *dst)
 {
-	return;
+	DirectX::XMFLOAT4X4 tmpMat4x4;
+	DirectX::XMStoreFloat4x4(&tmpMat4x4, m_ShaderState.m_pMatrixStacks[matrixMode].Top());
+	
+	memcpy(dst, &tmpMat4x4, sizeof(DirectX::XMFLOAT4X4));
 }
 
 // Set curMat to identity matrix
 void CShaderAPIDX11::LoadIdentity(void)
 {
-	return;
+	m_pCurMatrix = &DirectX::XMMatrixIdentity();
 }
 
 // Set curMat to camera2world matrix (Probably)
 void CShaderAPIDX11::LoadCameraToWorld(void)
 {
-	return;
+	// Cam2World = view inverse without translation
+	DirectX::XMMATRIX invView;
+	invView = DirectX::XMMatrixInverse(NULL, m_ShaderState.m_pMatrixStacks[MATERIAL_VIEW].Top());
+
+	DirectX::XMFLOAT4X4 invView4x4;
+	DirectX::XMStoreFloat4x4(&invView4x4, invView);
+
+	invView4x4.m[3][0] = invView4x4.m[3][1] = invView4x4.m[3][2] = 0.0f;
+	invView = DirectX::XMLoadFloat4x4(&invView4x4);
+
+	*m_pCurMatrix = invView;
 }
 
-// Set current matrix to ortho matrix given view 'cube' (Probably)
+// Multiply current matrix with ortho matrix given view 'cube' (Probably)
 void CShaderAPIDX11::Ortho(double left, double right, double bottom, double top, double zNear, double zFar)
 {
-	return;
+	DirectX::XMMATRIX ortho = DirectX::XMMatrixOrthographicOffCenterRH(left, right, bottom, top, zNear, zFar);
+
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(ortho, *m_pCurMatrix);
 }
 
-// Set current matrix to perspective matrix given clip planes, aspect ratio and x angle
+// Multiply current matrix with perspective matrix given clip planes, aspect ratio and x angle
 void CShaderAPIDX11::PerspectiveX(double fovx, double aspect, double zNear, double zFar)
 {
-	return;
+	// Get dimensions of near 'face'
+	float width = 2 * tan( (fovx / 2) * (M_PI / 180.0) ) * zNear;
+	float height = width / aspect;
+
+	DirectX::XMMATRIX persp = DirectX::XMMatrixPerspectiveRH(width, height, zNear, zFar);
+
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(persp, *m_pCurMatrix);
 }
 
-// Set current matrix to matrix given a subrect of the screen (Probably)
+// Multiply current matrix with matrix given a subrect of the screen (Probably)
 void CShaderAPIDX11::PickMatrix(int x, int y, int width, int height)
 {
+	// I'll do this later
+
 	return;
 }
 
 // Rotate the current matrix by angle around axis x,y,z
 void CShaderAPIDX11::Rotate(float angle, float x, float y, float z)
 {
-	return;
+	DirectX::XMVECTOR axis = DirectX::XMVectorSet(x, y, z, 0);
+
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationAxis(axis, angle * (M_PI  / 180.0f)), *m_pCurMatrix);
 }
 
 // Translate current matrix by x,y,z in absolute coordinates (Probably)
 void CShaderAPIDX11::Translate(float x, float y, float z)
 {
-	return;
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslation(x, y, z), *m_pCurMatrix);
 }
 
 // Scale current matrix by x,y,z in absolute axes (Probably)
 void CShaderAPIDX11::Scale(float x, float y, float z)
 {
-	return;
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(x, y, z), *m_pCurMatrix);
 }
 
 // Scale current matrix by x,y,1 in absolute axes (probably)
 void CShaderAPIDX11::ScaleXY(float x, float y)
 {
-	return;
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(x, y, 1.f), *m_pCurMatrix);
 }
 
 // Sets the color to modulate by
@@ -337,7 +402,7 @@ CMeshBuilder* CShaderAPIDX11::GetVertexModifyBuilder()
 // Currently using flashlight? (Probably)
 bool CShaderAPIDX11::InFlashlightMode() const
 {
-	return false;// ShaderUtil()->InFlashlightMode();
+	return ShaderUtil()->InFlashlightMode();
 }
 
 // Get flashlight state and set worldToTexture to the flashlight's worldToTexture matrix
@@ -350,27 +415,27 @@ const FlashlightState_t &CShaderAPIDX11::GetFlashlightState(VMatrix &worldToText
 
 bool CShaderAPIDX11::InEditorMode() const
 {
-	return false;// ShaderUtil()->InEditorMode();
+	return ShaderUtil()->InEditorMode();
 }
 
 
 // Gets the bound morph's vertex format; returns 0 if no morph is bound
 MorphFormat_t CShaderAPIDX11::GetBoundMorphFormat()
 {
-	return 0;
+	return ShaderUtil()->GetBoundMorphFormat();
 }
 
 
 // Binds a standard texture at id to sampler
 void CShaderAPIDX11::BindStandardTexture(Sampler_t sampler, StandardTextureId_t id)
 {
-	return;
+	ShaderUtil()->BindStandardTexture(sampler, id);
 }
 
 // Gets rendertarget at nRenderTargetID
 ITexture *CShaderAPIDX11::GetRenderTargetEx(int nRenderTargetID)
 {
-	return NULL;// ShaderUtil()->GetRenderTargetEx(nRenderTargetID);
+	return ShaderUtil()->GetRenderTargetEx(nRenderTargetID);
 }
 
 // Set tonemapping scale to scale
@@ -407,8 +472,8 @@ void CShaderAPIDX11::PerspectiveOffCenterX(double fovx, double aspect, double zN
 // Gets max dxlevel and actual dxlevel, puts em in you know where
 void CShaderAPIDX11::GetDXLevelDefaults(uint &max_dxlevel, uint &recommended_dxlevel)
 {
-	//max_dxlevel = g_pHardwareConfig->GetInfo().m_nMaxDXSupportLevel;
-	//recommended_dxlevel = g_pHardwareConfig->GetInfo().m_nDXSupportLevel;
+	max_dxlevel = g_pHardwareConfigDX11->GetInfo().m_nMaxDXSupportLevel;
+	recommended_dxlevel = g_pHardwareConfigDX11->GetInfo().m_nDXSupportLevel;
 }
 
 // Get flashlight state, world2texture mat and flashlightdepthtexture
@@ -441,7 +506,7 @@ int CShaderAPIDX11::GetPixelFogCombo() //0 is either range fog, or no fog simula
 // Bind vertex texture to texture at slot id
 void CShaderAPIDX11::BindStandardVertexTexture(VertexTextureSampler_t sampler, StandardTextureId_t id)
 {
-	return;
+	ShaderUtil()->BindStandardVertexTexture(sampler, id);
 }
 
 
@@ -455,7 +520,7 @@ bool CShaderAPIDX11::IsHWMorphingEnabled() const
 // Get dimensions of standard texture 'id'
 void CShaderAPIDX11::GetStandardTextureDimensions(int *pWidth, int *pHeight, StandardTextureId_t id)
 {
-	*pWidth = *pHeight = 0;
+	ShaderUtil()->GetStandardTextureDimensions(pWidth, pHeight, id);
 }
 
 // Set vertex shader constant var to pVec (BOOLEAN)
@@ -609,7 +674,7 @@ void CShaderAPIDX11::SetRasterState(const ShaderRasterState_t& state)
 // Sets the mode...
 bool CShaderAPIDX11::SetMode(void* hwnd, int nAdapter, const ShaderDeviceInfo_t &info)
 {
-	return true;
+	return g_pShaderDeviceMgrDX11->SetMode(hwnd, nAdapter, info) != NULL;
 }
 
 // Change video mode to that described in info

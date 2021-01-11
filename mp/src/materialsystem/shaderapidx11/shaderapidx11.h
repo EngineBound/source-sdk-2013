@@ -9,6 +9,7 @@
 #include "ishaderapi.h"
 #include "materialsystem/idebugtextureinfo.h"
 #include "meshdx11.h"
+#include "statesdx11.h"
 
 class CShaderAPIDX11 : public IShaderAPI, public IDebugTextureInfo
 {
@@ -671,6 +672,12 @@ public:
 private:
 
 	CMeshDX11 m_Mesh;
+	MaterialMatrixMode_t m_MatrixMode;
+	DirectX::XMMATRIX *m_pCurMatrix;
+
+	DynamicStateDX11 m_DynamicState;
+	ShaderStateDX11 m_ShaderState;
+	
 };
 
 #endif // SHADERAPIDX11_H

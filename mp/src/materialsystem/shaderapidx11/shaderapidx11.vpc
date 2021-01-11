@@ -49,9 +49,8 @@ $Project "ShaderApiDX11 (DML)"
         $File   "shaderapidx11_global.h"
         $File   "vertexshaderdx11.h"
         $File   "vertexshaderdx11.cpp"
-        $File   "shaderutildx11.h"
-        $File   "shaderutildx11.cpp"
         $File   "meshdx11.h"
         $File   "meshdx11.cpp"
+        $File   "statesdx11.h"
 	}
 }

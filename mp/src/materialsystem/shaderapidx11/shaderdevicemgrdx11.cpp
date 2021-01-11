@@ -96,10 +96,10 @@ InitReturnVal_t CShaderDeviceMgrDX11::Init()
 
 	for (UINT i = 0; m_pDXGIFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; ++i)
 	{
-		HWInfo_t info = m_vpAdapters[m_vpAdapters.AddToTail()];
+		HWInfo_t *info = &m_vpAdapters[m_vpAdapters.AddToTail()];
 		IDXGIOutput* pOutput = GetAdapterOutput(i);
 
-		if (!PopulateHWInfo(&info, pAdapter, pOutput))
+		if (!PopulateHWInfo(info, pAdapter, pOutput))
 			continue;
 
 		// Read from dxsupport.cfg
@@ -274,14 +274,13 @@ void CShaderDeviceMgrDX11::Shutdown()
 // Gets the number of adapters...
 int	 CShaderDeviceMgrDX11::GetAdapterCount() const
 {
-	return 0;// m_vpAdapters.Count();
+	return m_vpAdapters.Count();
 }
 
 
 // Returns info about each adapter
 void CShaderDeviceMgrDX11::GetAdapterInfo(int nAdapter, MaterialAdapterInfo_t& info) const
 {
-	//info = (MaterialAdapterInfo_t)m_vpAdapters[nAdapter];
 	memset(&info, 0, sizeof(info));
 	info.m_nDXSupportLevel = 110;
 }
@@ -373,8 +372,9 @@ bool CShaderDeviceMgrDX11::SetAdapter(int nAdapter, int nFlags)
 CreateInterfaceFn CShaderDeviceMgrDX11::SetMode(void *hWnd, int nAdapter, const ShaderDeviceInfo_t& mode)
 {
 	int nDXLevel = mode.m_nDXLevel != 0 ? mode.m_nDXLevel : m_vpAdapters[nAdapter].m_nDXSupportLevel;
-	nDXLevel = CommandLine()->ParmValue("-dxlevel", nDXLevel);
 	nDXLevel = min(nDXLevel, m_vpAdapters[nAdapter].m_nMaxDXSupportLevel);
+
+	nDXLevel = CommandLine()->ParmValue("-dxlevel", nDXLevel);
 
 	if (nDXLevel < 110)
 	{
@@ -383,10 +383,7 @@ CreateInterfaceFn CShaderDeviceMgrDX11::SetMode(void *hWnd, int nAdapter, const 
 	}
 
 	if (g_pShaderDeviceDX11)
-	{
 		g_pShaderDeviceDX11->Shutdown();
-		g_pShaderDeviceDX11 = NULL;
-	}
 
 	if (!g_pShaderDeviceDX11->Initialize(hWnd, nAdapter, mode))
 		return NULL;
