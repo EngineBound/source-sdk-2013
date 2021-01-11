@@ -42,6 +42,8 @@ void CShaderAPIDX11::SetViewports(int nCount, const ShaderViewport_t* pViewports
 		m_DynamicState.m_pViewports[i].MaxDepth = pViewports[i].m_flMaxZ;
 		m_DynamicState.m_pViewports[i].MinDepth = pViewports[i].m_flMinZ;
 	}
+
+	g_pD3DDeviceContext->RSSetViewports(m_DynamicState.m_nNumViewports, m_DynamicState.m_pViewports);
 }
 
 // Get viewports up to nMax, stored in pViewports array and return num stored
@@ -661,17 +663,26 @@ void CShaderAPIDX11::ClearColor4ub(unsigned char r, unsigned char g, unsigned ch
 // Methods related to binding shaders
 void CShaderAPIDX11::BindVertexShader(VertexShaderHandle_t hVertexShader)
 {
-	return;
+	ID3D11VertexShader *pVertexShader = g_pShaderDeviceDX11->GetVertexShader(hVertexShader);
+	m_DynamicState.m_pCurVertexShader = pVertexShader;
+
+	g_pD3DDeviceContext->VSSetShader(m_DynamicState.m_pCurVertexShader, NULL, 0);
 }
 
 void CShaderAPIDX11::BindGeometryShader(GeometryShaderHandle_t hGeometryShader)
 {
-	return;
+	ID3D11GeometryShader *pGeometryShader = g_pShaderDeviceDX11->GetGeometryShader(hGeometryShader);
+	m_DynamicState.m_pCurGeometryShader = pGeometryShader;
+
+	g_pD3DDeviceContext->GSSetShader(m_DynamicState.m_pCurGeometryShader, NULL, 0);
 }
 
 void CShaderAPIDX11::BindPixelShader(PixelShaderHandle_t hPixelShader)
 {
-	return;
+	ID3D11PixelShader *pPixelShader = g_pShaderDeviceDX11->GetPixelShader(hPixelShader);
+	m_DynamicState.m_pCurPixelShader = pPixelShader;
+
+	g_pD3DDeviceContext->PSSetShader(m_DynamicState.m_pCurPixelShader, NULL, 0);
 }
 
 

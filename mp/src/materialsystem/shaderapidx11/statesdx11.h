@@ -23,6 +23,10 @@ struct DynamicStateDX11
 	int m_nNumViewports;
 	D3D11_VIEWPORT m_pViewports[MAX_DX11_VIEWPORTS];
 
+	ID3D11VertexShader *m_pCurVertexShader;
+	ID3D11GeometryShader *m_pCurGeometryShader;
+	ID3D11PixelShader *m_pCurPixelShader;
+
 	DynamicStateDX11()
 	{
 		ZeroMemory(this, sizeof(DynamicStateDX11));

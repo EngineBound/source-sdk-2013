@@ -292,40 +292,94 @@ void CShaderDeviceDX11::SetView(void* hWnd)
 // Shader compilation
 IShaderBuffer* CShaderDeviceDX11::CompileShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
-	// Don't worry about this FOR NOW CHANGE CHANGE CHANGE CHANGE
-	return NULL;
+	ID3DBlob *pShader, *pErrors;
+
+	// Compatibility with dx9
+	int nCompileFlags = D3DCOMPILE_AVOID_FLOW_CONTROL | D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY;
+
+#ifdef _DEBUG
+	nCompileFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+	HRESULT hr = D3DCompile(pProgram, nBufLen, "",
+		NULL, NULL, "main", pShaderVersion, nCompileFlags, 0, &pShader,
+		&pErrors);
+
+	if (FAILED(hr))
+	{
+		if (pErrors)
+		{
+			const char *pErrorMessage = (const char *)pErrors->GetBufferPointer();
+			Warning("Shader compilation failed! Errors:\n\t%s\n", pErrorMessage);
+			pErrors->Release();
+		}
+		return NULL;
+	}
+
+	// NOTE: This uses small block heap allocator; so I'm not going
+	// to bother creating a memory pool.
+	CShaderBuffer *pShaderBuffer = new CShaderBuffer(pShader);
+
+	if (pErrors)
+		pErrors->Release();
+
+	return pShaderBuffer;
 }
 
 
 // Shader creation, destruction
 VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(IShaderBuffer* pShaderBuffer)
 {
-	return VERTEX_SHADER_HANDLE_INVALID;
+	return CreateVertexShader((char *)pShaderBuffer->GetBits(), pShaderBuffer->GetSize(), NULL);
 }
 
 void CShaderDeviceDX11::DestroyVertexShader(VertexShaderHandle_t hShader)
 {
-	return;
+	if (hShader == VERTEX_SHADER_HANDLE_INVALID)
+		return;
+
+	VertexShaderIndex_t ind = (VertexShaderIndex_t)hShader;
+	VertexShader_t &shader = m_VertexShaders[ind];
+
+	shader.m_pShader->Release();
+	shader.m_pReflection->Release();
+	m_VertexShaders.Remove(ind);
 }
 
 GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(IShaderBuffer* pShaderBuffer)
 {
-	return GEOMETRY_SHADER_HANDLE_INVALID;
+	return CreateGeometryShader((char *)pShaderBuffer->GetBits(), pShaderBuffer->GetSize(), NULL);
 }
 
 void CShaderDeviceDX11::DestroyGeometryShader(GeometryShaderHandle_t hShader)
 {
-	return;
+	if ( hShader == GEOMETRY_SHADER_HANDLE_INVALID )
+		return;
+
+	GeometryShaderIndex_t ind = (GeometryShaderIndex_t)hShader;
+	GeometryShader_t &shader = m_GeometryShaders[ind];
+
+	shader.m_pShader->Release();
+	shader.m_pReflection->Release();
+	m_GeometryShaders.Remove(ind);
 }
 
 PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(IShaderBuffer* pShaderBuffer)
 {
-	return PIXEL_SHADER_HANDLE_INVALID;
+	return CreatePixelShader((char *)pShaderBuffer->GetBits(), pShaderBuffer->GetSize(), NULL);
 }
 
 void CShaderDeviceDX11::DestroyPixelShader(PixelShaderHandle_t hShader)
 {
-	return;
+	if (hShader == PIXEL_SHADER_HANDLE_INVALID)
+		return;
+
+	PixelShaderIndex_t ind = (PixelShaderIndex_t)hShader;
+	PixelShader_t &shader = m_PixelShaders[ind];
+
+	shader.m_pShader->Release();
+	shader.m_pReflection->Release();
+	m_PixelShaders.Remove(ind);
 }
 
 
@@ -334,32 +388,92 @@ void CShaderDeviceDX11::DestroyPixelShader(PixelShaderHandle_t hShader)
 // and a text buffer for a source-code (.fxc) shader
 VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
-	return VERTEX_SHADER_HANDLE_INVALID;
+	ID3D11VertexShader *pShader = NULL;
+	HRESULT hr = m_pDXGIDevice->CreateVertexShader(pProgram, nBufLen, NULL, &pShader);
+
+	if (FAILED(hr) || !pShader)
+		return VERTEX_SHADER_HANDLE_INVALID;
+
+	ID3D11ShaderReflection *pReflection = NULL;
+	hr = D3DReflect(pProgram, nBufLen, IID_ID3D11ShaderReflection, (void **)&pReflection);
+
+	if (FAILED(hr) || !pReflection)
+	{
+		pShader->Release();
+		return VERTEX_SHADER_HANDLE_INVALID;
+	}
+
+	VertexShaderIndex_t ind = m_VertexShaders.AddToTail();
+	m_VertexShaders[ind].m_pShader = pShader;
+	m_VertexShaders[ind].m_pReflection = pReflection;
+
+	return (VertexShaderHandle_t)ind;
 }
 
 VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(CUtlBuffer &buf, const char *pShaderVersion)
 {
-	return VERTEX_SHADER_HANDLE_INVALID;
+	// Not a very good way to do this
+	return CreateVertexShader((char *)buf.Base(), buf.Size(), pShaderVersion);
 }
 
 GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
-	return GEOMETRY_SHADER_HANDLE_INVALID;
+	ID3D11GeometryShader *pShader = NULL;
+	HRESULT hr = m_pDXGIDevice->CreateGeometryShader(pProgram, nBufLen, NULL, &pShader);
+
+	if (FAILED(hr) || !pShader)
+		return GEOMETRY_SHADER_HANDLE_INVALID;
+
+	ID3D11ShaderReflection *pReflection = NULL;
+	hr = D3DReflect(pProgram, nBufLen, IID_ID3D11ShaderReflection, (void **)&pReflection);
+	
+	if (FAILED(hr) || !pReflection)
+	{
+		pShader->Release();
+		return GEOMETRY_SHADER_HANDLE_INVALID;
+	}
+
+	GeometryShaderIndex_t ind = m_GeometryShaders.AddToTail();
+	m_GeometryShaders[ind].m_pShader = pShader;
+	m_GeometryShaders[ind].m_pReflection = pReflection;
+
+	return (GeometryShaderHandle_t)ind;
 }
 
 GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(CUtlBuffer &buf, const char *pShaderVersion)
 {
-	return GEOMETRY_SHADER_HANDLE_INVALID;
+	// Not a very good way to do this
+	return CreateGeometryShader((char *)buf.Base(), buf.Size(), pShaderVersion);
 }
 
 PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
-	return PIXEL_SHADER_HANDLE_INVALID;
+	ID3D11PixelShader *pShader = NULL;
+	HRESULT hr = m_pDXGIDevice->CreatePixelShader(pProgram, nBufLen, NULL, &pShader);
+
+	if (FAILED(hr) || !pShader)
+		return PIXEL_SHADER_HANDLE_INVALID;
+
+	ID3D11ShaderReflection *pReflection = NULL;
+	hr = D3DReflect(pProgram, nBufLen, IID_ID3D11ShaderReflection, (void **)&pReflection);
+
+	if (FAILED(hr) || !pReflection)
+	{
+		pShader->Release();
+		return PIXEL_SHADER_HANDLE_INVALID;
+	}
+
+	VertexShaderIndex_t ind = m_PixelShaders.AddToTail();
+	m_PixelShaders[ind].m_pShader = pShader;
+	m_PixelShaders[ind].m_pReflection = pReflection;
+
+	return (PixelShaderHandle_t)ind;
 }
 
 PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(CUtlBuffer &buf, const char *pShaderVersion)
 {
-	return PIXEL_SHADER_HANDLE_INVALID;
+	// Not a very good way to do this
+	return CreatePixelShader((char *)buf.Base(), buf.Size(), pShaderVersion);
 }
 
 

@@ -8,6 +8,47 @@
 #include "IShaderDevice.h"
 #include "meshdx11.h"
 #include <d3d11.h>
+#include <d3dcompiler.h>
+
+#include "tier1/utllinkedlist.h"
+
+// Implemented IShaderBuffer (shader memory block)
+
+class CShaderBuffer : public IShaderBuffer
+{
+public:
+	CShaderBuffer(ID3DBlob *pD3DBlob) : m_pD3DBlob(pD3DBlob) {}
+
+	virtual size_t GetSize() const
+	{
+		if (!m_pD3DBlob)
+			return 0;
+
+		return m_pD3DBlob->GetBufferSize();
+	}
+
+	virtual const void* GetBits() const
+	{
+		if (!m_pD3DBlob)
+			return NULL;
+
+		return m_pD3DBlob->GetBufferPointer();
+	}
+
+	virtual void Release()
+	{
+		if (m_pD3DBlob)
+		{
+			m_pD3DBlob->Release();
+		}
+		
+		delete this;
+	}
+
+private:
+	ID3DBlob *m_pD3DBlob;
+
+};
 
 class CShaderDeviceDX11 : public IShaderDevice
 {
@@ -104,6 +145,30 @@ public:
 #endif
 	virtual char *GetDisplayDeviceName();
 
+	inline ID3D11VertexShader *GetVertexShader(VertexShaderHandle_t handle)
+	{
+		if (handle == VERTEX_SHADER_HANDLE_INVALID)
+			return NULL;
+
+		return m_VertexShaders[(VertexShaderIndex_t)handle].m_pShader;
+	}
+
+	inline ID3D11GeometryShader *GetGeometryShader(GeometryShaderHandle_t handle)
+	{
+		if (handle == GEOMETRY_SHADER_HANDLE_INVALID)
+			return NULL;
+
+		return m_GeometryShaders[(GeometryShaderIndex_t)handle].m_pShader;
+	}
+
+	inline ID3D11PixelShader *GetPixelShader(PixelShaderHandle_t handle)
+	{
+		if (handle == PIXEL_SHADER_HANDLE_INVALID)
+			return NULL;
+
+		return m_PixelShaders[(PixelShaderIndex_t)handle].m_pShader;
+	}
+
 private:
 
 	int m_nCurrentAdapter;
@@ -113,6 +178,32 @@ private:
 	IDXGIOutput *m_pDXGIOutput;
 	ID3D11Device *m_pDXGIDevice;
 	ID3D11DeviceContext* m_pDXGIDeviceContext;
+
+	struct VertexShader_t
+	{
+		ID3D11VertexShader *m_pShader;
+		ID3D11ShaderReflection *m_pReflection;
+	};
+
+	struct GeometryShader_t
+	{
+		ID3D11GeometryShader *m_pShader;
+		ID3D11ShaderReflection *m_pReflection;
+	};
+
+	struct PixelShader_t
+	{
+		ID3D11PixelShader *m_pShader;
+		ID3D11ShaderReflection *m_pReflection;
+	};
+
+	CUtlFixedLinkedList< VertexShader_t > m_VertexShaders;
+	CUtlFixedLinkedList< GeometryShader_t > m_GeometryShaders;
+	CUtlFixedLinkedList< PixelShader_t > m_PixelShaders;
+
+	typedef CUtlFixedLinkedList< VertexShader_t >::IndexType_t VertexShaderIndex_t;
+	typedef CUtlFixedLinkedList< GeometryShader_t >::IndexType_t GeometryShaderIndex_t;
+	typedef CUtlFixedLinkedList< PixelShader_t >::IndexType_t PixelShaderIndex_t;
 
 	void *m_CurrenthWnd;
 	int m_nWndWidth, m_nWndHeight;

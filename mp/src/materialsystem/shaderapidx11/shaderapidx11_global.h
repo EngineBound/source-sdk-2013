@@ -21,6 +21,10 @@ inline IShaderUtil* ShaderUtil()
 	return g_pShaderUtil;
 }
 
+extern ID3D11Device *g_pD3DDevice;
+extern ID3D11DeviceContext *g_pD3DDeviceContext;
+extern IDXGISwapChain *g_pD3DSwapChain;
+
 extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
 extern CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11;
 extern CShaderAPIDX11 *g_pShaderAPIDX11;
