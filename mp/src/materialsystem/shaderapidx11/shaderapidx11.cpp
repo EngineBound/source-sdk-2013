@@ -21,10 +21,9 @@ extern IShaderUtil *g_pShaderUtil;
 
 // This file requires shader states to function, write those first :))
 
-CShaderAPIDX11::CShaderAPIDX11() : m_Mesh(false)
+CShaderAPIDX11::CShaderAPIDX11() : m_Mesh(false), m_DynamicState(), m_ShaderState()
 {
-	m_DynamicState = DynamicStateDX11();
-	m_ShaderState = ShaderStateDX11();
+
 }
 	
 // Set nCount viewports to those in pViewports
@@ -152,7 +151,8 @@ void CShaderAPIDX11::GetMatrix(MaterialMatrixMode_t matrixMode, float *dst)
 // Set curMat to identity matrix
 void CShaderAPIDX11::LoadIdentity(void)
 {
-	m_pCurMatrix = &DirectX::XMMatrixIdentity();
+	DirectX::XMMATRIX tmpMatrix = DirectX::XMMatrixIdentity();
+	*m_pCurMatrix = tmpMatrix;
 }
 
 // Set curMat to camera2world matrix (Probably)
@@ -290,7 +290,11 @@ void CShaderAPIDX11::SetDefaultState()
 // Get the current camera position in world space.
 void CShaderAPIDX11::GetWorldSpaceCameraPosition(float* pPos) const
 {
-	return;
+	// Stored in view matrix
+	DirectX::XMFLOAT4X4 matView;
+	DirectX::XMStoreFloat4x4(&matView, m_ShaderState.m_pMatrixStacks[MATERIAL_VIEW].Top());
+
+	memcpy(pPos, &matView, sizeof(DirectX::XMFLOAT4X4));
 }
 
 // Number of bones for current rendered item? (maybe just everything but i doubt it)
@@ -466,7 +470,18 @@ void CShaderAPIDX11::LoadBoneMatrix(int boneIndex, const float *m)
 // Create perspective matrix given offset, fov and aspect
 void CShaderAPIDX11::PerspectiveOffCenterX(double fovx, double aspect, double zNear, double zFar, double bottom, double top, double left, double right)
 {
-	return;
+	// Get dimensions of near 'face'
+	float widthOver2 = tan((fovx / 2) * (M_PI / 180.0)) * zNear;
+	float heightOver2 = widthOver2 / aspect;
+
+	float planeLeft = left * widthOver2 - widthOver2 * (1.f - left);
+	float planeRight = right * widthOver2 - widthOver2 * (1.f - right);
+	float planeBottom = bottom * heightOver2 - heightOver2 * (1.f - bottom);
+	float planeTop = top * heightOver2 - heightOver2 * (1.f - top);
+
+	DirectX::XMMATRIX persp = DirectX::XMMatrixPerspectiveOffCenterRH(planeLeft, planeRight, planeBottom, planeTop, zNear, zFar);
+
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(persp, *m_pCurMatrix);
 }
 
 // Gets max dxlevel and actual dxlevel, puts em in you know where
@@ -526,7 +541,7 @@ void CShaderAPIDX11::GetStandardTextureDimensions(int *pWidth, int *pHeight, Sta
 // Set vertex shader constant var to pVec (BOOLEAN)
 void CShaderAPIDX11::SetBooleanVertexShaderConstant(int var, BOOL const* pVec, int numBools/* = 1*/, bool bForce/* = false*/)
 {
-	return;
+
 }
 
 // Set vertex shader constant var to pVec (INT)
