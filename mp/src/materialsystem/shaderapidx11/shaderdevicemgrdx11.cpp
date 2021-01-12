@@ -360,6 +360,9 @@ void CShaderDeviceMgrDX11::GetCurrentModeInfo(ShaderDisplayMode_t* pInfo, int nA
 // Initialization, shutdown
 bool CShaderDeviceMgrDX11::SetAdapter(int nAdapter, int nFlags)
 {
+	if (!PopulateHWInfo(&g_pHardwareConfigDX11->GetInfo(), GetAdapter(nAdapter), GetAdapterOutput(nAdapter)))
+		return false;
+
 	g_pShaderDeviceDX11->m_nCurrentAdapter = nAdapter;
 	return true;
 }

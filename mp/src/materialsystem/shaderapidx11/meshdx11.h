@@ -9,11 +9,11 @@
 
 #define VERTEX_DATA_SIZE 1024
 
-class CMeshDX11 : public IMesh
+class CBaseMeshDX11 : public IMesh
 {
 public:
-	CMeshDX11( bool bIsDynamic );
-	~CMeshDX11();
+	CBaseMeshDX11( bool bIsDynamic );
+	~CBaseMeshDX11();
 
 // IVertexBuffer methods
 public:
@@ -121,9 +121,17 @@ public:
 
 	virtual unsigned ComputeMemoryUsed();
 
-private:
+protected:
 	bool m_bIsDynamic;
 	unsigned char *m_pVertexData;
+};
+
+class CMeshDX11 : public CBaseMeshDX11
+{
+	typedef CBaseMeshDX11 BaseClass;
+public:
+	CMeshDX11(bool bIsDynamic) : BaseClass(bIsDynamic) {}
+
 };
 
 #endif

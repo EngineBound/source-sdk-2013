@@ -1199,7 +1199,7 @@ void CShaderAPIDX11::SceneFogMode(MaterialFogMode_t fogMode)
 // Can we download textures?
 bool CShaderAPIDX11::CanDownloadTextures() const
 {
-	return false;
+	return false;// g_pShaderDeviceDX11->IsActivated();
 }
 
 

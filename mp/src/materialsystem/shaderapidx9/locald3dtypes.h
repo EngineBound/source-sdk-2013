@@ -46,8 +46,16 @@ public:
 	typedef ID3D10Buffer					*LPDIRECT3DVERTEXBUFFER;
 };
 
-#endif // defined( DX10 ) && !defined( DX_TO_GL_ABSTRACTION )
+#elif defined(DX11)
 
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#include <DirectXMath.h>
+
+// Stupid typedef to avoid breaking API
+typedef ID3D11Resource IDirect3DBaseTexture;
+
+#else
 
 #if !defined( _X360 ) && !defined( DX_TO_GL_ABSTRACTION )
 #ifdef _DEBUG
@@ -107,14 +115,22 @@ public:
 	typedef IDirect3DIndexBuffer			*LPDIRECT3DINDEXBUFFER;
 	typedef IDirect3DVertexBuffer			*LPDIRECT3DVERTEXBUFFER;
 };
+#endif
 
 typedef void *HardwareShader_t;
 
 //-----------------------------------------------------------------------------
 // The vertex and pixel shader type
 //-----------------------------------------------------------------------------
-typedef int VertexShader_t;
-typedef int PixelShader_t;	
+#ifdef PLATFORM_64BITS
+typedef __int64 VertexShader_t;
+typedef __int64 PixelShader_t;
+typedef __int64 GeometryShader_t;
+#else
+typedef __int32 VertexShader_t;
+typedef __int32 PixelShader_t;
+typedef __int32 GeometryShader_t;
+#endif
 
 //-----------------------------------------------------------------------------
 // Bitpattern for an invalid shader
@@ -124,8 +140,6 @@ typedef int PixelShader_t;
 
 #define D3DSAMP_NOTSUPPORTED					D3DSAMP_FORCE_DWORD
 #define D3DRS_NOTSUPPORTED						D3DRS_FORCE_DWORD
-
-#include "togl/rendermechanism.h"
 
 #if defined( _X360 )
 

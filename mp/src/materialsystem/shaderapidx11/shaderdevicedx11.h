@@ -169,6 +169,8 @@ public:
 		return m_PixelShaders[(PixelShaderIndex_t)handle].m_pShader;
 	}
 
+	virtual bool IsActivated() const { return m_bDeviceInitialized; }
+
 private:
 
 	int m_nCurrentAdapter;

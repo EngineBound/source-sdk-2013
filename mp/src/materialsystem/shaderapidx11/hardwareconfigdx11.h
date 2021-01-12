@@ -239,7 +239,8 @@ public:
 	inline bool ShouldAlwaysUseShaderModel2bShaders() const { return IsOpenGL(); }
 	inline bool PlatformRequiresNonNullPixelShaders() const { return IsOpenGL(); }
 
-	const HWInfo_t& GetInfo() const { return m_HWInfo; }
+	HWInfo_t& GetInfo() { return m_HWInfo; }
+
 private:
 
 	void SetupHWInfo(int nDXLevel);

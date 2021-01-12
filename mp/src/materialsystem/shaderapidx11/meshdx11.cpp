@@ -1,11 +1,11 @@
 #include "meshdx11.h"
 
-CMeshDX11::CMeshDX11(bool bIsDynamic) : m_bIsDynamic( bIsDynamic )
+CBaseMeshDX11::CBaseMeshDX11(bool bIsDynamic) : m_bIsDynamic( bIsDynamic )
 {
 	m_pVertexData = new unsigned char[VERTEX_DATA_SIZE];
 }
 
-CMeshDX11::~CMeshDX11()
+CBaseMeshDX11::~CBaseMeshDX11()
 {
 	delete[] m_pVertexData;
 }
@@ -16,41 +16,41 @@ CMeshDX11::~CMeshDX11()
 
 // NOTE: The following two methods are only valid for static vertex buffers
 	// Returns the number of vertices and the format of the vertex buffer
-int CMeshDX11::VertexCount() const
+int CBaseMeshDX11::VertexCount() const
 {
 	return 0;
 }
 
-VertexFormat_t CMeshDX11::GetVertexFormat() const
+VertexFormat_t CBaseMeshDX11::GetVertexFormat() const
 {
 	return VERTEX_POSITION;
 }
 
 // Is this vertex buffer dynamic?
-bool CMeshDX11::IsDynamic() const
+bool CBaseMeshDX11::IsDynamic() const
 {
 	return m_bIsDynamic;
 }
 
 // NOTE: For dynamic vertex buffers only!
 // Casts the memory of the dynamic vertex buffer to the appropriate type
-void CMeshDX11::BeginCastBuffer(VertexFormat_t format)
+void CBaseMeshDX11::BeginCastBuffer(VertexFormat_t format)
 {
 	
 }
 
-void CMeshDX11::EndCastBuffer()
+void CBaseMeshDX11::EndCastBuffer()
 {
 
 }
 
 // Returns the number of vertices that can still be written into the buffer
-int CMeshDX11::GetRoomRemaining() const
+int CBaseMeshDX11::GetRoomRemaining() const
 {
 	return 0;
 }
 
-bool CMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
+bool CBaseMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 {
 	desc.m_VertexSize_Position = 0;
 	desc.m_VertexSize_BoneWeight = 0;
@@ -101,18 +101,18 @@ bool CMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 
 	return true;
 }
-void CMeshDX11::Unlock(int nVertexCount, VertexDesc_t &desc) 
+void CBaseMeshDX11::Unlock(int nVertexCount, VertexDesc_t &desc) 
 {
 }
 
 // Spews the mesh data
-void CMeshDX11::Spew(int nVertexCount, const VertexDesc_t &desc)
+void CBaseMeshDX11::Spew(int nVertexCount, const VertexDesc_t &desc)
 {
 
 }
 
 // Call this in debug mode to make sure our data is good.
-void CMeshDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
+void CBaseMeshDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
 {
 }
 
@@ -122,25 +122,25 @@ void CMeshDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
 
 	// NOTE: The following two methods are only valid for static index buffers
 	// Returns the number of indices and the format of the index buffer
-int CMeshDX11::IndexCount() const
+int CBaseMeshDX11::IndexCount() const
 {
 	return 0;
 }
 
-MaterialIndexFormat_t CMeshDX11::IndexFormat() const
+MaterialIndexFormat_t CBaseMeshDX11::IndexFormat() const
 {
 	return MATERIAL_INDEX_FORMAT_UNKNOWN;
 }
 
 // NOTE: For dynamic index buffers only!
 // Casts the memory of the dynamic index buffer to the appropriate type
-void CMeshDX11::BeginCastBuffer(MaterialIndexFormat_t format)
+void CBaseMeshDX11::BeginCastBuffer(MaterialIndexFormat_t format)
 {
 
 }
 
 // Locks, unlocks the index buffer
-bool CMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
+bool CBaseMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 {
 	static int tmpIndex;
 	desc.m_pIndices = (unsigned short*)&tmpIndex;
@@ -151,27 +151,27 @@ bool CMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 	return true;
 }
 
-void CMeshDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
+void CBaseMeshDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 {
 }
 
-void CMeshDX11::ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount, IndexDesc_t& desc)
+void CBaseMeshDX11::ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount, IndexDesc_t& desc)
 {
 	Lock(nIndexCount, false, desc);
 }
 
-void CMeshDX11::ModifyEnd(IndexDesc_t& desc)
+void CBaseMeshDX11::ModifyEnd(IndexDesc_t& desc)
 {
 }
 
 // Spews the mesh data
-void CMeshDX11::Spew(int nIndexCount, const IndexDesc_t &desc)
+void CBaseMeshDX11::Spew(int nIndexCount, const IndexDesc_t &desc)
 {
 
 }
 
 // Ensures the data in the index buffer is valid
-void CMeshDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
+void CBaseMeshDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 {
 }
 
@@ -181,16 +181,16 @@ void CMeshDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 
 
 // Sets the primitive type
-void CMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
+void CBaseMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
 {
 }
 
 // Draws the entire mesh
-void CMeshDX11::Draw(int firstIndex, int numIndices)
+void CBaseMeshDX11::Draw(int firstIndex, int numIndices)
 {
 }
 
-void CMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
+void CBaseMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
 {
 }
 
@@ -198,12 +198,12 @@ void CMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
 // the same lightmap, material, vertex and index buffers with multipass shaders
 // can drastically reduce state-switching overhead.
 // NOTE: this only works with STATIC meshes.
-void CMeshDX11::Draw(CPrimList *pLists, int nLists)
+void CBaseMeshDX11::Draw(CPrimList *pLists, int nLists)
 {
 }
 
 // Copy verts and/or indices to a mesh builder. This only works for temp meshes!
-void CMeshDX11::CopyToMeshBuilder(
+void CBaseMeshDX11::CopyToMeshBuilder(
 	int iStartVert,		// Which vertices to copy.
 	int nVerts,
 	int iStartIndex,	// Which indices to copy.
@@ -214,53 +214,53 @@ void CMeshDX11::CopyToMeshBuilder(
 }
 
 // Spews the mesh data
-void CMeshDX11::Spew(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
+void CBaseMeshDX11::Spew(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
 {
 }
 
 // Call this in debug mode to make sure our data is good.
-void CMeshDX11::ValidateData(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
+void CBaseMeshDX11::ValidateData(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
 {
 }
 
 // New version
 // Locks/unlocks the mesh, providing space for nVertexCount and nIndexCount.
 // nIndexCount of -1 means don't lock the index buffer...
-void CMeshDX11::LockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
+void CBaseMeshDX11::LockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
 	Lock(nVertexCount, false, *static_cast<VertexDesc_t*>(&desc));
 	Lock(nIndexCount, false, *static_cast<IndexDesc_t*>(&desc));
 }
 
-void CMeshDX11::ModifyBegin(int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t& desc)
+void CBaseMeshDX11::ModifyBegin(int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t& desc)
 {
 	LockMesh(nVertexCount, nIndexCount, desc);
 }
-void CMeshDX11::ModifyEnd(MeshDesc_t& desc)
+void CBaseMeshDX11::ModifyEnd(MeshDesc_t& desc)
 {
 }
-void CMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
+void CBaseMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
 }
 
-void CMeshDX11::ModifyBeginEx(bool bReadOnly, int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t &desc)
+void CBaseMeshDX11::ModifyBeginEx(bool bReadOnly, int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t &desc)
 {
 	LockMesh(nVertexCount, nIndexCount, desc);
 }
 
-void CMeshDX11::SetFlexMesh(IMesh *pMesh, int nVertexOffset)
+void CBaseMeshDX11::SetFlexMesh(IMesh *pMesh, int nVertexOffset)
 {
 }
 
-void CMeshDX11::DisableFlexMesh()
+void CBaseMeshDX11::DisableFlexMesh()
 {
 }
 
-void CMeshDX11::MarkAsDrawn()
+void CBaseMeshDX11::MarkAsDrawn()
 {
 }
 
-unsigned CMeshDX11::ComputeMemoryUsed()
+unsigned CBaseMeshDX11::ComputeMemoryUsed()
 {
 	return 0;
 }
