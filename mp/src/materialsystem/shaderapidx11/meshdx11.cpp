@@ -1,13 +1,29 @@
 #include "meshdx11.h"
+#include "shaderdevicedx11.h"
+#include "shaderapidx11_global.h"
+#include "ishaderutil.h"
 
-CBaseMeshDX11::CBaseMeshDX11(bool bIsDynamic) : m_bIsDynamic( bIsDynamic )
+CBaseMeshDX11::CBaseMeshDX11(bool bIsDynamic) : m_bIsDynamic(bIsDynamic), m_nNumInds(0), m_nNumVerts(0),
+m_pIndexBuffer(0), m_pVertexBuffer(0), m_Type(MATERIAL_TRIANGLES), m_VertexFormat(0)
 {
 	m_pVertexData = new unsigned char[VERTEX_DATA_SIZE];
+
+	m_bIsIBufLocked = false;
+	m_bIsVBufLocked = false;
+	m_bMeshLocked = false;
 }
 
 CBaseMeshDX11::~CBaseMeshDX11()
 {
 	delete[] m_pVertexData;
+
+	if (m_bIsDynamic)
+	{
+		if (m_pIndexBuffer)
+		{
+			g_pShaderDeviceDX11->DestroyIndexBuffer(m_pIndexBuffer);
+		}
+	}
 }
 
 //--------------------------------------------------------------//
@@ -18,12 +34,17 @@ CBaseMeshDX11::~CBaseMeshDX11()
 	// Returns the number of vertices and the format of the vertex buffer
 int CBaseMeshDX11::VertexCount() const
 {
-	return 0;
+	return m_pVertexBuffer ? m_pVertexBuffer->VertexCount() : 0;
+}
+
+void CBaseMeshDX11::SetVertexFormat(VertexFormat_t format)
+{
+	m_VertexFormat = format;
 }
 
 VertexFormat_t CBaseMeshDX11::GetVertexFormat() const
 {
-	return VERTEX_POSITION;
+	return m_VertexFormat;
 }
 
 // Is this vertex buffer dynamic?
@@ -47,62 +68,46 @@ void CBaseMeshDX11::EndCastBuffer()
 // Returns the number of vertices that can still be written into the buffer
 int CBaseMeshDX11::GetRoomRemaining() const
 {
-	return 0;
+	return m_pVertexBuffer->GetRoomRemaining();
 }
 
 bool CBaseMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 {
-	desc.m_VertexSize_Position = 0;
-	desc.m_VertexSize_BoneWeight = 0;
-	desc.m_VertexSize_BoneMatrixIndex = 0;
-	desc.m_VertexSize_Normal = 0;
-	desc.m_VertexSize_Color = 0;
-	desc.m_VertexSize_Specular = 0;
+	Assert(!m_bIsVBufLocked);
 
-	for (int i = 0; i < VERTEX_MAX_TEXTURE_COORDINATES; ++i)
-		desc.m_VertexSize_TexCoord[i] = 0;
+	if (!g_pShaderDeviceDX11->IsActivated() || nVertexCount == 0)
+	{
+		CVertexBufferDX11::ComputeVertexDesc(0, 0, desc);
+		desc.m_nFirstVertex = 0;
+		return false;
+	}
 
-	desc.m_VertexSize_TangentS = 0;
-	desc.m_VertexSize_TangentT = 0;
-	desc.m_VertexSize_Wrinkle = 0;
+	if (!m_pVertexBuffer)
+	{
+		m_pVertexBuffer = static_cast<CVertexBufferDX11 *>(
+			g_pShaderDeviceDX11->CreateVertexBuffer(SHADER_BUFFER_TYPE_STATIC,
+				m_VertexFormat, nVertexCount, NULL));
+	}
 
-	desc.m_VertexSize_UserData = 0;
 
-	desc.m_ActualVertexSize = 0;
+	if (!m_pVertexBuffer->Lock(nVertexCount, bAppend, desc))
+	{
+		Assert(0);
+		Error("Vertex buffer lock failed!!!\n");
+		return false;
+	}
 
-	desc.m_CompressionType = VERTEX_COMPRESSION_NONE;
-
-	desc.m_NumBoneWeights = 0; // 2
-
-	desc.m_pPosition = (float*)m_pVertexData;
-
-	desc.m_pBoneWeight = (float*)m_pVertexData;
-
-	desc.m_pBoneMatrixIndex = (unsigned char*)m_pVertexData;
-
-	desc.m_pNormal = (float*)m_pVertexData;
-
-	desc.m_pColor = (unsigned char*)m_pVertexData;
-	desc.m_pSpecular = (unsigned char*)m_pVertexData;
-
-	for (int i = 0; i < VERTEX_MAX_TEXTURE_COORDINATES; ++i)
-		desc.m_pTexCoord[i] = (float*)m_pVertexData;
-
-	desc.m_pTangentS = (float*)m_pVertexData;
-	desc.m_pTangentT = (float*)m_pVertexData;
-
-	desc.m_pWrinkle = (float*)m_pVertexData;
-
-	desc.m_pUserData = (float*)m_pVertexData;
-
-	desc.m_nFirstVertex = 0;
-
-	desc.m_nOffset = 0;
-
+	m_bIsVBufLocked = true;
 	return true;
 }
 void CBaseMeshDX11::Unlock(int nVertexCount, VertexDesc_t &desc) 
 {
+	if (!m_bIsVBufLocked)
+		return;
+
+	Assert(m_pVertexBuffer);
+	m_pVertexBuffer->Unlock(nVertexCount, desc);
+	m_bIsVBufLocked = false;
 }
 
 // Spews the mesh data
@@ -124,12 +129,12 @@ void CBaseMeshDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
 	// Returns the number of indices and the format of the index buffer
 int CBaseMeshDX11::IndexCount() const
 {
-	return 0;
+	return m_pIndexBuffer ? m_pIndexBuffer->IndexCount() : 0;
 }
 
 MaterialIndexFormat_t CBaseMeshDX11::IndexFormat() const
 {
-	return MATERIAL_INDEX_FORMAT_UNKNOWN;
+	return m_pIndexBuffer->IndexFormat();
 }
 
 // NOTE: For dynamic index buffers only!
@@ -142,17 +147,34 @@ void CBaseMeshDX11::BeginCastBuffer(MaterialIndexFormat_t format)
 // Locks, unlocks the index buffer
 bool CBaseMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 {
-	static int tmpIndex;
-	desc.m_pIndices = (unsigned short*)&tmpIndex;
-	desc.m_nOffset = 0;
-	desc.m_nFirstIndex = 0;
-	desc.m_nIndexSize = 0;
+	Assert(!m_bIsIBufLocked);
 
+	if (!m_pIndexBuffer)
+	{
+		m_pIndexBuffer = static_cast<CIndexBufferDX11 *>(
+			g_pShaderDeviceDX11->CreateIndexBuffer(SHADER_BUFFER_TYPE_STATIC,
+				MATERIAL_INDEX_FORMAT_16BIT,
+				nMaxIndexCount, NULL));
+	}
+
+	if (!m_pIndexBuffer->Lock(nMaxIndexCount, bAppend, desc))
+	{
+		return false;
+	}
+
+	m_bIsIBufLocked = true;
 	return true;
 }
 
 void CBaseMeshDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 {
+	if (!m_bIsIBufLocked)
+		return;
+
+	Assert(m_pIndexBuffer);
+
+	m_pIndexBuffer->Unlock(nWrittenIndexCount, desc);
+	m_bIsIBufLocked = false;
 }
 
 void CBaseMeshDX11::ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount, IndexDesc_t& desc)
@@ -162,6 +184,7 @@ void CBaseMeshDX11::ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount
 
 void CBaseMeshDX11::ModifyEnd(IndexDesc_t& desc)
 {
+	Unlock(0, desc);
 }
 
 // Spews the mesh data
@@ -183,6 +206,13 @@ void CBaseMeshDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 // Sets the primitive type
 void CBaseMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
 {
+	Assert(type != MATERIAL_INSTANCED_QUADS);
+	if (!ShaderUtil()->OnSetPrimitiveType(this, type))
+	{
+		return;
+	}
+
+	m_Type = type;
 }
 
 // Draws the entire mesh
@@ -228,19 +258,37 @@ void CBaseMeshDX11::ValidateData(int nVertexCount, int nIndexCount, const MeshDe
 // nIndexCount of -1 means don't lock the index buffer...
 void CBaseMeshDX11::LockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
+	Assert(!m_bMeshLocked);
+
 	Lock(nVertexCount, false, *static_cast<VertexDesc_t*>(&desc));
-	Lock(nIndexCount, false, *static_cast<IndexDesc_t*>(&desc));
+
+	if (m_Type != MATERIAL_POINTS)
+		Lock(nIndexCount, false, *static_cast<IndexDesc_t*>(&desc));
+
+	m_bMeshLocked = true;
 }
 
 void CBaseMeshDX11::ModifyBegin(int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t& desc)
 {
-	LockMesh(nVertexCount, nIndexCount, desc);
+	ModifyBegin(false, nFirstIndex, nIndexCount, *static_cast<IndexDesc_t *>(&desc));
 }
 void CBaseMeshDX11::ModifyEnd(MeshDesc_t& desc)
 {
+	UnlockMesh(0, 0, desc);
 }
 void CBaseMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
+	Assert(m_bMeshLocked);
+
+	Unlock(nVertexCount, *static_cast<VertexDesc_t*>(&desc));
+
+	if (m_Type != MATERIAL_POINTS)
+		Unlock(nIndexCount, *static_cast<IndexDesc_t*>(&desc));
+
+	m_nNumInds = nIndexCount;
+	m_nNumVerts = nVertexCount;
+
+	m_bMeshLocked = false;
 }
 
 void CBaseMeshDX11::ModifyBeginEx(bool bReadOnly, int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t &desc)

@@ -761,12 +761,14 @@ void CShaderAPIDX11::FlushBufferedPrimitives()
 IMesh* CShaderAPIDX11::GetDynamicMesh(IMaterial* pMaterial, int nHWSkinBoneCount, bool bBuffered/* = true*/,
 	IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
+	m_Mesh.SetVertexFormat(VERTEX_POSITION | VERTEX_NORMAL | VERTEX_COLOR);
 	return &m_Mesh;
 }
 
 IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t vertexFormat, int nHWSkinBoneCount,
 	bool bBuffered/* = true*/, IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
+	m_Mesh.SetVertexFormat(VERTEX_POSITION | VERTEX_NORMAL | VERTEX_COLOR);
 	return &m_Mesh;
 }
 
@@ -1671,6 +1673,23 @@ void CShaderAPIDX11::BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffe
 void CShaderAPIDX11::BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBytes)
 {
 	return;
+}
+
+void CShaderAPIDX11::UnbindVertexBuffer(ID3D11Buffer *pBuffer)
+{
+	// Check for buffer later
+
+	for (int i = 0; i < MAX_DX11_STREAMS; ++i)
+	{
+		BindVertexBuffer(i, NULL, 0, 0, 0, VERTEX_POSITION, 0);
+	}
+}
+
+void CShaderAPIDX11::UnbindIndexBuffer(ID3D11Buffer *pBuffer)
+{
+	// Check for buffer later
+
+	BindIndexBuffer(NULL, 0);
 }
 
 // The classic moment:

@@ -17,6 +17,9 @@
 #include "tier1/utlstack.h"
 
 #define MAX_DX11_VIEWPORTS 16
+#define MAX_DX11_STREAMS 16
+#define MAX_DX11_CBUFFERS	15
+#define MAX_DX11_SAMPLERS	16
 
 struct DynamicStateDX11
 {

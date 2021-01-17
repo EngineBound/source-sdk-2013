@@ -6,6 +6,7 @@
 #endif
 
 #include "materialsystem/imesh.h"
+#include "buffersdx11.h"
 
 #define VERTEX_DATA_SIZE 1024
 
@@ -21,6 +22,7 @@ public:
 	// NOTE: The following two methods are only valid for static vertex buffers
 	// Returns the number of vertices and the format of the vertex buffer
 	virtual int VertexCount() const;
+	virtual void SetVertexFormat(VertexFormat_t format);
 	virtual VertexFormat_t GetVertexFormat() const;
 
 	// Is this mesh dynamic?
@@ -124,6 +126,17 @@ public:
 protected:
 	bool m_bIsDynamic;
 	unsigned char *m_pVertexData;
+
+	CIndexBufferDX11 *m_pIndexBuffer;
+	CVertexBufferDX11 *m_pVertexBuffer;
+	bool m_bIsIBufLocked;
+	bool m_bIsVBufLocked;
+	bool m_bMeshLocked;
+	VertexFormat_t m_VertexFormat;
+
+	MaterialPrimitiveType_t m_Type;
+	int m_nNumVerts;
+	int m_nNumInds;
 };
 
 class CMeshDX11 : public CBaseMeshDX11

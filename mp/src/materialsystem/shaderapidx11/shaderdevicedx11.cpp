@@ -4,6 +4,7 @@
 #include "shaderdevicemgrdx11.h"
 
 #include "shaderapidx11_global.h"
+#include "buffersdx11.h"
 
 #define RELEASE_AND_NULLIFY_P(var) if (var) { \
 	var->Release(); \
@@ -477,61 +478,75 @@ PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(CUtlBuffer &buf, const 
 }
 
 
+
 // NOTE: Deprecated!! Use CreateVertexBuffer/CreateIndexBuffer instead
 // Creates/destroys Mesh
 IMesh* CShaderDeviceDX11::CreateStaticMesh(VertexFormat_t vertexFormat, const char *pTextureBudgetGroup, IMaterial * pMaterial)
 {
-	return &m_Mesh;
+	CMeshDX11 *pNewMesh = new CMeshDX11(false);
+	pNewMesh->SetVertexFormat(vertexFormat);
+	if (pMaterial != NULL)
+	{
+		// Set material here
+	}
+	return pNewMesh;
 }
 
 void CShaderDeviceDX11::DestroyStaticMesh(IMesh* mesh)
 {
-	return;
+	// Make sure not dynamic
+	CBaseMeshDX11 *pMesh = static_cast<CBaseMeshDX11 *>(mesh);
+	if (pMesh)
+	{
+		delete pMesh;
+	}
 }
 
 
 // Creates/destroys static vertex + index buffers
 IVertexBuffer *CShaderDeviceDX11::CreateVertexBuffer(ShaderBufferType_t type, VertexFormat_t fmt, int nVertexCount, const char *pBudgetGroup)
 {
-	return (type == SHADER_BUFFER_TYPE_STATIC || type == SHADER_BUFFER_TYPE_STATIC_TEMP) ? &m_Mesh : &m_DynamicMesh;
+	CVertexBufferDX11 *pVertexBuffer = new CVertexBufferDX11(nVertexCount, fmt, type);
+	return pVertexBuffer;
 }
 
 void CShaderDeviceDX11::DestroyVertexBuffer(IVertexBuffer *pVertexBuffer)
 {
-	return;
+	if (pVertexBuffer)
+	{
+		CVertexBufferDX11 *tempVertexBuffer = assert_cast<CVertexBufferDX11*>(pVertexBuffer);
+		g_pShaderAPIDX11->UnbindVertexBuffer(tempVertexBuffer->GetDXBuffer());
+		delete tempVertexBuffer;
+	}
 }
 
 
 IIndexBuffer *CShaderDeviceDX11::CreateIndexBuffer(ShaderBufferType_t bufferType, MaterialIndexFormat_t fmt, int nIndexCount, const char *pBudgetGroup)
 {
-	switch (bufferType)
-	{
-	case SHADER_BUFFER_TYPE_STATIC:
-	case SHADER_BUFFER_TYPE_STATIC_TEMP:
-		return &m_Mesh;
-	default:
-		Assert(0);
-	case SHADER_BUFFER_TYPE_DYNAMIC:
-	case SHADER_BUFFER_TYPE_DYNAMIC_TEMP:
-		return &m_DynamicMesh;
-	}
+	CIndexBufferDX11 *pIndexBuffer = new CIndexBufferDX11(nIndexCount, fmt, bufferType);
+	return pIndexBuffer;
 }
 
 void CShaderDeviceDX11::DestroyIndexBuffer(IIndexBuffer *pIndexBuffer)
 {
-	return;
+	if (pIndexBuffer)
+	{
+		CIndexBufferDX11 *tempIndexBuffer = assert_cast<CIndexBufferDX11*>(pIndexBuffer);
+		g_pShaderAPIDX11->UnbindIndexBuffer(tempIndexBuffer->GetDXBuffer());
+		delete tempIndexBuffer;
+	}
 }
 
 
 // Do we need to specify the stream here in the case of locking multiple dynamic VBs on different streams?
 IVertexBuffer *CShaderDeviceDX11::GetDynamicVertexBuffer(int nStreamID, VertexFormat_t vertexFormat, bool bBuffered)
 {
-	return &m_DynamicMesh;
+	return NULL;
 }
 
 IIndexBuffer *CShaderDeviceDX11::GetDynamicIndexBuffer(MaterialIndexFormat_t fmt, bool bBuffered)
 {
-	return &m_Mesh;
+	return NULL;
 }
 
 

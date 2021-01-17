@@ -559,7 +559,9 @@ public:
 
 	// ------------ New Vertex/Index Buffer interface ----------------------------
 	virtual void BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffer, int nOffsetInBytes, int nFirstVertex, int nVertexCount, VertexFormat_t fmt, int nRepetitions = 1);
+	virtual void UnbindVertexBuffer(ID3D11Buffer *pBuffer);
 	virtual void BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBytes);
+	virtual void UnbindIndexBuffer(ID3D11Buffer *pBuffer);
 	virtual void Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount);
 	// ------------ End ----------------------------
 
@@ -672,6 +674,7 @@ public:
 private:
 
 	CMeshDX11 m_Mesh;
+
 	MaterialMatrixMode_t m_MatrixMode;
 	DirectX::XMMATRIX *m_pCurMatrix;
 
