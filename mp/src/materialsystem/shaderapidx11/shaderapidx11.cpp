@@ -21,7 +21,7 @@ extern IShaderUtil *g_pShaderUtil;
 
 // This file requires shader states to function, write those first :))
 
-CShaderAPIDX11::CShaderAPIDX11() : m_Mesh(false), m_DynamicState(), m_ShaderState()
+CShaderAPIDX11::CShaderAPIDX11() : m_DynamicMesh(true), m_DynamicState(), m_ShaderState(), m_FlexMesh(true)
 {
 
 }
@@ -761,15 +761,65 @@ void CShaderAPIDX11::FlushBufferedPrimitives()
 IMesh* CShaderAPIDX11::GetDynamicMesh(IMaterial* pMaterial, int nHWSkinBoneCount, bool bBuffered/* = true*/,
 	IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
-	m_Mesh.SetVertexFormat(VERTEX_POSITION | VERTEX_NORMAL | VERTEX_COLOR);
-	return &m_Mesh;
+	return GetDynamicMeshEx(pMaterial, 0, nHWSkinBoneCount, bBuffered, pVertexOverride, pIndexOverride);
 }
 
 IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t vertexFormat, int nHWSkinBoneCount,
 	bool bBuffered/* = true*/, IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
-	m_Mesh.SetVertexFormat(VERTEX_POSITION | VERTEX_NORMAL | VERTEX_COLOR);
-	return &m_Mesh;
+	CBaseMeshDX11 *pMesh;
+
+	pMesh = &m_DynamicMesh;
+
+	if (pVertexOverride)
+	{
+		CBaseMeshDX11 *pVertexOverrideMesh = static_cast<CBaseMeshDX11 *>(pVertexOverride);
+		pMesh->SetVertexFormat(pVertexOverrideMesh->GetVertexFormat());
+	}
+	else
+	{
+		VertexFormat_t fmt;
+
+		if (vertexFormat != 0)
+		{
+			fmt = vertexFormat;
+			int nVertexFormatBoneWeights = NumBoneWeights(vertexFormat);
+			if (nHWSkinBoneCount < nVertexFormatBoneWeights)
+			{
+				nHWSkinBoneCount = nVertexFormatBoneWeights;
+			}
+		}
+		else
+			fmt = pMaterial->GetVertexFormat() & ~VERTEX_FORMAT_COMPRESSED;
+
+		fmt &= ~VERTEX_BONE_WEIGHT_MASK;
+		if (nHWSkinBoneCount > 0)
+		{
+			fmt |= VERTEX_BONEWEIGHT(2);
+			fmt |= VERTEX_BONE_INDEX;
+		}
+
+		fmt |= VERTEX_POSITION | VERTEX_NORMAL | VERTEX_COLOR; // Remove later
+
+		pMesh->SetVertexFormat(fmt);
+	}
+
+	if (pMesh == &m_DynamicMesh)
+	{
+		CBaseMeshDX11 *pVertexOverrideMesh = static_cast<CBaseMeshDX11 *>(pVertexOverride);
+		if (pVertexOverrideMesh)
+		{
+			pMesh->SetVertexBuffer(pVertexOverrideMesh->GetVertexBuffer());
+		}
+
+		CBaseMeshDX11 *pIndexOverrideMesh = static_cast<CBaseMeshDX11 *>(pIndexOverride);
+		if (pIndexOverrideMesh)
+		{
+			pMesh->SetIndexBuffer(pIndexOverrideMesh->GetIndexBuffer());
+		}
+	}
+
+	return pMesh;
 }
 
 enum
@@ -1543,7 +1593,7 @@ int CShaderAPIDX11::CompareSnapshots(StateSnapshot_t snapshot0, StateSnapshot_t 
 // Get mesh for flexing
 IMesh *CShaderAPIDX11::GetFlexMesh()
 {
-	return &m_Mesh;
+	return &m_FlexMesh;
 }
 
 // Set flashlight state to one given by state, w2t, and texture pointer

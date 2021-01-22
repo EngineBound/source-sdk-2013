@@ -673,7 +673,8 @@ public:
 
 private:
 
-	CMeshDX11 m_Mesh;
+	CMeshDX11 m_DynamicMesh;
+	CMeshDX11 m_FlexMesh;
 
 	MaterialMatrixMode_t m_MatrixMode;
 	DirectX::XMMATRIX *m_pCurMatrix;

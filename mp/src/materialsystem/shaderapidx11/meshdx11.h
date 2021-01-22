@@ -45,6 +45,16 @@ public:
 	// Call this in debug mode to make sure our data is good.
 	virtual void ValidateData(int nVertexCount, const VertexDesc_t & desc);
 
+	virtual void SetVertexBuffer(CVertexBufferDX11 *pBuffer)
+	{
+		m_pVertexBuffer = pBuffer;
+	}
+
+	virtual CVertexBufferDX11 *GetVertexBuffer()
+	{
+		return m_pVertexBuffer;
+	}
+
 // IIndexBuffer methods
 public:
 
@@ -72,6 +82,16 @@ public:
 
 	// Ensures the data in the index buffer is valid
 	virtual void ValidateData(int nIndexCount, const IndexDesc_t &desc);
+
+	virtual void SetIndexBuffer(CIndexBufferDX11 *pBuffer)
+	{
+		m_pIndexBuffer = pBuffer;
+	}
+
+	virtual CIndexBufferDX11 *GetIndexBuffer()
+	{
+		return m_pIndexBuffer;
+	}
 
 // IMesh methods
 public:
