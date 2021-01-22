@@ -19,6 +19,10 @@ CBaseMeshDX11::~CBaseMeshDX11()
 
 	if (m_bIsDynamic)
 	{
+		if (m_pVertexBuffer)
+		{
+			g_pShaderDeviceDX11->DestroyVertexBuffer(m_pVertexBuffer);
+		}
 		if (m_pIndexBuffer)
 		{
 			g_pShaderDeviceDX11->DestroyIndexBuffer(m_pIndexBuffer);
@@ -84,6 +88,13 @@ bool CBaseMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 
 	if (!m_pVertexBuffer)
 	{
+		m_pVertexBuffer = static_cast<CVertexBufferDX11 *>(
+			g_pShaderDeviceDX11->CreateVertexBuffer(SHADER_BUFFER_TYPE_STATIC,
+				m_VertexFormat, nVertexCount, NULL));
+	}
+	else if (m_pVertexBuffer->VertexCount() < nVertexCount) // Remove this statement asap, horrible, defeats the purpose of static buffers
+	{
+		g_pShaderDeviceDX11->DestroyVertexBuffer(m_pVertexBuffer);
 		m_pVertexBuffer = static_cast<CVertexBufferDX11 *>(
 			g_pShaderDeviceDX11->CreateVertexBuffer(SHADER_BUFFER_TYPE_STATIC,
 				m_VertexFormat, nVertexCount, NULL));
@@ -156,6 +167,14 @@ bool CBaseMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 				MATERIAL_INDEX_FORMAT_16BIT,
 				nMaxIndexCount, NULL));
 	}
+	else if (m_pIndexBuffer->IndexCount() < nMaxIndexCount) // Remove this statement asap, horrible, defeats the purpose of static buffers
+	{
+		g_pShaderDeviceDX11->DestroyIndexBuffer(m_pIndexBuffer);
+		m_pIndexBuffer = static_cast<CIndexBufferDX11 *>(
+			g_pShaderDeviceDX11->CreateIndexBuffer(SHADER_BUFFER_TYPE_STATIC,
+				MATERIAL_INDEX_FORMAT_16BIT,
+				nMaxIndexCount, NULL));
+	}
 
 	if (!m_pIndexBuffer->Lock(nMaxIndexCount, bAppend, desc))
 	{
@@ -218,6 +237,13 @@ void CBaseMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
 // Draws the entire mesh
 void CBaseMeshDX11::Draw(int firstIndex, int numIndices)
 {
+	if (!ShaderUtil()->OnDrawMesh(this, firstIndex, numIndices))
+	{
+		MarkAsDrawn();
+		return;
+	}
+
+	
 }
 
 void CBaseMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
