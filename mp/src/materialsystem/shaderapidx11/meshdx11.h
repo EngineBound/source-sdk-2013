@@ -110,6 +110,8 @@ public:
 	// NOTE: this only works with STATIC meshes.
 	virtual void Draw(CPrimList *pLists, int nLists);
 
+	virtual void DrawPrimLists(CPrimList *pLists, int nLists);
+
 	// Copy verts and/or indices to a mesh builder. This only works for temp meshes!
 	virtual void CopyToMeshBuilder(
 		int iStartVert,		// Which vertices to copy.

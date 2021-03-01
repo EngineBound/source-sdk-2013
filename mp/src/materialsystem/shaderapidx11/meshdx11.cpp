@@ -2,6 +2,7 @@
 #include "shaderdevicedx11.h"
 #include "shaderapidx11_global.h"
 #include "ishaderutil.h"
+#include "shaderapidx11.h"
 
 CBaseMeshDX11::CBaseMeshDX11(bool bIsDynamic) : m_bIsDynamic(bIsDynamic), m_nNumInds(0), m_nNumVerts(0),
 m_pIndexBuffer(0), m_pVertexBuffer(0), m_Type(MATERIAL_TRIANGLES), m_VertexFormat(0)
@@ -243,7 +244,19 @@ void CBaseMeshDX11::Draw(int firstIndex, int numIndices)
 		return;
 	}
 
-	
+	CPrimList primList;
+	if (firstIndex == -1 || numIndices == 0)
+	{
+		primList.m_FirstIndex = 0;
+		primList.m_NumIndices = m_nNumInds;
+	}
+	else
+	{
+		primList.m_FirstIndex = firstIndex;
+		primList.m_NumIndices = numIndices;
+	}
+
+	DrawPrimLists(&primList, 1);
 }
 
 void CBaseMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
@@ -256,6 +269,28 @@ void CBaseMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
 // NOTE: this only works with STATIC meshes.
 void CBaseMeshDX11::Draw(CPrimList *pLists, int nLists)
 {
+	if (!ShaderUtil()->OnDrawMesh(this, pLists, nLists))
+	{
+		MarkAsDrawn();
+		return;
+	}
+
+	DrawPrimLists(pLists, nLists);
+}
+
+void CBaseMeshDX11::DrawPrimLists(CPrimList *pLists, int nLists)
+{
+	// Don't draw if nothing should be drawn
+	int i = 0;
+	for (; i < nLists; ++i)
+	{
+		if (pLists[i].m_NumIndices > 0)
+			break;
+	}
+	if (i == nLists)
+		return;
+
+	g_pShaderAPIDX11->DrawMesh(this);
 }
 
 // Copy verts and/or indices to a mesh builder. This only works for temp meshes!

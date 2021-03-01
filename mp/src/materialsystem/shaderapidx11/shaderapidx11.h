@@ -8,6 +8,7 @@
 #include <d3d11.h>
 #include "ishaderapi.h"
 #include "materialsystem/idebugtextureinfo.h"
+#include "imaterialdx11.h"
 #include "meshdx11.h"
 #include "statesdx11.h"
 
@@ -563,6 +564,7 @@ public:
 	virtual void BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBytes);
 	virtual void UnbindIndexBuffer(ID3D11Buffer *pBuffer);
 	virtual void Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount);
+	void DrawMesh(IMesh *pMesh);
 	// ------------ End ----------------------------
 
 
@@ -682,6 +684,9 @@ private:
 	DynamicStateDX11 m_DynamicState;
 	ShaderStateDX11 m_ShaderState;
 	
+	// Current mesh/material to render
+	CMeshDX11 *m_pMesh;
+	IMaterialExtended *m_pMaterial;
 };
 
 #endif // SHADERAPIDX11_H

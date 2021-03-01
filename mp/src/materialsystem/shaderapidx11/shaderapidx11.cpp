@@ -1749,6 +1749,17 @@ void CShaderAPIDX11::Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex
 	return;
 }
 
+void CShaderAPIDX11::DrawMesh(IMesh *pMesh)
+{
+	m_pMesh = static_cast<CMeshDX11 *>(pMesh);
+	if (!m_pMesh || !m_pMaterial)
+	{
+		return;
+	}
+
+	//TODO TODO
+}
+
 	// Apply stencil operations to every pixel on the screen without disturbing depth or color buffers
 void CShaderAPIDX11::PerformFullScreenStencilOperation(void)
 {

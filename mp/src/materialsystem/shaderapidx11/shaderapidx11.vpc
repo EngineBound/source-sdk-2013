@@ -54,5 +54,8 @@ $Project "ShaderApiDX11 (DML)"
         $File   "statesdx11.h"
         $File   "buffersdx11.h"
         $File   "buffersdx11.cpp"
+        $File   "materialdx11.h"
+        $File   "materialdx11.cpp"
+        $File   "imaterialdx11.h"
 	}
 }
