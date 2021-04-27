@@ -6,9 +6,15 @@
 #endif
 
 #include "imaterialdx11.h"
+#include "utlsymbol.h"
+#include <KeyValues.h>
 
-class CMaterialDX11 : public IMaterialExtended
+class CMaterialDX11
 {
+public:
+	CMaterialDX11(char const* materialName, const char *pTextureGroupName, KeyValues *pKeyValues);
+	~CMaterialDX11();
+
 	// Get the name of the material.  This is a full path to 
 	// the vmt file starting from "hl2/materials" (or equivalent) without
 	// a file extension.
@@ -165,22 +171,13 @@ class CMaterialDX11 : public IMaterialExtended
 
 	virtual bool			IsPrecached() const;
 
-	virtual int GetReferenceCount() const;
-	virtual void SetEnumerationID(int);
-	virtual void SetNeedsWhiteLightmap(bool);
-	virtual bool GetNeedsWhiteLightmap() const;
-	virtual void Uncache(bool);
-	virtual void Precache();
-	virtual void PrecacheVars(KeyValues*, KeyValues*, CUtlVector<void*>*, int);
-	virtual void ReloadTextures();
-	virtual void SetMinLightmapPageID(int);
-	virtual void SetMaxLightmapPageID(int);
-	virtual int GetMinLightmapPageID();
-	virtual int GetMaxLightmapPageID();
-	virtual IShader* GetShader();
-	virtual bool IsPrecachedVars();
-	virtual void DrawMesh(VertexCompressionType_t compression);
-	virtual VertexFormat_t GetVertexUsage() const;
+private:
+
+	CUtlSymbol m_Name;
+	CUtlSymbol m_TextureGroupName;
+
+	KeyValues *m_pKeyValues;
+
 };
 
 #endif

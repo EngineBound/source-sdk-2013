@@ -5,16 +5,11 @@
 #pragma once
 #endif
 
-#include <d3d11.h>
-#include "hardwareconfigdx11.h"
-#include "ishaderdevice.h"
+#include "ishaderdevicemgrdx11.h"
 
-class CShaderDeviceMgrDX11 : public IShaderDeviceMgr
+class CShaderDeviceMgrDX11 : public IShaderDeviceMgrDX11
 {
 public:
-	CShaderDeviceMgrDX11();
-	//~CShaderDeviceMgrDX11();
-
 	// Here's where the app systems get to learn about each other 
 	virtual bool Connect(CreateInterfaceFn factory);
 	virtual void Disconnect();
@@ -27,6 +22,7 @@ public:
 	virtual InitReturnVal_t Init();
 	virtual void Shutdown();
 
+public:
 	// Gets the number of adapters...
 	virtual int	 GetAdapterCount() const;
 
@@ -57,21 +53,6 @@ public:
 	// Installs a callback to get called 
 	virtual void AddModeChangeCallback(ShaderModeChangeCallbackFunc_t func);
 	virtual void RemoveModeChangeCallback(ShaderModeChangeCallbackFunc_t func);
-
-protected:
-	IDXGIAdapter *GetAdapter(int nAdapter) const;
-	IDXGIOutput *GetAdapterOutput(int nAdapter) const;
-
-	friend class CShaderDeviceDX11;
-private:
-
-	IDXGIFactory *m_pDXGIFactory;
-
-	CUtlVector<HWInfo_t> m_vpAdapters;
-	bool PopulateHWInfo(HWInfo_t *pHWInfo, IDXGIAdapter *pAdapter, IDXGIOutput *pOutput);
-
-	CUtlVector<ModeChangeCallbackFunc_t> m_vpModeChangeCallbacks;
-
 };
 
-#endif // SHADERDEVICEMGRDX11_H
+#endif

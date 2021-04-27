@@ -1,300 +1,347 @@
+
 #include "meshdx11.h"
-#include "shaderdevicedx11.h"
-#include "shaderapidx11_global.h"
-#include "ishaderutil.h"
-#include "shaderapidx11.h"
 
-CBaseMeshDX11::CBaseMeshDX11(bool bIsDynamic) : m_bIsDynamic(bIsDynamic), m_nNumInds(0), m_nNumVerts(0),
-m_pIndexBuffer(0), m_pVertexBuffer(0), m_Type(MATERIAL_TRIANGLES), m_VertexFormat(0)
-{
-	m_pVertexData = new unsigned char[VERTEX_DATA_SIZE];
-
-	m_bIsIBufLocked = false;
-	m_bIsVBufLocked = false;
-	m_bMeshLocked = false;
-}
-
-CBaseMeshDX11::~CBaseMeshDX11()
-{
-	delete[] m_pVertexData;
-
-	if (m_bIsDynamic)
-	{
-		if (m_pVertexBuffer)
-		{
-			g_pShaderDeviceDX11->DestroyVertexBuffer(m_pVertexBuffer);
-		}
-		if (m_pIndexBuffer)
-		{
-			g_pShaderDeviceDX11->DestroyIndexBuffer(m_pIndexBuffer);
-		}
-	}
-}
-
-//--------------------------------------------------------------//
-//                          IVertexBuffer                       //
-//--------------------------------------------------------------//
+//-------------------------------------------//
+//             CVertexBufferDX11             //
+//-------------------------------------------//
 
 // NOTE: The following two methods are only valid for static vertex buffers
-	// Returns the number of vertices and the format of the vertex buffer
-int CBaseMeshDX11::VertexCount() const
+// Returns the number of vertices and the format of the vertex buffer
+int CVertexBufferDX11::VertexCount() const
 {
-	return m_pVertexBuffer ? m_pVertexBuffer->VertexCount() : 0;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
 }
 
-void CBaseMeshDX11::SetVertexFormat(VertexFormat_t format)
+VertexFormat_t CVertexBufferDX11::GetVertexFormat() const
 {
-	m_VertexFormat = format;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return VERTEX_FORMAT_UNKNOWN;
 }
 
-VertexFormat_t CBaseMeshDX11::GetVertexFormat() const
-{
-	return m_VertexFormat;
-}
 
 // Is this vertex buffer dynamic?
-bool CBaseMeshDX11::IsDynamic() const
+bool CVertexBufferDX11::IsDynamic() const
 {
-	return m_bIsDynamic;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return false;
 }
+
 
 // NOTE: For dynamic vertex buffers only!
 // Casts the memory of the dynamic vertex buffer to the appropriate type
-void CBaseMeshDX11::BeginCastBuffer(VertexFormat_t format)
+void CVertexBufferDX11::BeginCastBuffer(VertexFormat_t format)
 {
-	
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::EndCastBuffer()
+void CVertexBufferDX11::EndCastBuffer()
 {
-
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
+
 
 // Returns the number of vertices that can still be written into the buffer
-int CBaseMeshDX11::GetRoomRemaining() const
+int CVertexBufferDX11::GetRoomRemaining() const
 {
-	return m_pVertexBuffer->GetRoomRemaining();
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
 }
 
-bool CBaseMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
+
+bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 {
-	Assert(!m_bIsVBufLocked);
-
-	if (!g_pShaderDeviceDX11->IsActivated() || nVertexCount == 0)
-	{
-		CVertexBufferDX11::ComputeVertexDesc(0, 0, desc);
-		desc.m_nFirstVertex = 0;
-		return false;
-	}
-
-	if (!m_pVertexBuffer)
-	{
-		m_pVertexBuffer = static_cast<CVertexBufferDX11 *>(
-			g_pShaderDeviceDX11->CreateVertexBuffer(SHADER_BUFFER_TYPE_STATIC,
-				m_VertexFormat, nVertexCount, NULL));
-	}
-	else if (m_pVertexBuffer->VertexCount() < nVertexCount) // Remove this statement asap, horrible, defeats the purpose of static buffers
-	{
-		g_pShaderDeviceDX11->DestroyVertexBuffer(m_pVertexBuffer);
-		m_pVertexBuffer = static_cast<CVertexBufferDX11 *>(
-			g_pShaderDeviceDX11->CreateVertexBuffer(SHADER_BUFFER_TYPE_STATIC,
-				m_VertexFormat, nVertexCount, NULL));
-	}
-
-
-	if (!m_pVertexBuffer->Lock(nVertexCount, bAppend, desc))
-	{
-		Assert(0);
-		Error("Vertex buffer lock failed!!!\n");
-		return false;
-	}
-
-	m_bIsVBufLocked = true;
-	return true;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return false;
 }
-void CBaseMeshDX11::Unlock(int nVertexCount, VertexDesc_t &desc) 
+
+void CVertexBufferDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 {
-	if (!m_bIsVBufLocked)
-		return;
-
-	Assert(m_pVertexBuffer);
-	m_pVertexBuffer->Unlock(nVertexCount, desc);
-	m_bIsVBufLocked = false;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
+
 
 // Spews the mesh data
-void CBaseMeshDX11::Spew(int nVertexCount, const VertexDesc_t &desc)
+void CVertexBufferDX11::Spew(int nVertexCount, const VertexDesc_t &desc)
 {
-
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
+
 
 // Call this in debug mode to make sure our data is good.
-void CBaseMeshDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
+void CVertexBufferDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-//--------------------------------------------------------------//
-//                          IIndexBuffer                        //
-//--------------------------------------------------------------//
 
-	// NOTE: The following two methods are only valid for static index buffers
-	// Returns the number of indices and the format of the index buffer
-int CBaseMeshDX11::IndexCount() const
+//-------------------------------------------//
+//              CIndexBufferDX11             //
+//-------------------------------------------//
+
+// NOTE: The following two methods are only valid for static index buffers
+// Returns the number of indices and the format of the index buffer
+int CIndexBufferDX11::IndexCount() const
 {
-	return m_pIndexBuffer ? m_pIndexBuffer->IndexCount() : 0;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
 }
 
-MaterialIndexFormat_t CBaseMeshDX11::IndexFormat() const
+MaterialIndexFormat_t CIndexBufferDX11::IndexFormat() const
 {
-	return m_pIndexBuffer->IndexFormat();
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return MATERIAL_INDEX_FORMAT_UNKNOWN;
 }
+
+
+// Is this index buffer dynamic?
+bool CIndexBufferDX11::IsDynamic() const
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return false;
+}
+
 
 // NOTE: For dynamic index buffers only!
 // Casts the memory of the dynamic index buffer to the appropriate type
-void CBaseMeshDX11::BeginCastBuffer(MaterialIndexFormat_t format)
+void CIndexBufferDX11::BeginCastBuffer(MaterialIndexFormat_t format)
 {
-
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
+
+void CIndexBufferDX11::EndCastBuffer()
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// Returns the number of indices that can still be written into the buffer
+int CIndexBufferDX11::GetRoomRemaining() const
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
+}
+
 
 // Locks, unlocks the index buffer
-bool CBaseMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
+bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 {
-	Assert(!m_bIsIBufLocked);
-
-	if (!m_pIndexBuffer)
-	{
-		m_pIndexBuffer = static_cast<CIndexBufferDX11 *>(
-			g_pShaderDeviceDX11->CreateIndexBuffer(SHADER_BUFFER_TYPE_STATIC,
-				MATERIAL_INDEX_FORMAT_16BIT,
-				nMaxIndexCount, NULL));
-	}
-	else if (m_pIndexBuffer->IndexCount() < nMaxIndexCount) // Remove this statement asap, horrible, defeats the purpose of static buffers
-	{
-		g_pShaderDeviceDX11->DestroyIndexBuffer(m_pIndexBuffer);
-		m_pIndexBuffer = static_cast<CIndexBufferDX11 *>(
-			g_pShaderDeviceDX11->CreateIndexBuffer(SHADER_BUFFER_TYPE_STATIC,
-				MATERIAL_INDEX_FORMAT_16BIT,
-				nMaxIndexCount, NULL));
-	}
-
-	if (!m_pIndexBuffer->Lock(nMaxIndexCount, bAppend, desc))
-	{
-		return false;
-	}
-
-	m_bIsIBufLocked = true;
-	return true;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return false;
 }
 
-void CBaseMeshDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
+void CIndexBufferDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 {
-	if (!m_bIsIBufLocked)
-		return;
-
-	Assert(m_pIndexBuffer);
-
-	m_pIndexBuffer->Unlock(nWrittenIndexCount, desc);
-	m_bIsIBufLocked = false;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount, IndexDesc_t& desc)
+
+// FIXME: Remove this!!
+// Locks, unlocks the index buffer for modify
+void CIndexBufferDX11::ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount, IndexDesc_t& desc)
 {
-	Lock(nIndexCount, false, desc);
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::ModifyEnd(IndexDesc_t& desc)
+void CIndexBufferDX11::ModifyEnd(IndexDesc_t& desc)
 {
-	Unlock(0, desc);
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
+
 
 // Spews the mesh data
-void CBaseMeshDX11::Spew(int nIndexCount, const IndexDesc_t &desc)
+void CIndexBufferDX11::Spew(int nIndexCount, const IndexDesc_t &desc)
 {
-
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
+
 
 // Ensures the data in the index buffer is valid
-void CBaseMeshDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
+void CIndexBufferDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-//--------------------------------------------------------------//
-//                              IMesh                           //
-//--------------------------------------------------------------//
 
+//-------------------------------------------//
+//                 CMeshDX11                 //
+//-------------------------------------------//
 
-// Sets the primitive type
-void CBaseMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
+// Is the mesh dynamic?
+bool CMeshDX11::IsDynamic() const
 {
-	Assert(type != MATERIAL_INSTANCED_QUADS);
-	if (!ShaderUtil()->OnSetPrimitiveType(this, type))
-	{
-		return;
-	}
-
-	m_Type = type;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return false;
 }
 
-// Draws the entire mesh
-void CBaseMeshDX11::Draw(int firstIndex, int numIndices)
+
+// NOTE: For dynamic meshes only!
+void CMeshDX11::EndCastBuffer()
 {
-	if (!ShaderUtil()->OnDrawMesh(this, firstIndex, numIndices))
-	{
-		MarkAsDrawn();
-		return;
-	}
-
-	CPrimList primList;
-	if (firstIndex == -1 || numIndices == 0)
-	{
-		primList.m_FirstIndex = 0;
-		primList.m_NumIndices = m_nNumInds;
-	}
-	else
-	{
-		primList.m_FirstIndex = firstIndex;
-		primList.m_NumIndices = numIndices;
-	}
-
-	DrawPrimLists(&primList, 1);
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
+
+// Returns room remaining :)
+int CMeshDX11::GetRoomRemaining() const
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
 }
+
+
+// IVertexBufferDX11
+
+// NOTE: The following two methods are only valid for static vertex buffers
+// Returns the number of vertices and the format of the vertex buffer
+int CMeshDX11::VertexCount() const
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
+}
+
+VertexFormat_t CMeshDX11::GetVertexFormat() const
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return VERTEX_FORMAT_UNKNOWN;
+}
+
+
+// NOTE: For dynamic vertex buffers only!
+// Casts the memory of the dynamic vertex buffer to the appropriate type
+void CMeshDX11::BeginCastBuffer(VertexFormat_t format)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+bool CMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return false;
+}
+
+void CMeshDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// Spews the mesh data
+void CMeshDX11::Spew(int nVertexCount, const VertexDesc_t &desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// Call this in debug mode to make sure our data is good.
+void CMeshDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// IIndexBufferDX11
+
+// NOTE: The following two methods are only valid for static index buffers
+// Returns the number of indices and the format of the index buffer
+int CMeshDX11::IndexCount() const
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
+}
+
+MaterialIndexFormat_t CMeshDX11::IndexFormat() const
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return MATERIAL_INDEX_FORMAT_UNKNOWN;
+}
+
+
+// NOTE: For dynamic index buffers only!
+// Casts the memory of the dynamic index buffer to the appropriate type
+void CMeshDX11::BeginCastBuffer(MaterialIndexFormat_t format)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// Locks, unlocks the index buffer
+bool CMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return false;
+}
+
+void CMeshDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// FIXME: Remove this!!
+// Locks, unlocks the index buffer for modify
+void CMeshDX11::ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount, IndexDesc_t& desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+void CMeshDX11::ModifyEnd(IndexDesc_t& desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// Spews the mesh data
+void CMeshDX11::Spew(int nIndexCount, const IndexDesc_t &desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// Ensures the data in the index buffer is valid
+void CMeshDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// IMesh
+
+// -----------------------------------
+
+// Sets/gets the primitive type
+void CMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+// Draws the mesh
+void CMeshDX11::Draw(int nFirstIndex, int nIndexCount)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+void CMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
 
 // Draw a list of (lists of) primitives. Batching your lists together that use
 // the same lightmap, material, vertex and index buffers with multipass shaders
 // can drastically reduce state-switching overhead.
 // NOTE: this only works with STATIC meshes.
-void CBaseMeshDX11::Draw(CPrimList *pLists, int nLists)
+void CMeshDX11::Draw(CPrimList *pLists, int nLists)
 {
-	if (!ShaderUtil()->OnDrawMesh(this, pLists, nLists))
-	{
-		MarkAsDrawn();
-		return;
-	}
-
-	DrawPrimLists(pLists, nLists);
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::DrawPrimLists(CPrimList *pLists, int nLists)
-{
-	// Don't draw if nothing should be drawn
-	int i = 0;
-	for (; i < nLists; ++i)
-	{
-		if (pLists[i].m_NumIndices > 0)
-			break;
-	}
-	if (i == nLists)
-		return;
-
-	g_pShaderAPIDX11->DrawMesh(this);
-}
 
 // Copy verts and/or indices to a mesh builder. This only works for temp meshes!
-void CBaseMeshDX11::CopyToMeshBuilder(
+void CopyToMeshBuilder(
 	int iStartVert,		// Which vertices to copy.
 	int nVerts,
 	int iStartIndex,	// Which indices to copy.
@@ -302,74 +349,73 @@ void CBaseMeshDX11::CopyToMeshBuilder(
 	int indexOffset,	// This is added to each index.
 	CMeshBuilder &builder)
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 // Spews the mesh data
-void CBaseMeshDX11::Spew(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
+void CMeshDX11::Spew(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
+
 // Call this in debug mode to make sure our data is good.
-void CBaseMeshDX11::ValidateData(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
+void CMeshDX11::ValidateData(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
+
 
 // New version
 // Locks/unlocks the mesh, providing space for nVertexCount and nIndexCount.
 // nIndexCount of -1 means don't lock the index buffer...
-void CBaseMeshDX11::LockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
+void CMeshDX11::LockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
-	Assert(!m_bMeshLocked);
-
-	Lock(nVertexCount, false, *static_cast<VertexDesc_t*>(&desc));
-
-	if (m_Type != MATERIAL_POINTS)
-		Lock(nIndexCount, false, *static_cast<IndexDesc_t*>(&desc));
-
-	m_bMeshLocked = true;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::ModifyBegin(int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t& desc)
+void CMeshDX11::ModifyBegin(int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t& desc)
 {
-	ModifyBegin(false, nFirstIndex, nIndexCount, *static_cast<IndexDesc_t *>(&desc));
-}
-void CBaseMeshDX11::ModifyEnd(MeshDesc_t& desc)
-{
-	UnlockMesh(0, 0, desc);
-}
-void CBaseMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
-{
-	Assert(m_bMeshLocked);
-
-	Unlock(nVertexCount, *static_cast<VertexDesc_t*>(&desc));
-
-	if (m_Type != MATERIAL_POINTS)
-		Unlock(nIndexCount, *static_cast<IndexDesc_t*>(&desc));
-
-	m_nNumInds = nIndexCount;
-	m_nNumVerts = nVertexCount;
-
-	m_bMeshLocked = false;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::ModifyBeginEx(bool bReadOnly, int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t &desc)
+void CMeshDX11::ModifyEnd(MeshDesc_t& desc)
 {
-	LockMesh(nVertexCount, nIndexCount, desc);
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::SetFlexMesh(IMesh *pMesh, int nVertexOffset)
+void CMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::DisableFlexMesh()
+
+void CMeshDX11::ModifyBeginEx(bool bReadOnly, int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t &desc)
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-void CBaseMeshDX11::MarkAsDrawn()
+
+void CMeshDX11::SetFlexMesh(IMesh *pMesh, int nVertexOffset)
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-unsigned CBaseMeshDX11::ComputeMemoryUsed()
+
+void CMeshDX11::DisableFlexMesh()
 {
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+void CMeshDX11::MarkAsDrawn()
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+
+unsigned CMeshDX11::ComputeMemoryUsed()
+{
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return 0;
 }

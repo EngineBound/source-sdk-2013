@@ -1,39 +1,28 @@
-#ifndef SHADERUTILDX11_H
-#define SHADERUTILDX11_H
+#ifndef MESHDX11_H
+#define MESHDX11_H
 
 #ifdef _WIN32
 #pragma once
 #endif
 
-#include "materialsystem/imesh.h"
-#include "buffersdx11.h"
+#include "imeshdx11.h"
 
-#define VERTEX_DATA_SIZE 1024
-
-class CBaseMeshDX11 : public IMesh
+class CVertexBufferDX11 : public IVertexBufferDX11
 {
-public:
-	CBaseMeshDX11( bool bIsDynamic );
-	~CBaseMeshDX11();
-
-// IVertexBuffer methods
-public:
-
 	// NOTE: The following two methods are only valid for static vertex buffers
 	// Returns the number of vertices and the format of the vertex buffer
 	virtual int VertexCount() const;
-	virtual void SetVertexFormat(VertexFormat_t format);
 	virtual VertexFormat_t GetVertexFormat() const;
 
-	// Is this mesh dynamic?
+	// Is this vertex buffer dynamic?
 	virtual bool IsDynamic() const;
 
-	// NOTE: For dynamic meshes only!
+	// NOTE: For dynamic vertex buffers only!
 	// Casts the memory of the dynamic vertex buffer to the appropriate type
 	virtual void BeginCastBuffer(VertexFormat_t format);
 	virtual void EndCastBuffer();
 
-	// Returns the number of bytes that can still be written into the buffer
+	// Returns the number of vertices that can still be written into the buffer
 	virtual int GetRoomRemaining() const;
 
 	virtual bool Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc);
@@ -44,29 +33,86 @@ public:
 
 	// Call this in debug mode to make sure our data is good.
 	virtual void ValidateData(int nVertexCount, const VertexDesc_t & desc);
+};
 
-	virtual void SetVertexBuffer(CVertexBufferDX11 *pBuffer)
-	{
-		m_pVertexBuffer = pBuffer;
-	}
-
-	virtual CVertexBufferDX11 *GetVertexBuffer()
-	{
-		return m_pVertexBuffer;
-	}
-
-// IIndexBuffer methods
-public:
-
+class CIndexBufferDX11 : public IIndexBufferDX11
+{
 	// NOTE: The following two methods are only valid for static index buffers
 	// Returns the number of indices and the format of the index buffer
 	virtual int IndexCount() const;
 	virtual MaterialIndexFormat_t IndexFormat() const;
 
-	// NOTE: For dynamic meshes only!
+	// Is this index buffer dynamic?
+	virtual bool IsDynamic() const;
+
+	// NOTE: For dynamic index buffers only!
 	// Casts the memory of the dynamic index buffer to the appropriate type
 	virtual void BeginCastBuffer(MaterialIndexFormat_t format);
+	virtual void EndCastBuffer();
 
+	// Returns the number of indices that can still be written into the buffer
+	virtual int GetRoomRemaining() const;
+
+	// Locks, unlocks the index buffer
+	virtual bool Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc);
+	virtual void Unlock(int nWrittenIndexCount, IndexDesc_t &desc);
+
+	// FIXME: Remove this!!
+	// Locks, unlocks the index buffer for modify
+	virtual void ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount, IndexDesc_t& desc);
+	virtual void ModifyEnd(IndexDesc_t& desc);
+
+	// Spews the mesh data
+	virtual void Spew(int nIndexCount, const IndexDesc_t &desc);
+
+	// Ensures the data in the index buffer is valid
+	virtual void ValidateData(int nIndexCount, const IndexDesc_t &desc);
+};
+
+class CMeshDX11 : public IMeshDX11, public CIndexBufferDX11, public CVertexBufferDX11
+{
+
+	// DX11 Buffer Commons
+public:
+	// Is the mesh dynamic?
+	virtual bool IsDynamic() const;
+
+	// NOTE: For dynamic meshes only!
+	virtual void EndCastBuffer();
+
+	// Returns room remaining :)
+	virtual int GetRoomRemaining() const;
+
+	// IVertexBufferDX11
+public:
+	// NOTE: The following two methods are only valid for static vertex buffers
+	// Returns the number of vertices and the format of the vertex buffer
+	virtual int VertexCount() const;
+	virtual VertexFormat_t GetVertexFormat() const;
+
+	// NOTE: For dynamic vertex buffers only!
+	// Casts the memory of the dynamic vertex buffer to the appropriate type
+	virtual void BeginCastBuffer(VertexFormat_t format);
+
+	virtual bool Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc);
+	virtual void Unlock(int nVertexCount, VertexDesc_t &desc);
+
+	// Spews the mesh data
+	virtual void Spew(int nVertexCount, const VertexDesc_t &desc);
+
+	// Call this in debug mode to make sure our data is good.
+	virtual void ValidateData(int nVertexCount, const VertexDesc_t & desc);
+
+	// IIndexBufferDX11
+public:
+	// NOTE: The following two methods are only valid for static index buffers
+	// Returns the number of indices and the format of the index buffer
+	virtual int IndexCount() const;
+	virtual MaterialIndexFormat_t IndexFormat() const;
+
+	// NOTE: For dynamic index buffers only!
+	// Casts the memory of the dynamic index buffer to the appropriate type
+	virtual void BeginCastBuffer(MaterialIndexFormat_t format);
 
 	// Locks, unlocks the index buffer
 	virtual bool Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc);
@@ -83,24 +129,15 @@ public:
 	// Ensures the data in the index buffer is valid
 	virtual void ValidateData(int nIndexCount, const IndexDesc_t &desc);
 
-	virtual void SetIndexBuffer(CIndexBufferDX11 *pBuffer)
-	{
-		m_pIndexBuffer = pBuffer;
-	}
-
-	virtual CIndexBufferDX11 *GetIndexBuffer()
-	{
-		return m_pIndexBuffer;
-	}
-
-// IMesh methods
+	// IMesh
 public:
+	// -----------------------------------
 
 	// Sets/gets the primitive type
 	virtual void SetPrimitiveType(MaterialPrimitiveType_t type);
 
 	// Draws the mesh
-	virtual void Draw(int nFirstIndex, int nIndexCount);
+	virtual void Draw(int nFirstIndex = -1, int nIndexCount = 0);
 
 	virtual void SetColorMesh(IMesh *pColorMesh, int nVertexOffset);
 
@@ -109,8 +146,6 @@ public:
 	// can drastically reduce state-switching overhead.
 	// NOTE: this only works with STATIC meshes.
 	virtual void Draw(CPrimList *pLists, int nLists);
-
-	virtual void DrawPrimLists(CPrimList *pLists, int nLists);
 
 	// Copy verts and/or indices to a mesh builder. This only works for temp meshes!
 	virtual void CopyToMeshBuilder(
@@ -144,29 +179,6 @@ public:
 	virtual void MarkAsDrawn();
 
 	virtual unsigned ComputeMemoryUsed();
-
-protected:
-	bool m_bIsDynamic;
-	unsigned char *m_pVertexData;
-
-	CIndexBufferDX11 *m_pIndexBuffer;
-	CVertexBufferDX11 *m_pVertexBuffer;
-	bool m_bIsIBufLocked;
-	bool m_bIsVBufLocked;
-	bool m_bMeshLocked;
-	VertexFormat_t m_VertexFormat;
-
-	MaterialPrimitiveType_t m_Type;
-	int m_nNumVerts;
-	int m_nNumInds;
-};
-
-class CMeshDX11 : public CBaseMeshDX11
-{
-	typedef CBaseMeshDX11 BaseClass;
-public:
-	CMeshDX11(bool bIsDynamic) : BaseClass(bIsDynamic) {}
-
 };
 
 #endif

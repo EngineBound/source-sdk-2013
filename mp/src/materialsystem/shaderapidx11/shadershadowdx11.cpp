@@ -4,46 +4,35 @@
 static CShaderShadowDX11 s_ShaderShadowDX11;
 CShaderShadowDX11 *g_pShaderShadowDX11 = &s_ShaderShadowDX11;
 
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderShadowDX11, IShaderShadow,
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderShadowDX11, IShaderShadowDX11,
 	SHADERSHADOW_INTERFACE_VERSION, s_ShaderShadowDX11)
-
-CShaderShadowDX11::CShaderShadowDX11() 
-{
-	SetDefaultState();
-}
-
-CShaderShadowDX11::~CShaderShadowDX11()
-{
-}
 
 // Sets the default *shadow* state
 void CShaderShadowDX11::SetDefaultState()
 {
-	m_bIsTranslucent = false;
-	m_bIsAlphaTested = false;
-	m_bIsDepthWriteEnabled = true;
-	m_bUsesVertexAndPixelShaders = false;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
+
 
 // Methods related to depth buffering
 void CShaderShadowDX11::DepthFunc(ShaderDepthFunc_t depthFunc)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::EnableDepthWrites(bool bEnable)
 {
-	m_bIsDepthWriteEnabled = bEnable;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::EnableDepthTest(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::EnablePolyOffset(PolygonOffsetMode_t nOffsetMode)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
@@ -52,66 +41,66 @@ void CShaderShadowDX11::EnablePolyOffset(PolygonOffsetMode_t nOffsetMode)
 // Methods related to stencil
 void CShaderShadowDX11::EnableStencil(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::StencilFunc(ShaderStencilFunc_t stencilFunc)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::StencilPassOp(ShaderStencilOp_t stencilOp)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::StencilFailOp(ShaderStencilOp_t stencilOp)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::StencilDepthFailOp(ShaderStencilOp_t stencilOp)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::StencilReference(int nReference)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::StencilMask(int nMask)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::StencilWriteMask(int nMask)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // Suppresses/activates color writing 
 void CShaderShadowDX11::EnableColorWrites(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::EnableAlphaWrites(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // Methods related to alpha blending
 void CShaderShadowDX11::EnableBlending(bool bEnable)
 {
-	m_bIsTranslucent = bEnable;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::BlendFunc(ShaderBlendFactor_t srcFactor, ShaderBlendFactor_t dstFactor)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 // More below...
@@ -119,33 +108,33 @@ void CShaderShadowDX11::BlendFunc(ShaderBlendFactor_t srcFactor, ShaderBlendFact
 // Alpha testing
 void CShaderShadowDX11::EnableAlphaTest(bool bEnable)
 {
-	m_bIsAlphaTested = bEnable;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::AlphaFunc(ShaderAlphaFunc_t alphaFunc, float alphaRef /* [0-1] */)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // Wireframe/filled polygons
 void CShaderShadowDX11::PolyMode(ShaderPolyModeFace_t face, ShaderPolyMode_t polyMode)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // Back face culling
 void CShaderShadowDX11::EnableCulling(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // constant color + transparency
 void CShaderShadowDX11::EnableConstantColor(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
@@ -154,49 +143,48 @@ void CShaderShadowDX11::EnableConstantColor(bool bEnable)
 // If pTexCoordDimensions is *not* specified, we assume all coordinates
 // are 2-dimensional
 void CShaderShadowDX11::VertexShaderVertexFormat(unsigned int nFlags,
-	int nTexCoordCount, int* pTexCoordDimensions, int nUserDataSize)
+	int nTexCoordCount, int* pTexCoordDimensions, int nUserDataSize) 
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
-
 
 // Pixel and vertex shader methods
 void CShaderShadowDX11::SetVertexShader(const char* pFileName, int nStaticVshIndex)
 {
-	m_bUsesVertexAndPixelShaders = (pFileName != NULL);
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::SetPixelShader(const char* pFileName, int nStaticPshIndex)
 {
-	m_bUsesVertexAndPixelShaders = (pFileName != NULL);
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // Indicates we're going to light the model
 void CShaderShadowDX11::EnableLighting(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // Enables specular lighting (lighting has also got to be enabled)
 void CShaderShadowDX11::EnableSpecular(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // Convert from linear to gamma color space on writes to frame buffer.
 void CShaderShadowDX11::EnableSRGBWrite(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // Convert from gamma to linear on texture fetch.
 void CShaderShadowDX11::EnableSRGBRead(Sampler_t sampler, bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
@@ -205,29 +193,29 @@ void CShaderShadowDX11::EnableSRGBRead(Sampler_t sampler, bool bEnable)
 // we allocate enough room for 3 weights (max allowed)
 void CShaderShadowDX11::EnableVertexBlend(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // per texture unit stuff
 void CShaderShadowDX11::OverbrightValue(TextureStage_t stage, float value)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::EnableTexture(Sampler_t sampler, bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::EnableTexGen(TextureStage_t stage, bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::TexGen(TextureStage_t stage, ShaderTexGenParam_t param)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
@@ -235,70 +223,69 @@ void CShaderShadowDX11::TexGen(TextureStage_t stage, ShaderTexGenParam_t param)
 // Can be used to specify different operation per channel (alpha/color)...
 void CShaderShadowDX11::EnableCustomPixelPipe(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::CustomTextureStages(int stageCount)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::CustomTextureOperation(TextureStage_t stage, ShaderTexChannel_t channel,
-	ShaderTexOp_t op, ShaderTexArg_t arg1, ShaderTexArg_t arg2)
+	ShaderTexOp_t op, ShaderTexArg_t arg1, ShaderTexArg_t arg2) 
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
-
 
 // indicates what per-vertex data we're providing
 void CShaderShadowDX11::DrawFlags(unsigned int drawFlags)
 {
-
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // A simpler method of dealing with alpha modulation
 void CShaderShadowDX11::EnableAlphaPipe(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::EnableConstantAlpha(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::EnableVertexAlpha(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::EnableTextureAlpha(TextureStage_t stage, bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // GR - Separate alpha blending
 void CShaderShadowDX11::EnableBlendingSeparateAlpha(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::BlendFuncSeparateAlpha(ShaderBlendFactor_t srcFactor, ShaderBlendFactor_t dstFactor)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::FogMode(ShaderFogMode_t fogMode)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 void CShaderShadowDX11::SetDiffuseMaterialSource(ShaderMaterialSource_t materialSource)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
@@ -306,37 +293,37 @@ void CShaderShadowDX11::SetDiffuseMaterialSource(ShaderMaterialSource_t material
 // The flags to pass in here come from the MorphFormatFlags_t enum
 void CShaderShadowDX11::SetMorphFormat(MorphFormat_t flags)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
-void CShaderShadowDX11::DisableFogGammaCorrection(bool bDisable) //some blending modes won't work properly with corrected fog
+void CShaderShadowDX11::DisableFogGammaCorrection(bool bDisable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
-
+ //some blending modes won't work properly with corrected fog
 
 // Alpha to coverage
 void CShaderShadowDX11::EnableAlphaToCoverage(bool bEnable)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // Shadow map filtering
 void CShaderShadowDX11::SetShadowDepthFiltering(Sampler_t stage)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 // More alpha blending state
 void CShaderShadowDX11::BlendOp(ShaderBlendOp_t blendOp)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderShadowDX11::BlendOpSeparateAlpha(ShaderBlendOp_t blendOp)
 {
-	return;
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }

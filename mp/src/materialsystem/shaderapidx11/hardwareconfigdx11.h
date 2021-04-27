@@ -104,14 +104,14 @@ struct HWInfo_t : public MaterialAdapterInfo_t
 	float m_nGammaControlPointCount;
 };
 
-class IMaterialSystemHardwareConfigExtended : public IMaterialSystemHardwareConfig
+class IMaterialSystemHardwareConfigDX11 : public IMaterialSystemHardwareConfig
 {
 public:
 	// Required for the system to run
 	virtual const char *GetHWSpecificShaderDLLName() const = 0;
 };
 
-class CHardwareConfigDX11 : public IMaterialSystemHardwareConfigExtended
+class CHardwareConfigDX11 : public IMaterialSystemHardwareConfigDX11
 {
 public:
 	CHardwareConfigDX11();

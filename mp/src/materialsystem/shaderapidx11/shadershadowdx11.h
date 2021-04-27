@@ -5,14 +5,11 @@
 #pragma once
 #endif
 
-#include "ishadershadow.h"
+#include "ishadershadowdx11.h"
 
-class CShaderShadowDX11 : public IShaderShadow
+class CShaderShadowDX11 : public IShaderShadowDX11
 {
 public:
-	CShaderShadowDX11();
-	~CShaderShadowDX11();
-
 	// Sets the default *shadow* state
 	virtual void SetDefaultState();
 
@@ -65,7 +62,7 @@ public:
 
 	// Pixel and vertex shader methods
 	virtual void SetVertexShader(const char* pFileName, int nStaticVshIndex);
-	virtual	void SetPixelShader(const char* pFileName, int nStaticPshIndex);
+	virtual	void SetPixelShader(const char* pFileName, int nStaticPshIndex = 0);
 
 	// Indicates we're going to light the model
 	virtual void EnableLighting(bool bEnable);
@@ -128,11 +125,6 @@ public:
 	// More alpha blending state
 	virtual void BlendOp(ShaderBlendOp_t blendOp);
 	virtual void BlendOpSeparateAlpha(ShaderBlendOp_t blendOp);
-	
-	bool m_bIsTranslucent;
-	bool m_bIsAlphaTested;
-	bool m_bIsDepthWriteEnabled;
-	bool m_bUsesVertexAndPixelShaders;
 };
 
-#endif //SHADERSHADOWDX11_H
+#endif

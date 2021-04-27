@@ -5,18 +5,11 @@
 #pragma once
 #endif
 
-#include <d3d11.h>
-#include "ishaderapi.h"
-#include "materialsystem/idebugtextureinfo.h"
-#include "imaterialdx11.h"
-#include "meshdx11.h"
-#include "statesdx11.h"
+#include "ishaderapidx11.h"
 
-class CShaderAPIDX11 : public IShaderAPI, public IDebugTextureInfo
+class CShaderAPIDX11 : public IShaderAPIDX11
 {
 public:
-	CShaderAPIDX11();
-
 	// ------------------------------------------------------- //
 	//                       IShaderAPI                        //
 	// ------------------------------------------------------- //
@@ -560,9 +553,7 @@ public:
 
 	// ------------ New Vertex/Index Buffer interface ----------------------------
 	virtual void BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffer, int nOffsetInBytes, int nFirstVertex, int nVertexCount, VertexFormat_t fmt, int nRepetitions = 1);
-	virtual void UnbindVertexBuffer(ID3D11Buffer *pBuffer);
 	virtual void BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBytes);
-	virtual void UnbindIndexBuffer(ID3D11Buffer *pBuffer);
 	virtual void Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount);
 	void DrawMesh(IMesh *pMesh);
 	// ------------ End ----------------------------
@@ -672,21 +663,6 @@ public:
 	// used during a frame. Returns the old state of debug texture rendering flag to use
 	// it for restoring the mode.
 	virtual bool SetDebugTextureRendering(bool bEnable);
-
-private:
-
-	CMeshDX11 m_DynamicMesh;
-	CMeshDX11 m_FlexMesh;
-
-	MaterialMatrixMode_t m_MatrixMode;
-	DirectX::XMMATRIX *m_pCurMatrix;
-
-	DynamicStateDX11 m_DynamicState;
-	ShaderStateDX11 m_ShaderState;
-	
-	// Current mesh/material to render
-	CMeshDX11 *m_pMesh;
-	IMaterialExtended *m_pMaterial;
 };
 
-#endif // SHADERAPIDX11_H
+#endif

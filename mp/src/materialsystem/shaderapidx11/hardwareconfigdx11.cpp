@@ -2,7 +2,7 @@
 #include "hardwareconfigdx11.h"
 #include "shaderdevicedx11.h"
 #include "ishaderutil.h"
-#include "shaderapidx11_global.h"
+#include "dx11global.h"
 #include "materialsystem/materialsystem_config.h"
 
 // LAST INCLUDE AND WHATEVER
@@ -11,7 +11,7 @@
 static CHardwareConfigDX11 s_HardwareConfigDX11;
 CHardwareConfigDX11 *g_pHardwareConfigDX11 = &s_HardwareConfigDX11;
 
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CHardwareConfigDX11, IMaterialSystemHardwareConfigExtended,
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CHardwareConfigDX11, IMaterialSystemHardwareConfigDX11,
 	MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION, s_HardwareConfigDX11)
 
 
@@ -31,11 +31,16 @@ void CHardwareConfigDX11::SetupHWInfo(int nDXLevel)
 // Does the destination buffer (back buffer) have an alpha channel?
 bool CHardwareConfigDX11::HasDestAlphaBuffer() const
 {
+	/*
 	if (!g_pShaderDeviceDX11)
 		return false;
 
 	// Not exactly correct right now but it'll do for a bit
 	return (g_pShaderDeviceDX11->GetBackBufferFormat() == IMAGE_FORMAT_BGRA8888);
+	*/
+
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return false;
 }
 
 // Is there a stencil buffer?
@@ -47,10 +52,15 @@ bool CHardwareConfigDX11::HasStencilBuffer() const
 // Get the bit depth of the framebuffer
 int	 CHardwareConfigDX11::GetFrameBufferColorDepth() const
 {
+	/*
 	if (!g_pShaderDeviceDX11)
 		return 0;
 
 	return ShaderUtil()->ImageFormatInfo(g_pShaderDeviceDX11->GetBackBufferFormat()).m_NumBytes;
+	*/
+
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
 }
 
 // Get the number of usable samplers (textures, sort of)
@@ -407,10 +417,15 @@ bool CHardwareConfigDX11::SupportsGLMixedSizeTargets() const
 // Is anti-aliasing enabled?
 bool CHardwareConfigDX11::IsAAEnabled() const	// Is antialiasing being used?
 {
+	/*
 	if (!g_pShaderDeviceDX11)
 		return false;
 
 	return g_pShaderDeviceDX11->IsAAEnabled();
+	*/
+
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return false;
 }
 
 
@@ -462,10 +477,15 @@ bool CHardwareConfigDX11::SupportsStreamOffset() const // DX90+
 // How many bits in the stencil buffer?
 int CHardwareConfigDX11::StencilBufferBits() const
 {
+	/*
 	if (!g_pShaderDeviceDX11)
 		return 0;
 
 	return g_pShaderDeviceDX11->StencilBufferBits();
+	*/
+
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
 }
 
 // What is the maximum number of viewports?
@@ -520,7 +540,9 @@ bool CHardwareConfigDX11::HasFastVertexTextures() const
 // Hardware morph batch count, not certain what this means.
 int CHardwareConfigDX11::MaxHWMorphBatchCount() const
 {
-	return ShaderUtil()->MaxHWMorphBatchCount();
+	// return ShaderUtil()->MaxHWMorphBatchCount();
+	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	return -1;
 }
 
 

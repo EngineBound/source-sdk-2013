@@ -22,8 +22,8 @@ $Configuration
 	{
 		$AdditionalIncludeDirectories		"$BASE;..\..\public\shaderapi"
         $PreprocessorDefinitions		"$BASE;DX11;SHADERAPIDX11;SHADER_DLL_EXPORT;strncpy=use_Q_strncpy_instead;_snprintf=use_Q_snprintf_instead"
-		$PreprocessorDefinitions		"$BASE;USE_ACTUAL_DX" [($WIN32||$X360) && !$GL]
-		$PreprocessorDefinitions		"$BASE;GL_GLEXT_PROTOTYPES;DX_TO_GL_ABSTRACTION" [$GL]
+//		$PreprocessorDefinitions		"$BASE;USE_ACTUAL_DX" [($WIN32||$X360) && !$GL]
+//		$PreprocessorDefinitions		"$BASE;GL_GLEXT_PROTOTYPES;DX_TO_GL_ABSTRACTION" [$GL]
 	}
     
     $Linker
@@ -36,26 +36,41 @@ $Project "ShaderApiDX11 (DML)"
 {
 	$Folder "Source Files"
 	{
-        $File	"shaderapidx11.h"
-        $File	"shaderapidx11.cpp"
-        $File	"shaderdevicemgrdx11.h"
-        $File	"shaderdevicemgrdx11.cpp"
-        $File	"hardwareconfigdx11.h"
-        $File	"hardwareconfigdx11.cpp"
-        $File	"shaderdevicedx11.h"
-        $File	"shaderdevicedx11.cpp"
-        $File	"shadershadowdx11.h"
-        $File	"shadershadowdx11.cpp"
-        $File   "shaderapidx11_global.h"
-        $File   "shadermanagerdx11.h"
-        $File   "shadermanagerdx11.cpp"
+        $File	"dx11global.h"
+        
+        $File	"ishaderapidx11.h"
+        $File	"ishaderdevicedx11.h"
+        $File	"ishaderdevicemgrdx11.h"
+        $File	"ishadershadowdx11.h"
+        $File	"imeshdx11.h"
+        $File	"imaterialdx11.h"
+        
+        $File   "hardwareconfigdx11.h"
+        $File   "hardwareconfigdx11.cpp"
+        
+        $File   "ishaderapidx11.h"
+        $File   "shaderapidx11.h"
+        $File   "shaderapidx11.cpp"
+        
+        $File   "ishaderdevicedx11.h"
+        $File   "shaderdevicedx11.h"
+        $File   "shaderdevicedx11.cpp"
+        
+        $File   "ishaderdevicemgrdx11.h"
+        $File   "shaderdevicemgrdx11.h"
+        $File   "shaderdevicemgrdx11.cpp"
+        
+        $File   "ishadershadowdx11.h"
+        $File   "shadershadowdx11.h"
+        $File   "shadershadowdx11.cpp"
+        
+        $File   "imeshdx11.h"
         $File   "meshdx11.h"
         $File   "meshdx11.cpp"
-        $File   "statesdx11.h"
-        $File   "buffersdx11.h"
-        $File   "buffersdx11.cpp"
+        
+        $File   "imaterialdx11.h"
         $File   "materialdx11.h"
         $File   "materialdx11.cpp"
-        $File   "imaterialdx11.h"
+        
 	}
 }
