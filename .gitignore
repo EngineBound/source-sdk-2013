@@ -112,3 +112,13 @@ lib/public/vgui_controls.lib
 # Bin files
 mp/game/bin/
 *.lib
+mp/game/steamcmd
+mp/game/steamapps
+mp/game/sourcetest
+mp/game/hl2.exe
+mp/game/steam_appid.txt
+mp/game/thirdpartylegalnotices.txt
+mp/game/sdktools
+mp/game/hl2
+mp/game/hl2mp
+mp/game/platform
