@@ -8,6 +8,7 @@ CShaderDeviceDX11 *g_pShaderDeviceDX11 = &s_ShaderDeviceDX11;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceDX11, IShaderDeviceDX11,
 	SHADER_DEVICE_INTERFACE_VERSION, s_ShaderDeviceDX11)
 
+IShaderDeviceDX11 *g_pShaderDevice = g_pShaderDeviceDX11;
 
 // Releases/reloads resources when other apps want some memory
 void CShaderDeviceDX11::ReleaseResources()

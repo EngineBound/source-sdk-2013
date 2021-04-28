@@ -1,5 +1,9 @@
 
 #include "shaderdevicemgrdx11.h"
+#include "dx11global.h"
+
+#include "ishaderutil.h"
+
 
 static CShaderDeviceMgrDX11 s_ShaderDeviceMgrDX11;
 CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11 = &s_ShaderDeviceMgrDX11;
@@ -7,11 +11,16 @@ CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11 = &s_ShaderDeviceMgrDX11;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceMgrDX11, IShaderDeviceMgrDX11,
 	SHADER_DEVICE_MGR_INTERFACE_VERSION, s_ShaderDeviceMgrDX11)
 
+IShaderDeviceMgrDX11 *g_pShaderDeviceMgr = g_pShaderDeviceMgrDX11;
+IShaderUtil *g_pShaderUtil;
+
 // Here's where the app systems get to learn about each other 
 bool CShaderDeviceMgrDX11::Connect(CreateInterfaceFn factory)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	// Get shaderutil
+	g_pShaderUtil = (IShaderUtil*)factory(SHADER_UTIL_INTERFACE_VERSION, NULL);
+
+	return true;
 }
 
 void CShaderDeviceMgrDX11::Disconnect()

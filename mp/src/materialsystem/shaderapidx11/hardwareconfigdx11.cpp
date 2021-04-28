@@ -14,6 +14,8 @@ CHardwareConfigDX11 *g_pHardwareConfigDX11 = &s_HardwareConfigDX11;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CHardwareConfigDX11, IMaterialSystemHardwareConfigDX11,
 	MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION, s_HardwareConfigDX11)
 
+IMaterialSystemHardwareConfigDX11 *g_pHardwareConfig = g_pHardwareConfigDX11;
+
 
 CHardwareConfigDX11::CHardwareConfigDX11()
 {

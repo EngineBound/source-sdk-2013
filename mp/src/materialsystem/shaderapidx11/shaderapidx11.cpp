@@ -7,6 +7,11 @@ CShaderAPIDX11 *g_pShaderAPIDX11 = &s_ShaderAPIDX11;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IShaderAPIDX11,
 	SHADERAPI_INTERFACE_VERSION, s_ShaderAPIDX11)
 
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IDebugTextureInfoDX11,
+	DEBUG_TEXTURE_INFO_VERSION, s_ShaderAPIDX11)
+
+IShaderAPIDX11 *g_pShaderAPI = g_pShaderAPIDX11;
+
 // ------------------------------------------------------- //
 //                       IShaderAPI                        //
 // ------------------------------------------------------- //
@@ -1486,12 +1491,12 @@ void CShaderAPIDX11::EnableShaderShaderMutex(bool)
 
 void CShaderAPIDX11::ShaderLock()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	// Nothing for now
 }
 
 void CShaderAPIDX11::ShaderUnlock()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	// Nothing for now
 }
 
 

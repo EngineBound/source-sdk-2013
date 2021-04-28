@@ -7,7 +7,7 @@
 
 #include "ishaderapidx11.h"
 
-class CShaderAPIDX11 : public IShaderAPIDX11
+class CShaderAPIDX11 : public IShaderAPIDX11, public IDebugTextureInfoDX11
 {
 public:
 	// ------------------------------------------------------- //
