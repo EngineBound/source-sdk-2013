@@ -7,9 +7,20 @@
 
 #include "ishaderdevicedx11.h"
 
+#include <d3d11.h>
+
+class CShaderDeviceDX11;
+
+extern CShaderDeviceDX11* g_pShaderDeviceDX11;
+
 class CShaderDeviceDX11 : public IShaderDeviceDX11
 {
 public:
+	CShaderDeviceDX11();
+
+	virtual bool Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t mode);
+	virtual void Shutdown();
+
 	// Releases/reloads resources when other apps want some memory
 	virtual void ReleaseResources();
 	virtual void ReacquireResources();
@@ -97,6 +108,19 @@ public:
 #endif
 
 	virtual char *GetDisplayDeviceName();
+
+	virtual bool IsActivated() const;
+private:
+	bool m_bDeviceInitialized;
+	int m_nAdapter;
+
+	IDXGIOutput* m_pDXGIOutput;
+
+	IDXGISwapChain* m_pDXGISwapChain;
+	ID3D11Device* m_pD3DDevice;
+	ID3D11DeviceContext* m_pD3DDeviceContext;
+
+	friend class CShaderDeviceMgrDX11;
 };
 
 #endif

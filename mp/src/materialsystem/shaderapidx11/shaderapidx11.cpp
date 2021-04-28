@@ -1,5 +1,9 @@
 
 #include "shaderapidx11.h"
+#include "dx11global.h"
+
+#include "shaderdevicedx11.h"
+#include "ishaderdevicemgrdx11.h"
 
 static CShaderAPIDX11 s_ShaderAPIDX11;
 CShaderAPIDX11 *g_pShaderAPIDX11 = &s_ShaderAPIDX11;
@@ -11,6 +15,8 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IDebugTextureInfoDX11,
 	DEBUG_TEXTURE_INFO_VERSION, s_ShaderAPIDX11)
 
 IShaderAPIDX11 *g_pShaderAPI = g_pShaderAPIDX11;
+
+extern CShaderDeviceDX11* g_pShaderDeviceDX11;
 
 // ------------------------------------------------------- //
 //                       IShaderAPI                        //
@@ -592,8 +598,7 @@ void CShaderAPIDX11::SetRasterState(const ShaderRasterState_t& state)
 // Sets the mode...
 bool CShaderAPIDX11::SetMode(void* hwnd, int nAdapter, const ShaderDeviceInfo_t &info)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	return g_pShaderDeviceMgr->SetMode(hwnd, nAdapter, info) != NULL;
 }
 
 
@@ -1078,8 +1083,7 @@ void CShaderAPIDX11::SceneFogMode(MaterialFogMode_t fogMode)
 // Can we download textures?
 bool CShaderAPIDX11::CanDownloadTextures() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	return g_pShaderDeviceDX11->IsActivated();
 }
 
 

@@ -7,6 +7,8 @@ CShaderShadowDX11 *g_pShaderShadowDX11 = &s_ShaderShadowDX11;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderShadowDX11, IShaderShadowDX11,
 	SHADERSHADOW_INTERFACE_VERSION, s_ShaderShadowDX11)
 
+IShaderShadowDX11* g_pShaderShadow = g_pShaderShadowDX11;
+
 // Sets the default *shadow* state
 void CShaderShadowDX11::SetDefaultState()
 {

@@ -1,6 +1,9 @@
 
 #include "shaderdevicedx11.h"
+#include "dx11global.h"
+
 #include "meshdx11.h"
+#include "shaderdevicemgrdx11.h"
 
 static CShaderDeviceDX11 s_ShaderDeviceDX11;
 CShaderDeviceDX11 *g_pShaderDeviceDX11 = &s_ShaderDeviceDX11;
@@ -9,6 +12,82 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceDX11, IShaderDeviceDX11,
 	SHADER_DEVICE_INTERFACE_VERSION, s_ShaderDeviceDX11)
 
 IShaderDeviceDX11 *g_pShaderDevice = g_pShaderDeviceDX11;
+
+
+extern CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11;
+
+CShaderDeviceDX11::CShaderDeviceDX11()
+{
+	m_nAdapter = -1;
+	m_pDXGIOutput = NULL;
+	m_pDXGISwapChain = NULL;
+	m_pD3DDevice = NULL;
+	m_pD3DDeviceContext = NULL;
+
+	m_bDeviceInitialized = false;
+}
+
+bool CShaderDeviceDX11::Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t mode)
+{
+	if (m_bDeviceInitialized) 
+		return false;
+
+	IDXGIAdapter *pAdapter = g_pShaderDeviceMgrDX11->GetAdapter(nAdapter);
+	if (!pAdapter)
+		return false;
+
+	m_pDXGIOutput = g_pShaderDeviceMgrDX11->GetAdapterOutput(nAdapter);
+	if (!m_pDXGIOutput)
+		return false;
+	m_pDXGIOutput->AddRef();
+
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	V_memset(&swapChainDesc, 0, sizeof(swapChainDesc));
+
+	swapChainDesc.BufferDesc.Width = mode.m_DisplayMode.m_nWidth;
+	swapChainDesc.BufferDesc.Height = mode.m_DisplayMode.m_nHeight;
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB; // May need to change
+	swapChainDesc.BufferDesc.RefreshRate.Denominator = mode.m_DisplayMode.m_nRefreshRateDenominator;
+	swapChainDesc.BufferDesc.RefreshRate.Numerator = mode.m_DisplayMode.m_nRefreshRateNumerator;
+
+	swapChainDesc.SampleDesc.Count = max(mode.m_nAASamples, 1);
+	swapChainDesc.SampleDesc.Quality = mode.m_nAAQuality;
+
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
+
+	swapChainDesc.BufferCount = mode.m_nBackBufferCount;
+
+	swapChainDesc.OutputWindow = (HWND)hWnd;
+
+	swapChainDesc.Windowed = mode.m_bWindowed;
+
+	swapChainDesc.SwapEffect = mode.m_nBackBufferCount > 1 ? DXGI_SWAP_EFFECT_SEQUENTIAL : DXGI_SWAP_EFFECT_DISCARD;
+
+	swapChainDesc.Flags = mode.m_bWindowed ? 0 : DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+	HRESULT hr = D3D11CreateDeviceAndSwapChain(pAdapter, D3D_DRIVER_TYPE_UNKNOWN, NULL, 0, NULL, 0, D3D11_SDK_VERSION,
+		&swapChainDesc, &m_pDXGISwapChain, &m_pD3DDevice, NULL, &m_pD3DDeviceContext);
+	if (FAILED(hr))
+		return false;
+
+	m_nAdapter = nAdapter;
+
+	m_bDeviceInitialized = true;
+	return true;
+}
+
+void CShaderDeviceDX11::Shutdown()
+{
+	if (!m_bDeviceInitialized) return;
+
+	m_nAdapter = -1;
+	m_pDXGIOutput = NULL;
+	m_pDXGISwapChain = NULL;
+	m_pD3DDevice = NULL;
+	m_pD3DDeviceContext = NULL;
+
+	m_bDeviceInitialized = false;
+}
 
 // Releases/reloads resources when other apps want some memory
 void CShaderDeviceDX11::ReleaseResources()
@@ -38,16 +117,14 @@ void CShaderDeviceDX11::GetBackBufferDimensions(int& width, int& height) const
 // Returns the current adapter in use
 int CShaderDeviceDX11::GetCurrentAdapter() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return -1;
+	return m_nAdapter;
 }
 
 
 // Are we using graphics?
 bool CShaderDeviceDX11::IsUsingGraphics() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	return m_bDeviceInitialized;
 }
 
 
@@ -161,37 +238,37 @@ void CShaderDeviceDX11::DestroyPixelShader(PixelShaderHandle_t hShader)
 // Utility methods to make shader creation simpler
 // NOTE: For the utlbuffer version, use a binary buffer for a compiled shader
 // and a text buffer for a source-code (.fxc) shader
-VertexShaderHandle_t CreateVertexShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
+VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
 }
 
-VertexShaderHandle_t CreateVertexShader(CUtlBuffer &buf, const char *pShaderVersion = NULL)
+VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(CUtlBuffer &buf, const char *pShaderVersion)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
 }
 
-GeometryShaderHandle_t CreateGeometryShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
+GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
 }
 
-GeometryShaderHandle_t CreateGeometryShader(CUtlBuffer &buf, const char *pShaderVersion)
+GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(CUtlBuffer &buf, const char *pShaderVersion)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
 }
 
-PixelShaderHandle_t CreatePixelShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
+PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
 }
 
-PixelShaderHandle_t CreatePixelShader(CUtlBuffer &buf, const char *pShaderVersion)
+PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(CUtlBuffer &buf, const char *pShaderVersion)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
@@ -279,4 +356,9 @@ char *CShaderDeviceDX11::GetDisplayDeviceName()
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
+}
+
+bool CShaderDeviceDX11::IsActivated() const
+{
+	return m_bDeviceInitialized;
 }

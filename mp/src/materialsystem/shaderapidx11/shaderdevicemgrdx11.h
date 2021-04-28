@@ -6,6 +6,11 @@
 #endif
 
 #include "ishaderdevicemgrdx11.h"
+#include "hardwareconfigdx11.h"
+
+#include "tier1.h"
+
+#include <d3d11.h>
 
 class CShaderDeviceMgrDX11 : public IShaderDeviceMgrDX11
 {
@@ -53,6 +58,18 @@ public:
 	// Installs a callback to get called 
 	virtual void AddModeChangeCallback(ShaderModeChangeCallbackFunc_t func);
 	virtual void RemoveModeChangeCallback(ShaderModeChangeCallbackFunc_t func);
+public:
+
+	IDXGIAdapter *GetAdapter(int nAdapter) const;
+	IDXGIOutput *GetAdapterOutput(int nAdapter) const;
+
+private:
+	bool PopulateHWInfo(HWInfo_t *pHWInfo, IDXGIAdapter *pAdapter, IDXGIOutput *pOutput);
+
+	int m_nAdapter;
+	CUtlVector<HWInfo_t> m_vAdapterInfo;
+
+	IDXGIFactory *m_pDXGIFactory;
 };
 
 #endif
