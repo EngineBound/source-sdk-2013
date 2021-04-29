@@ -37,6 +37,7 @@ $Project "ShaderApiDX11 (DML)"
 	$Folder "Source Files"
 	{
         $File	"dx11global.h"
+        $File	"statesdx11.h"
         
         $File	"ishaderapidx11.h"
         $File	"ishaderdevicedx11.h"

@@ -6,10 +6,13 @@
 #endif
 
 #include "ishaderapidx11.h"
+#include "statesdx11.h"
 
 class CShaderAPIDX11 : public IShaderAPIDX11, public IDebugTextureInfoDX11
 {
 public:
+	CShaderAPIDX11();
+
 	// ------------------------------------------------------- //
 	//                       IShaderAPI                        //
 	// ------------------------------------------------------- //
@@ -663,6 +666,12 @@ public:
 	// used during a frame. Returns the old state of debug texture rendering flag to use
 	// it for restoring the mode.
 	virtual bool SetDebugTextureRendering(bool bEnable);
+private:
+	MaterialMatrixMode_t m_MatrixMode;
+	DirectX::XMMATRIX *m_pCurMatrix;
+
+	DynamicStateDX11 m_DynamicState;
+	ShaderStateDX11 m_ShaderState;
 };
 
 #endif

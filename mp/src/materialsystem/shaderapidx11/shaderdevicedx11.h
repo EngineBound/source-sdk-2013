@@ -110,6 +110,10 @@ public:
 	virtual char *GetDisplayDeviceName();
 
 	virtual bool IsActivated() const;
+public:
+
+	ID3D11DeviceContext* GetDeviceContext() const;
+
 private:
 	bool m_bDeviceInitialized;
 	int m_nAdapter;

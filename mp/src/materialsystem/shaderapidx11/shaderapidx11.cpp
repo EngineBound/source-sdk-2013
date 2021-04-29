@@ -4,6 +4,7 @@
 
 #include "shaderdevicedx11.h"
 #include "ishaderdevicemgrdx11.h"
+#include "ishaderutil.h"
 
 static CShaderAPIDX11 s_ShaderAPIDX11;
 CShaderAPIDX11 *g_pShaderAPIDX11 = &s_ShaderAPIDX11;
@@ -18,6 +19,15 @@ IShaderAPIDX11 *g_pShaderAPI = g_pShaderAPIDX11;
 
 extern CShaderDeviceDX11* g_pShaderDeviceDX11;
 
+CShaderAPIDX11::CShaderAPIDX11()
+{
+	m_MatrixMode = MATERIAL_VIEW;
+	m_DynamicState = DynamicStateDX11();
+	m_ShaderState = ShaderStateDX11();
+
+	m_pCurMatrix = &m_ShaderState.m_MatrixStacks[m_MatrixMode].Top();
+}
+
 // ------------------------------------------------------- //
 //                       IShaderAPI                        //
 // ------------------------------------------------------- //
@@ -25,28 +35,64 @@ extern CShaderDeviceDX11* g_pShaderDeviceDX11;
 // Viewport methods
 void CShaderAPIDX11::SetViewports(int nCount, const ShaderViewport_t* pViewports)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	nCount = min(nCount, MAX_DX11_VIEWPORTS);
+
+	for (int i = 0; i < nCount; ++i)
+	{
+		Assert(pViewports[i].m_nVersion == SHADER_VIEWPORT_VERSION);
+
+		m_DynamicState.m_pViewports[i].Width = pViewports->m_nWidth;
+		m_DynamicState.m_pViewports[i].Height = pViewports->m_nHeight;
+		
+		m_DynamicState.m_pViewports[i].MinDepth = pViewports->m_flMinZ;
+		m_DynamicState.m_pViewports[i].MaxDepth = pViewports->m_flMaxZ;
+
+		m_DynamicState.m_pViewports[i].TopLeftX = pViewports->m_nTopLeftX;
+		m_DynamicState.m_pViewports[i].TopLeftY = pViewports->m_nTopLeftY;
+	}
+
+	m_DynamicState.m_nViewportCount = nCount;
+
+	// May be better to do this only on each draw if needed
+	g_pShaderDeviceDX11->GetDeviceContext()->RSSetViewports(nCount, m_DynamicState.m_pViewports);
 }
 
 int CShaderAPIDX11::GetViewports(ShaderViewport_t* pViewports, int nMax) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return -1;
+	if (!pViewports)
+		return 0;
+
+	int nCount = min(m_DynamicState.m_nViewportCount, nMax);
+	for (int i = 0; i < nCount; ++i)
+	{
+		pViewports[i].m_nVersion = SHADER_VIEWPORT_VERSION;
+
+		pViewports[i].m_nWidth = m_DynamicState.m_pViewports[i].Width;
+		pViewports[i].m_nHeight = m_DynamicState.m_pViewports[i].Height;
+
+		pViewports->m_flMinZ = m_DynamicState.m_pViewports[i].MinDepth;
+		pViewports->m_flMaxZ = m_DynamicState.m_pViewports[i].MaxDepth;
+
+		pViewports->m_nTopLeftX = m_DynamicState.m_pViewports[i].TopLeftX;
+		pViewports->m_nTopLeftY = m_DynamicState.m_pViewports[i].TopLeftY;
+	}
+
+	return nCount;
 }
 
 
 // returns the current time in seconds....
 double CShaderAPIDX11::CurrentTime() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return -1.0;
+	// Why is this a shaderapi function???
+	return Sys_FloatTime();
 }
 
 
 // Gets the lightmap dimensions
 void CShaderAPIDX11::GetLightmapDimensions(int *w, int *h)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	g_pShaderUtil->GetLightmapDimensions(w, h);
 }
 
 
@@ -67,57 +113,86 @@ void CShaderAPIDX11::GetSceneFogColor(unsigned char *rgb)
 // stuff related to matrix stacks
 void CShaderAPIDX11::MatrixMode(MaterialMatrixMode_t matrixMode)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_MatrixMode = matrixMode;
+	m_pCurMatrix = &m_ShaderState.m_MatrixStacks[m_MatrixMode].Top();
 }
 
 void CShaderAPIDX11::PushMatrix()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	CUtlStack<DirectX::XMMATRIX> &matStack = m_ShaderState.m_MatrixStacks[m_MatrixMode];
+	int nNewInd = matStack.Push();
+	matStack[nNewInd] = matStack[nNewInd - 1];
+
+	m_pCurMatrix = &m_ShaderState.m_MatrixStacks[m_MatrixMode].Top();
 }
 
 void CShaderAPIDX11::PopMatrix()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_ShaderState.m_MatrixStacks[m_MatrixMode].Pop();
+
+	m_pCurMatrix = &m_ShaderState.m_MatrixStacks[m_MatrixMode].Top();
 }
 
 void CShaderAPIDX11::LoadMatrix(float *m)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	DirectX::XMFLOAT4X4 inMat(m);
+	*m_pCurMatrix = DirectX::XMLoadFloat4x4(&inMat);
 }
 
 void CShaderAPIDX11::MultMatrix(float *m)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	DirectX::XMFLOAT4X4 inMat(m);
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(*m_pCurMatrix, DirectX::XMLoadFloat4x4(&inMat));
 }
 
 void CShaderAPIDX11::MultMatrixLocal(float *m)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	DirectX::XMFLOAT4X4 inMat(m);
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&inMat), *m_pCurMatrix);
 }
 
 void CShaderAPIDX11::GetMatrix(MaterialMatrixMode_t matrixMode, float *dst)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	DirectX::XMFLOAT4X4 tmpMat;
+	DirectX::XMStoreFloat4x4(&tmpMat, *m_pCurMatrix);
+	V_memcpy(dst, &tmpMat, sizeof(DirectX::XMFLOAT4X4));
 }
 
 void CShaderAPIDX11::LoadIdentity(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	*m_pCurMatrix = DirectX::XMMatrixIdentity();
 }
 
 void CShaderAPIDX11::LoadCameraToWorld(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	// C2W = inv view - translation
+
+	DirectX::XMMATRIX invView = DirectX::XMMatrixInverse(NULL, m_ShaderState.m_MatrixStacks[MATERIAL_VIEW].Top());
+
+	DirectX::XMFLOAT4X4 tmpMat;
+	DirectX::XMStoreFloat4x4(&tmpMat, invView);
+
+	tmpMat.m[3][0] = tmpMat.m[3][1] = tmpMat.m[3][2] = 0.f;
+	invView = DirectX::XMLoadFloat4x4(&tmpMat);
+
+	*m_pCurMatrix = invView;
+
 }
 
 void CShaderAPIDX11::Ortho(double left, double right, double bottom, double top, double zNear, double zFar)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	DirectX::XMMATRIX orthoMat = DirectX::XMMatrixOrthographicOffCenterRH(left, right, bottom, top, zNear, zFar);
+
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(orthoMat, *m_pCurMatrix);
 }
 
 void CShaderAPIDX11::PerspectiveX(double fovx, double aspect, double zNear, double zFar)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	float width = 2 * zNear * tan(fovx * M_PI / 360.0);
+	float height = width / aspect;
+
+	DirectX::XMMATRIX perspMat = DirectX::XMMatrixPerspectiveRH(width, height, zNear, zFar);
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(perspMat, *m_pCurMatrix);
 }
 
 void CShaderAPIDX11::PickMatrix(int x, int y, int width, int height)
@@ -127,22 +202,25 @@ void CShaderAPIDX11::PickMatrix(int x, int y, int width, int height)
 
 void CShaderAPIDX11::Rotate(float angle, float x, float y, float z)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	DirectX::XMVECTOR rotAxis;
+	rotAxis = DirectX::XMVectorSet(x, y, z, 0);
+
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationAxis(rotAxis, angle * M_PI / 180.0), *m_pCurMatrix);
 }
 
 void CShaderAPIDX11::Translate(float x, float y, float z)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslation(x, y, z), *m_pCurMatrix);
 }
 
 void CShaderAPIDX11::Scale(float x, float y, float z)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(x, y, z), *m_pCurMatrix);
 }
 
 void CShaderAPIDX11::ScaleXY(float x, float y)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(x, y, 1.f), *m_pCurMatrix);
 }
 
 
@@ -267,7 +345,7 @@ void CShaderAPIDX11::SetPixelShaderIndex(int pshIndex)
 // Get the dimensions of the back buffer.
 void CShaderAPIDX11::GetBackBufferDimensions(int& width, int& height) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	g_pShaderDevice->GetBackBufferDimensions(width, height);
 }
 
 

@@ -4,6 +4,7 @@
 
 #include "meshdx11.h"
 #include "shaderdevicemgrdx11.h"
+#include "shaderapidx11.h"
 
 static CShaderDeviceDX11 s_ShaderDeviceDX11;
 CShaderDeviceDX11 *g_pShaderDeviceDX11 = &s_ShaderDeviceDX11;
@@ -104,13 +105,16 @@ void CShaderDeviceDX11::ReacquireResources()
 // returns the backbuffer format and dimensions
 ImageFormat CShaderDeviceDX11::GetBackBufferFormat() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return IMAGE_FORMAT_UNKNOWN;
+	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	return IMAGE_FORMAT_RGB888;
 }
 
 void CShaderDeviceDX11::GetBackBufferDimensions(int& width, int& height) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	DXGI_SWAP_CHAIN_DESC swapDesc;
+	m_pDXGISwapChain->GetDesc(&swapDesc);
+	height = swapDesc.BufferDesc.Height;
+	width = swapDesc.BufferDesc.Width;
 }
 
 
@@ -361,4 +365,9 @@ char *CShaderDeviceDX11::GetDisplayDeviceName()
 bool CShaderDeviceDX11::IsActivated() const
 {
 	return m_bDeviceInitialized;
+}
+
+ID3D11DeviceContext* CShaderDeviceDX11::GetDeviceContext() const
+{
+	return m_pD3DDeviceContext;
 }
