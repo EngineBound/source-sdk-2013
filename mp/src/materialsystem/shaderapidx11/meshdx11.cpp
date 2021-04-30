@@ -250,6 +250,8 @@ bool CVertexBufferDX11::CreateBuffer()
 
 	m_nBufferPosition = 0;
 
+	m_bIsLocked = false;
+
 	return !FAILED(hr);
 }
 
@@ -302,6 +304,7 @@ int CVertexBufferDX11::GetRoomRemaining() const
 bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 {
 	// DYNAMIC ONLY for now
+	Assert(!m_bIsLocked);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -331,18 +334,22 @@ bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 		desc.m_nFirstVertex = m_nBufferPosition / m_nVertexSize;
 	desc.m_nOffset = m_nBufferPosition;
 
+	m_bIsLocked = true;
 	return true;
 }
 
 void CVertexBufferDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 {
 	// DYNAMIC ONLY for now
+	if (!m_bIsLocked) return;
 
 	Assert(nVertexCount <= m_nVertexCount);
 
 	g_pShaderDeviceDX11->UnmapD3DResource(m_pD3DBuffer, 0);
 
 	m_nBufferPosition += nVertexCount * m_nVertexSize;
+
+	m_bIsLocked = false;
 }
 
 
@@ -375,6 +382,8 @@ CIndexBufferDX11::CIndexBufferDX11(ShaderBufferType_t type, MaterialIndexFormat_
 	m_nIndexSize = SizeForIndex(fmt);
 	m_nBufferSize = m_nIndexSize * m_nIndexCount;
 	m_nBufferPosition = 0;
+
+	m_bIsLocked = false;
 }
 
 CIndexBufferDX11::~CIndexBufferDX11()
@@ -458,6 +467,7 @@ int CIndexBufferDX11::GetRoomRemaining() const
 bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 {
 	// DYNAMIC ONLY for now
+	Assert(!m_bIsLocked);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -486,18 +496,22 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 	desc.m_nIndexSize = m_nIndexSize;
 	desc.m_pIndices = (unsigned short *)mappedResource.pData + m_nBufferPosition;
 
+	m_bIsLocked = true;
 	return true;
 }
 
 void CIndexBufferDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 {
 	// DYNAMIC ONLY for now
+	if (!m_bIsLocked) return;
 
 	Assert(nWrittenIndexCount <= m_nIndexCount); // probably incorrect :)
 
 	g_pShaderDeviceDX11->UnmapD3DResource(m_pD3DBuffer, 0);
 
 	m_nBufferPosition += nWrittenIndexCount * m_nIndexSize;
+
+	m_bIsLocked = false;
 }
 
 
@@ -774,7 +788,8 @@ void CMeshDX11::ModifyEnd(MeshDesc_t& desc)
 
 void CMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pVertexBufferDX11->Unlock(nVertexCount, desc);
+	m_pIndexBufferDX11->Unlock(nIndexCount, desc);
 }
 
 

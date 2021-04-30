@@ -54,6 +54,8 @@ private:
 	size_t m_nBufferSize;
 	size_t m_nBufferPosition;
 
+	bool m_bIsLocked;
+
 	//unsigned char* m_VertBuffer;
 
 	ID3D11Buffer *m_pD3DBuffer;
@@ -109,6 +111,8 @@ private:
 	int m_nIndexSize;
 	size_t m_nBufferSize;
 	size_t m_nBufferPosition;
+
+	bool m_bIsLocked;
 
 	ID3D11Buffer *m_pD3DBuffer;
 };
