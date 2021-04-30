@@ -207,19 +207,24 @@ CVertexBufferDX11::CVertexBufferDX11(ShaderBufferType_t type, VertexFormat_t fmt
 	Assert(nVertexCount != 0);
 
 	m_bIsDynamic = IsDynamicBufferType(type);
-	m_nVertexCount = nVertexCount;
+	m_nVertexCount = (fmt == VERTEX_FORMAT_UNKNOWN) ? 0 : nVertexCount;
 	m_VertexFormat = fmt;
 
 	VertexDesc_t tmpDesc;
 	ComputeVertexDesc(0, fmt, tmpDesc);
 
 	m_nVertexSize = tmpDesc.m_ActualVertexSize;
-	m_nBufferSize = m_nVertexSize * m_nVertexCount;
+	m_nBufferSize = (fmt == VERTEX_FORMAT_UNKNOWN) ? nVertexCount : m_nVertexSize * m_nVertexCount;
+	m_nBufferPosition = 0;
+
+	//m_VertBuffer = (unsigned char*)malloc(m_nBufferSize);
 }
 
 CVertexBufferDX11::~CVertexBufferDX11()
 {
 	DestroyBuffer();
+
+	//free(m_VertBuffer);
 }
 
 bool CVertexBufferDX11::CreateBuffer()
@@ -242,6 +247,8 @@ bool CVertexBufferDX11::CreateBuffer()
 
 	HRESULT hr = g_pShaderDeviceDX11->CreateD3DBuffer(&bufferDesc, &m_pD3DBuffer);
 	Assert(!FAILED(hr));
+
+	m_nBufferPosition = 0;
 
 	return !FAILED(hr);
 }
@@ -294,13 +301,48 @@ int CVertexBufferDX11::GetRoomRemaining() const
 
 bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	// DYNAMIC ONLY for now
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+	D3D11_MAP map = D3D11_MAP_WRITE_NO_OVERWRITE;
+	if (!bAppend || GetRoomRemaining() < nVertexCount * m_nVertexSize)
+	{
+		map = D3D11_MAP_WRITE_DISCARD;
+		m_nBufferPosition = 0;
+	}
+
+	// ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	HRESULT hr = g_pShaderDeviceDX11->MapD3DResource(m_pD3DBuffer, 0, bAppend ? D3D11_MAP_WRITE_NO_OVERWRITE : D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(hr))
+	{
+		Assert(0);
+		ComputeVertexDesc(0, 0, desc);
+		desc.m_nFirstVertex = 0;
+		desc.m_nOffset = 0;
+
+		return false;
+	}
+
+	ComputeVertexDesc((unsigned char *)mappedResource.pData + m_nBufferPosition, m_VertexFormat, desc);
+	if (m_nBufferPosition == 0)
+		desc.m_nFirstVertex = 0;
+	else
+		desc.m_nFirstVertex = m_nBufferPosition / m_nVertexSize;
+	desc.m_nOffset = m_nBufferPosition;
+
+	return true;
 }
 
 void CVertexBufferDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	// DYNAMIC ONLY for now
+
+	Assert(nVertexCount <= m_nVertexCount);
+
+	g_pShaderDeviceDX11->UnmapD3DResource(m_pD3DBuffer, 0);
+
+	m_nBufferPosition += nVertexCount * m_nVertexSize;
 }
 
 
@@ -332,6 +374,7 @@ CIndexBufferDX11::CIndexBufferDX11(ShaderBufferType_t type, MaterialIndexFormat_
 
 	m_nIndexSize = SizeForIndex(fmt);
 	m_nBufferSize = m_nIndexSize * m_nIndexCount;
+	m_nBufferPosition = 0;
 }
 
 CIndexBufferDX11::~CIndexBufferDX11()
@@ -359,6 +402,8 @@ bool CIndexBufferDX11::CreateBuffer()
 
 	HRESULT hr = g_pShaderDeviceDX11->CreateD3DBuffer(&bufferDesc, &m_pD3DBuffer);
 	Assert(!FAILED(hr));
+
+	m_nBufferPosition = 0;
 
 	return !FAILED(hr);
 }
@@ -412,13 +457,47 @@ int CIndexBufferDX11::GetRoomRemaining() const
 // Locks, unlocks the index buffer
 bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	// DYNAMIC ONLY for now
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+	D3D11_MAP map = D3D11_MAP_WRITE_NO_OVERWRITE;
+	if (!bAppend || GetRoomRemaining() < nMaxIndexCount * m_nIndexSize)
+	{
+		map = D3D11_MAP_WRITE_DISCARD;
+		m_nBufferPosition = 0;
+	}
+
+	// ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	HRESULT hr = g_pShaderDeviceDX11->MapD3DResource(m_pD3DBuffer, 0, bAppend ? D3D11_MAP_WRITE_NO_OVERWRITE : D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(hr))
+	{
+		Assert(0);
+		desc.m_nFirstIndex = 0;
+		desc.m_nOffset = 0;
+		desc.m_nIndexSize = 0;
+		desc.m_pIndices = NULL;
+
+		return false;
+	}
+
+	desc.m_nFirstIndex = m_nBufferPosition / m_nIndexSize;
+	desc.m_nOffset = m_nBufferPosition;
+	desc.m_nIndexSize = m_nIndexSize;
+	desc.m_pIndices = (unsigned short *)mappedResource.pData + m_nBufferPosition;
+
+	return true;
 }
 
 void CIndexBufferDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	// DYNAMIC ONLY for now
+
+	Assert(nWrittenIndexCount <= m_nIndexCount); // probably incorrect :)
+
+	g_pShaderDeviceDX11->UnmapD3DResource(m_pD3DBuffer, 0);
+
+	m_nBufferPosition += nWrittenIndexCount * m_nIndexSize;
 }
 
 
@@ -678,7 +757,9 @@ void CMeshDX11::ValidateData(int nVertexCount, int nIndexCount, const MeshDesc_t
 // nIndexCount of -1 means don't lock the index buffer...
 void CMeshDX11::LockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pVertexBufferDX11->Lock(nVertexCount, false, desc);
+	if (nIndexCount > -1)
+		m_pIndexBufferDX11->Lock(nIndexCount, false, desc);
 }
 
 void CMeshDX11::ModifyBegin(int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t& desc)

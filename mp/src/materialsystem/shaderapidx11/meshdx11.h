@@ -52,6 +52,9 @@ private:
 
 	int m_nVertexSize;
 	size_t m_nBufferSize;
+	size_t m_nBufferPosition;
+
+	//unsigned char* m_VertBuffer;
 
 	ID3D11Buffer *m_pD3DBuffer;
 };
@@ -105,6 +108,7 @@ private:
 
 	int m_nIndexSize;
 	size_t m_nBufferSize;
+	size_t m_nBufferPosition;
 
 	ID3D11Buffer *m_pD3DBuffer;
 };

@@ -66,7 +66,13 @@ bool CShaderDeviceDX11::Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t 
 
 	swapChainDesc.Flags = mode.m_bWindowed ? 0 : DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	HRESULT hr = D3D11CreateDeviceAndSwapChain(pAdapter, D3D_DRIVER_TYPE_UNKNOWN, NULL, 0, NULL, 0, D3D11_SDK_VERSION,
+	UINT deviceFlags = 0;
+
+#ifdef _DEBUG
+	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+	HRESULT hr = D3D11CreateDeviceAndSwapChain(pAdapter, D3D_DRIVER_TYPE_UNKNOWN, NULL, deviceFlags, NULL, 0, D3D11_SDK_VERSION,
 		&swapChainDesc, &m_pDXGISwapChain, &m_pD3DDevice, NULL, &m_pD3DDeviceContext);
 	if (FAILED(hr))
 		return false;
@@ -298,13 +304,6 @@ IVertexBuffer *CShaderDeviceDX11::CreateVertexBuffer(ShaderBufferType_t type, Ve
 	return NULL;
 }
 
-HRESULT CShaderDeviceDX11::CreateD3DBuffer(D3D11_BUFFER_DESC *pDesc, ID3D11Buffer **pOutBuffer)
-{
-	Assert(m_bDeviceInitialized);
-
-	return m_pD3DDevice->CreateBuffer(pDesc, NULL, pOutBuffer);
-}
-
 void CShaderDeviceDX11::DestroyVertexBuffer(IVertexBuffer *pVertexBuffer)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
@@ -320,6 +319,27 @@ IIndexBuffer *CShaderDeviceDX11::CreateIndexBuffer(ShaderBufferType_t bufferType
 void CShaderDeviceDX11::DestroyIndexBuffer(IIndexBuffer *pIndexBuffer)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+}
+
+HRESULT CShaderDeviceDX11::CreateD3DBuffer(D3D11_BUFFER_DESC *pDesc, ID3D11Buffer **pOutBuffer)
+{
+	Assert(m_bDeviceInitialized);
+
+	return m_pD3DDevice->CreateBuffer(pDesc, NULL, pOutBuffer);
+}
+
+HRESULT CShaderDeviceDX11::MapD3DResource(ID3D11Resource *pResource, UINT Subresource, D3D11_MAP MapType, UINT MapFlags, D3D11_MAPPED_SUBRESOURCE *pMappedResource)
+{
+	Assert(m_bDeviceInitialized);
+
+	return m_pD3DDeviceContext->Map(pResource, Subresource, MapType, MapFlags, pMappedResource);
+}
+
+void CShaderDeviceDX11::UnmapD3DResource(ID3D11Resource *pResource, UINT Subresource)
+{
+	Assert(m_bDeviceInitialized);
+
+	return m_pD3DDeviceContext->Unmap(pResource, Subresource);
 }
 
 
