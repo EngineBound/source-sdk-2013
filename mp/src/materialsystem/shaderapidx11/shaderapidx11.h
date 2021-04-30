@@ -8,10 +8,13 @@
 #include "ishaderapidx11.h"
 #include "statesdx11.h"
 
+class IMeshDX11;
+
 class CShaderAPIDX11 : public IShaderAPIDX11, public IDebugTextureInfoDX11
 {
 public:
 	CShaderAPIDX11();
+	~CShaderAPIDX11();
 
 	// ------------------------------------------------------- //
 	//                       IShaderAPI                        //
@@ -672,6 +675,8 @@ private:
 
 	DynamicStateDX11 m_DynamicState;
 	ShaderStateDX11 m_ShaderState;
+
+	IMeshDX11 *m_pDynamicMesh;
 };
 
 #endif

@@ -4,6 +4,7 @@
 
 #include "shaderdevicedx11.h"
 #include "ishaderdevicemgrdx11.h"
+#include "meshdx11.h"
 #include "ishaderutil.h"
 
 static CShaderAPIDX11 s_ShaderAPIDX11;
@@ -26,6 +27,14 @@ CShaderAPIDX11::CShaderAPIDX11()
 	m_ShaderState = ShaderStateDX11();
 
 	m_pCurMatrix = &m_ShaderState.m_MatrixStacks[m_MatrixMode].Top();
+	
+	m_pDynamicMesh = NULL;
+}
+
+CShaderAPIDX11::~CShaderAPIDX11()
+{
+	if (m_pDynamicMesh)
+		delete m_pDynamicMesh;
 }
 
 // ------------------------------------------------------- //
@@ -736,15 +745,23 @@ void CShaderAPIDX11::FlushBufferedPrimitives()
 IMesh* CShaderAPIDX11::GetDynamicMesh(IMaterial* pMaterial, int nHWSkinBoneCount, bool bBuffered,
 	IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+
+	if (!m_pDynamicMesh)
+		m_pDynamicMesh = new CMeshDX11(true);
+
+	return m_pDynamicMesh;
 }
 
 IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t vertexFormat, int nHWSkinBoneCount,
 	bool bBuffered, IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+
+	if (!m_pDynamicMesh)
+		m_pDynamicMesh = new CMeshDX11(true);
+
+	return m_pDynamicMesh;
 }
 
 

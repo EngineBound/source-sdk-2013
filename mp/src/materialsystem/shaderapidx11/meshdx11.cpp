@@ -1,30 +1,273 @@
 
+#include "dx11global.h"
+#include "shaderdevicedx11.h"
+
 #include "meshdx11.h"
+
+inline void ComputeVertexDesc(unsigned char *pBuffer, VertexFormat_t vertexFormat, VertexDesc_t &desc)
+{
+	// Static vertex data so meshbuilder can write to nothing
+	static ALIGN32 ModelVertexDX8_t dummyVerts[4];
+	float *dummyData = (float *)&dummyVerts;
+
+	int *pVertexSizePtrs[64];
+	int nVertexSizePtrs = 0;
+
+	VertexCompressionType_t compressionType = CompressionType(vertexFormat);
+	desc.m_CompressionType = compressionType;
+
+	int offset = 0;
+
+	if (vertexFormat & VERTEX_POSITION)
+	{
+		pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_Position;
+		desc.m_pPosition = reinterpret_cast<float *>(pBuffer + offset);
+		offset += GetVertexElementSize(VERTEX_ELEMENT_POSITION, compressionType);
+
+		if (vertexFormat & VERTEX_WRINKLE)
+		{
+			pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_Wrinkle;
+			desc.m_pWrinkle = reinterpret_cast<float *>(pBuffer + offset);
+			offset += GetVertexElementSize(VERTEX_ELEMENT_WRINKLE, compressionType);
+		}
+		else
+		{
+			desc.m_VertexSize_Wrinkle = 0;
+			desc.m_pWrinkle = dummyData;
+		}
+	}
+	else
+	{
+		desc.m_VertexSize_Position = 0;
+		desc.m_pPosition = dummyData;
+
+		desc.m_VertexSize_Wrinkle = 0;
+		desc.m_pWrinkle = dummyData;
+	}
+
+	desc.m_NumBoneWeights = NumBoneWeights(vertexFormat);
+
+	// Only allow 0 or 2, with index flag set respectively
+	Assert(((desc.m_NumBoneWeights == 2) && ((vertexFormat & VERTEX_BONE_INDEX) != 0)) ||
+		((desc.m_NumBoneWeights == 0) && ((vertexFormat & VERTEX_BONE_INDEX) == 0)));
+
+	if (vertexFormat & VERTEX_BONE_INDEX)
+	{
+		if (desc.m_NumBoneWeights > 0)
+		{
+			pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_BoneWeight;
+			desc.m_pBoneWeight = reinterpret_cast<float *>(pBuffer + offset);
+			offset += GetVertexElementSize(VERTEX_ELEMENT_BONEWEIGHTS2, compressionType);
+		}
+		else
+		{
+			desc.m_VertexSize_BoneWeight = 0;
+			desc.m_pBoneWeight = dummyData;
+		}
+
+		pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_BoneMatrixIndex;
+		desc.m_pBoneMatrixIndex = (pBuffer + offset);
+		offset += GetVertexElementSize(VERTEX_ELEMENT_BONEINDEX, compressionType);
+	}
+	else
+	{
+		desc.m_VertexSize_BoneWeight = 0;
+		desc.m_pBoneWeight = dummyData;
+
+		desc.m_VertexSize_BoneMatrixIndex = 0;
+		desc.m_pBoneMatrixIndex = (unsigned char *)dummyData;
+	}
+
+	if (vertexFormat & VERTEX_NORMAL)
+	{
+		pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_Normal;
+		desc.m_pNormal = reinterpret_cast<float *>(pBuffer + offset);
+		offset += GetVertexElementSize(VERTEX_ELEMENT_NORMAL, compressionType);
+	}
+	else
+	{
+		desc.m_VertexSize_Normal = 0;
+		desc.m_pNormal = dummyData;
+	}
+
+	if (vertexFormat & VERTEX_COLOR)
+	{
+		pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_Color;
+		desc.m_pColor = (pBuffer + offset);
+		offset += GetVertexElementSize(VERTEX_ELEMENT_COLOR, compressionType);
+	}
+	else
+	{
+		desc.m_VertexSize_Color = 0;
+		desc.m_pColor = (unsigned char *)dummyData;
+	}
+
+	if (vertexFormat & VERTEX_SPECULAR)
+	{
+		pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_Specular;
+		desc.m_pSpecular = (pBuffer + offset);
+		offset += GetVertexElementSize(VERTEX_ELEMENT_SPECULAR, compressionType);
+	}
+	else
+	{
+		desc.m_VertexSize_Specular = 0;
+		desc.m_pSpecular = (unsigned char *)dummyData;
+	}
+
+	for (int i = 0; i < VERTEX_MAX_TEXTURE_COORDINATES; ++i)
+	{
+		int coordSize = TexCoordSize(i, vertexFormat);
+
+		if (coordSize != 0)
+		{
+			pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_TexCoord[i];
+			desc.m_pTexCoord[i] = reinterpret_cast<float*>(pBuffer + offset);
+
+			// VERTEX_ELEMENT_TEXCOORD{coordSize}D_{i}
+			offset += GetVertexElementSize((VertexElement_t)(VERTEX_ELEMENT_TEXCOORD2D_0 +
+				(coordSize - 1) * VERTEX_MAX_TEXTURE_COORDINATES + i), compressionType
+			);
+		}
+		else
+		{
+			desc.m_pTexCoord[i] = dummyData;
+			desc.m_VertexSize_TexCoord[i] = 0;
+		}
+	}
+
+	if (vertexFormat & VERTEX_TANGENT_S)
+	{
+		pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_TangentS;
+		desc.m_pTangentS = reinterpret_cast<float*>(pBuffer + offset);
+		offset += GetVertexElementSize(VERTEX_ELEMENT_TANGENT_S, compressionType);
+	}
+	else
+	{
+		desc.m_VertexSize_TangentS = 0;
+		desc.m_pTangentS = dummyData;
+	}
+
+	if (vertexFormat & VERTEX_TANGENT_T)
+	{
+		pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_TangentT;
+		desc.m_pTangentT = reinterpret_cast<float*>(pBuffer + offset);
+		offset += GetVertexElementSize(VERTEX_ELEMENT_TANGENT_T, compressionType);
+	}
+	else
+	{
+		desc.m_VertexSize_TangentT = 0;
+		desc.m_pTangentT = dummyData;
+	}
+
+	int userDataSize = UserDataSize(vertexFormat);
+	if (userDataSize > 0)
+	{
+		pVertexSizePtrs[nVertexSizePtrs++] = &desc.m_VertexSize_UserData;
+		desc.m_pUserData = reinterpret_cast<float*>(pBuffer + offset);
+		offset += GetVertexElementSize((VertexElement_t)(VERTEX_ELEMENT_USERDATA1 + (userDataSize - 1)), compressionType);
+	}
+	else
+	{
+		desc.m_VertexSize_UserData = 0;
+		desc.m_pUserData = dummyData;
+	}
+
+	// Round up to next 16
+	if ((vertexFormat & VERTEX_FORMAT_USE_EXACT_FORMAT) == 0 && offset > 16)
+		offset = (offset + 0xF) & (~0xF);
+
+	desc.m_ActualVertexSize = offset;
+
+	for (int i = 0; i < nVertexSizePtrs; ++i)
+	{
+		*pVertexSizePtrs[i] = offset;
+	}
+}
+
+inline int SizeForIndex(MaterialIndexFormat_t indexFormat) {
+	switch (indexFormat)
+	{
+	default:
+	case MATERIAL_INDEX_FORMAT_UNKNOWN:
+		return 0;
+	case MATERIAL_INDEX_FORMAT_16BIT:
+		return 2;
+	case MATERIAL_INDEX_FORMAT_32BIT:
+		return 4;
+	}
+}
+
 
 //-------------------------------------------//
 //             CVertexBufferDX11             //
 //-------------------------------------------//
 
+CVertexBufferDX11::CVertexBufferDX11(ShaderBufferType_t type, VertexFormat_t fmt, int nVertexCount, const char *pBudgetGroup)
+{
+	Assert(nVertexCount != 0);
+
+	m_bIsDynamic = IsDynamicBufferType(type);
+	m_nVertexCount = nVertexCount;
+	m_VertexFormat = fmt;
+
+	VertexDesc_t tmpDesc;
+	ComputeVertexDesc(0, fmt, tmpDesc);
+
+	m_nVertexSize = tmpDesc.m_ActualVertexSize;
+	m_nBufferSize = m_nVertexSize * m_nVertexCount;
+}
+
+CVertexBufferDX11::~CVertexBufferDX11()
+{
+	DestroyBuffer();
+}
+
+bool CVertexBufferDX11::CreateBuffer()
+{
+	D3D11_BUFFER_DESC bufferDesc;
+	if (m_bIsDynamic)
+	{
+		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	}
+	else
+	{
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.CPUAccessFlags = 0;
+	}
+
+	bufferDesc.ByteWidth = m_nBufferSize;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.MiscFlags = 0;
+
+	HRESULT hr = g_pShaderDeviceDX11->CreateD3DBuffer(&bufferDesc, &m_pD3DBuffer);
+	Assert(!FAILED(hr));
+
+	return !FAILED(hr);
+}
+
+void CVertexBufferDX11::DestroyBuffer()
+{
+	m_pD3DBuffer->Release();
+}
+
 // NOTE: The following two methods are only valid for static vertex buffers
 // Returns the number of vertices and the format of the vertex buffer
 int CVertexBufferDX11::VertexCount() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return -1;
+	return m_nVertexCount;
 }
 
 VertexFormat_t CVertexBufferDX11::GetVertexFormat() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return VERTEX_FORMAT_UNKNOWN;
+	return m_VertexFormat;
 }
 
 
 // Is this vertex buffer dynamic?
 bool CVertexBufferDX11::IsDynamic() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	return m_bIsDynamic;
 }
 
 
@@ -79,26 +322,69 @@ void CVertexBufferDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc
 //              CIndexBufferDX11             //
 //-------------------------------------------//
 
+CIndexBufferDX11::CIndexBufferDX11(ShaderBufferType_t type, MaterialIndexFormat_t fmt, int nIndexCount, const char *pBudgetGroup)
+{
+	Assert(fmt != MATERIAL_INDEX_FORMAT_UNKNOWN);
+
+	m_bIsDynamic = IsDynamicBufferType(type);
+	m_nIndexCount = nIndexCount;
+	m_IndexFormat = fmt;
+
+	m_nIndexSize = SizeForIndex(fmt);
+	m_nBufferSize = m_nIndexSize * m_nIndexCount;
+}
+
+CIndexBufferDX11::~CIndexBufferDX11()
+{
+	DestroyBuffer();
+}
+
+bool CIndexBufferDX11::CreateBuffer()
+{
+	D3D11_BUFFER_DESC bufferDesc;
+	if (m_bIsDynamic)
+	{
+		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	}
+	else
+	{
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.CPUAccessFlags = 0;
+	}
+
+	bufferDesc.ByteWidth = m_nBufferSize;
+	bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bufferDesc.MiscFlags = 0;
+
+	HRESULT hr = g_pShaderDeviceDX11->CreateD3DBuffer(&bufferDesc, &m_pD3DBuffer);
+	Assert(!FAILED(hr));
+
+	return !FAILED(hr);
+}
+
+void CIndexBufferDX11::DestroyBuffer()
+{
+	m_pD3DBuffer->Release();
+}
+
 // NOTE: The following two methods are only valid for static index buffers
 // Returns the number of indices and the format of the index buffer
 int CIndexBufferDX11::IndexCount() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return -1;
+	return m_nIndexCount;
 }
 
 MaterialIndexFormat_t CIndexBufferDX11::IndexFormat() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return MATERIAL_INDEX_FORMAT_UNKNOWN;
+	return m_IndexFormat;
 }
 
 
 // Is this index buffer dynamic?
 bool CIndexBufferDX11::IsDynamic() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	return m_bIsDynamic;
 }
 
 
@@ -167,11 +453,37 @@ void CIndexBufferDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 //                 CMeshDX11                 //
 //-------------------------------------------//
 
+CMeshDX11::CMeshDX11(bool bIsDynamic)
+{
+	// ONLY WORKS FOR DYNAMIC RIGHT NOW
+
+	m_bIsDynamic = bIsDynamic;
+
+	m_pIndexBufferDX11 = NULL;
+	m_pVertexBufferDX11 = NULL;
+
+	if (m_bIsDynamic)
+	{
+		m_pVertexBufferDX11 = new CVertexBufferDX11(SHADER_BUFFER_TYPE_DYNAMIC, VERTEX_FORMAT_UNKNOWN, DYNAMIC_VERTEX_BUFFER_MEMORY, "");
+		m_pIndexBufferDX11 = new CIndexBufferDX11(SHADER_BUFFER_TYPE_DYNAMIC, MATERIAL_INDEX_FORMAT_16BIT, INDEX_BUFFER_SIZE, "");
+
+		m_pVertexBufferDX11->CreateBuffer();
+		m_pIndexBufferDX11->CreateBuffer();
+	}
+}
+
+CMeshDX11::~CMeshDX11()
+{
+	if (m_pVertexBufferDX11)
+		delete m_pVertexBufferDX11;
+	if (m_pIndexBufferDX11)
+		delete m_pIndexBufferDX11;
+}
+
 // Is the mesh dynamic?
 bool CMeshDX11::IsDynamic() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	return m_bIsDynamic;
 }
 
 
@@ -196,14 +508,12 @@ int CMeshDX11::GetRoomRemaining() const
 // Returns the number of vertices and the format of the vertex buffer
 int CMeshDX11::VertexCount() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return -1;
+	return m_pVertexBufferDX11->VertexCount();
 }
 
 VertexFormat_t CMeshDX11::GetVertexFormat() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return VERTEX_FORMAT_UNKNOWN;
+	return m_pVertexBufferDX11->GetVertexFormat();
 }
 
 
@@ -211,33 +521,32 @@ VertexFormat_t CMeshDX11::GetVertexFormat() const
 // Casts the memory of the dynamic vertex buffer to the appropriate type
 void CMeshDX11::BeginCastBuffer(VertexFormat_t format)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pVertexBufferDX11->BeginCastBuffer(format);
 }
 
 
 bool CMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	return m_pVertexBufferDX11->Lock(nVertexCount, bAppend, desc);
 }
 
 void CMeshDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pVertexBufferDX11->Unlock(nVertexCount, desc);
 }
 
 
 // Spews the mesh data
 void CMeshDX11::Spew(int nVertexCount, const VertexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pVertexBufferDX11->Spew(nVertexCount, desc);
 }
 
 
 // Call this in debug mode to make sure our data is good.
 void CMeshDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pVertexBufferDX11->ValidateData(nVertexCount, desc);
 }
 
 
@@ -247,14 +556,12 @@ void CMeshDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
 // Returns the number of indices and the format of the index buffer
 int CMeshDX11::IndexCount() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return -1;
+	return m_pIndexBufferDX11->IndexCount();
 }
 
 MaterialIndexFormat_t CMeshDX11::IndexFormat() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return MATERIAL_INDEX_FORMAT_UNKNOWN;
+	return m_pIndexBufferDX11->IndexFormat();
 }
 
 
@@ -262,20 +569,19 @@ MaterialIndexFormat_t CMeshDX11::IndexFormat() const
 // Casts the memory of the dynamic index buffer to the appropriate type
 void CMeshDX11::BeginCastBuffer(MaterialIndexFormat_t format)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pIndexBufferDX11->BeginCastBuffer(format);
 }
 
 
 // Locks, unlocks the index buffer
 bool CMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	return m_pIndexBufferDX11->Lock(nMaxIndexCount, bAppend, desc);
 }
 
 void CMeshDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pIndexBufferDX11->Unlock(nWrittenIndexCount, desc);
 }
 
 
@@ -283,26 +589,26 @@ void CMeshDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 // Locks, unlocks the index buffer for modify
 void CMeshDX11::ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount, IndexDesc_t& desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pIndexBufferDX11->ModifyBegin(bReadOnly, nFirstIndex, nIndexCount, desc);
 }
 
 void CMeshDX11::ModifyEnd(IndexDesc_t& desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pIndexBufferDX11->ModifyEnd(desc);
 }
 
 
 // Spews the mesh data
 void CMeshDX11::Spew(int nIndexCount, const IndexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pIndexBufferDX11->Spew(nIndexCount, desc);
 }
 
 
 // Ensures the data in the index buffer is valid
 void CMeshDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_pIndexBufferDX11->ValidateData(nIndexCount, desc);
 }
 
 
@@ -341,7 +647,7 @@ void CMeshDX11::Draw(CPrimList *pLists, int nLists)
 
 
 // Copy verts and/or indices to a mesh builder. This only works for temp meshes!
-void CopyToMeshBuilder(
+void CMeshDX11::CopyToMeshBuilder(
 	int iStartVert,		// Which vertices to copy.
 	int nVerts,
 	int iStartIndex,	// Which indices to copy.
@@ -362,7 +668,8 @@ void CMeshDX11::Spew(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
 // Call this in debug mode to make sure our data is good.
 void CMeshDX11::ValidateData(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ValidateData(nVertexCount, static_cast<const VertexDesc_t &>(desc));
+	ValidateData(nIndexCount, static_cast<const IndexDesc_t &>(desc));
 }
 
 

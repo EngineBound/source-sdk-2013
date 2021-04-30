@@ -298,6 +298,13 @@ IVertexBuffer *CShaderDeviceDX11::CreateVertexBuffer(ShaderBufferType_t type, Ve
 	return NULL;
 }
 
+HRESULT CShaderDeviceDX11::CreateD3DBuffer(D3D11_BUFFER_DESC *pDesc, ID3D11Buffer **pOutBuffer)
+{
+	Assert(m_bDeviceInitialized);
+
+	return m_pD3DDevice->CreateBuffer(pDesc, NULL, pOutBuffer);
+}
+
 void CShaderDeviceDX11::DestroyVertexBuffer(IVertexBuffer *pVertexBuffer)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);

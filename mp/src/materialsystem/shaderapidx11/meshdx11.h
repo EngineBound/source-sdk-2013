@@ -6,9 +6,19 @@
 #endif
 
 #include "imeshdx11.h"
+#include "ishaderdevice.h"
+#include <d3d11.h>
 
 class CVertexBufferDX11 : public IVertexBufferDX11
 {
+public:
+	CVertexBufferDX11(ShaderBufferType_t type, VertexFormat_t fmt, int nVertexCount, const char *pBudgetGroup);
+	~CVertexBufferDX11();
+
+	virtual bool CreateBuffer();
+	virtual void DestroyBuffer();
+
+public:
 	// NOTE: The following two methods are only valid for static vertex buffers
 	// Returns the number of vertices and the format of the vertex buffer
 	virtual int VertexCount() const;
@@ -33,10 +43,29 @@ class CVertexBufferDX11 : public IVertexBufferDX11
 
 	// Call this in debug mode to make sure our data is good.
 	virtual void ValidateData(int nVertexCount, const VertexDesc_t & desc);
+
+private:
+
+	bool m_bIsDynamic;
+	int m_nVertexCount;
+	VertexFormat_t m_VertexFormat;
+
+	int m_nVertexSize;
+	size_t m_nBufferSize;
+
+	ID3D11Buffer *m_pD3DBuffer;
 };
 
 class CIndexBufferDX11 : public IIndexBufferDX11
 {
+public:
+	CIndexBufferDX11(ShaderBufferType_t type, MaterialIndexFormat_t fmt, int nIndexCount, const char *pBudgetGroup);
+	~CIndexBufferDX11();
+
+	virtual bool CreateBuffer();
+	virtual void DestroyBuffer();
+
+public:
 	// NOTE: The following two methods are only valid for static index buffers
 	// Returns the number of indices and the format of the index buffer
 	virtual int IndexCount() const;
@@ -67,10 +96,24 @@ class CIndexBufferDX11 : public IIndexBufferDX11
 
 	// Ensures the data in the index buffer is valid
 	virtual void ValidateData(int nIndexCount, const IndexDesc_t &desc);
+
+private:
+
+	bool m_bIsDynamic;
+	int m_nIndexCount;
+	MaterialIndexFormat_t m_IndexFormat;
+
+	int m_nIndexSize;
+	size_t m_nBufferSize;
+
+	ID3D11Buffer *m_pD3DBuffer;
 };
 
-class CMeshDX11 : public IMeshDX11, public CIndexBufferDX11, public CVertexBufferDX11
+class CMeshDX11 : public IMeshDX11
 {
+public:
+	CMeshDX11(bool bIsDynamic);
+	~CMeshDX11();
 
 	// DX11 Buffer Commons
 public:
@@ -179,6 +222,12 @@ public:
 	virtual void MarkAsDrawn();
 
 	virtual unsigned ComputeMemoryUsed();
+private:
+	bool m_bIsDynamic;
+
+	CVertexBufferDX11 *m_pVertexBufferDX11;
+	CIndexBufferDX11 *m_pIndexBufferDX11;
+
 };
 
 #endif

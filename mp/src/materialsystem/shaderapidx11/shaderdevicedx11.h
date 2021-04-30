@@ -114,6 +114,8 @@ public:
 
 	ID3D11DeviceContext* GetDeviceContext() const;
 
+	HRESULT CreateD3DBuffer(D3D11_BUFFER_DESC *pDesc, ID3D11Buffer **pOutBuffer);
+
 private:
 	bool m_bDeviceInitialized;
 	int m_nAdapter;
