@@ -10,41 +10,78 @@ extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
 CAPITextureDX11::CAPITextureDX11()
 {
 	m_pD3DTexture = NULL;
+	m_pRenderTargetView = NULL;
+
+	m_bIsInitialised = false;
 }
 
 CAPITextureDX11::~CAPITextureDX11()
 {
 	if (m_pD3DTexture)
 		m_pD3DTexture->Release();
+
+	if (m_pRenderTargetView)
+		m_pRenderTargetView->Release();
 }
 
-ID3D11Resource *CAPITextureDX11::InitTexture(int width, int height, int depth, ImageFormat dstImageFormat, int numMipLevels, int numCopies, int flags)
+void CAPITextureDX11::InitTexture(int width, int height, int depth, ImageFormat dstImageFormat, int numMipLevels, int numCopies, int flags)
 {
-	ImageFormat supportedFormat = ResolveToSupportedFormat(dstImageFormat);
-	DXGI_FORMAT dxgiFormat = GetDXGIFormat(supportedFormat);
+	Assert(!m_bIsInitialised);
 
+	m_APIFormat = ResolveToSupportedFormat(dstImageFormat);
+	m_DXGIFormat = GetDXGIFormat(m_APIFormat);
+
+	if (flags & TEXTURE_CREATE_RENDERTARGET)
+	{
+		InitRenderTarget(width, height, NULL, dstImageFormat);
+		return;
+	}
+
+	CreateD3DTexture(width, height, depth, dstImageFormat, numMipLevels, flags);
+
+	m_bIsInitialised = true;
+}
+
+void CAPITextureDX11::Shutdown()
+{
+	if (m_pD3DTexture)
+		m_pD3DTexture->Release();
+
+	if (m_pRenderTargetView)
+		m_pRenderTargetView->Release();
+
+	m_bIsInitialised = false;
+}
+
+ID3D11Texture2D *CAPITextureDX11::CreateD3DTexture(int width, int height, int depth, ImageFormat dstImageFormat, int numMipLevels, int flags)
+{
 	UINT miscFlags = 0;
 	UINT bindFlags = 0;
 	UINT CPUAccessFlags = 0;
 	D3D11_USAGE usage = D3D11_USAGE_DEFAULT;
 
-	if (flags & TEXTURE_CREATE_CUBEMAP)
+	bool bIsCubemap = (flags & TEXTURE_CREATE_CUBEMAP) != 0;
+	bool bIsRenderTarget = (flags & TEXTURE_CREATE_RENDERTARGET) != 0;
+	bool bIsDepthBuffer = (flags & TEXTURE_CREATE_DEPTHBUFFER) != 0;
+	bool bIsDynamic = (flags & TEXTURE_CREATE_DYNAMIC) != 0;
+
+	if (bIsCubemap)
 	{
 		depth = 6;
 		miscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
 	}
 
-	if (flags & TEXTURE_CREATE_RENDERTARGET)
+	if (bIsRenderTarget)
 	{
 		bindFlags |= D3D11_BIND_RENDER_TARGET;
 	}
 
-	if (flags & TEXTURE_CREATE_DEPTHBUFFER)
+	if (bIsDepthBuffer)
 	{
 		bindFlags |= D3D11_BIND_DEPTH_STENCIL;
 	}
 
-	if (flags & TEXTURE_CREATE_DYNAMIC)
+	if (bIsDynamic)
 	{
 		CPUAccessFlags |= D3D11_CPU_ACCESS_WRITE;
 		usage = D3D11_USAGE_DYNAMIC;
@@ -53,7 +90,7 @@ ID3D11Resource *CAPITextureDX11::InitTexture(int width, int height, int depth, I
 	D3D11_TEXTURE2D_DESC desc;
 	ZeroMemory(&desc, sizeof(D3D11_TEXTURE2D_DESC));
 	desc.ArraySize = depth;
-	desc.Format = dxgiFormat;
+	desc.Format = m_DXGIFormat;
 	desc.Width = width;
 	desc.Height = height;
 	desc.MipLevels = numMipLevels;
@@ -65,10 +102,40 @@ ID3D11Resource *CAPITextureDX11::InitTexture(int width, int height, int depth, I
 	desc.SampleDesc.Quality = 0;
 
 	HRESULT hr = g_pShaderDeviceDX11->GetDevice()->CreateTexture2D(&desc, NULL, &m_pD3DTexture);
-
 	Assert(!FAILED(hr));
 
 	return m_pD3DTexture;
+}
+
+void CAPITextureDX11::InitRenderTarget(int width, int height, ID3D11Texture2D* pRenderTarget, ImageFormat dstImageFormat)
+{
+	m_APIFormat = ResolveToSupportedFormat(dstImageFormat);
+	m_DXGIFormat = GetDXGIFormat(m_APIFormat);
+
+	int flags = TEXTURE_CREATE_RENDERTARGET;
+
+	if (pRenderTarget)
+		m_pD3DTexture = pRenderTarget;
+	else
+		m_pD3DTexture = CreateD3DTexture(width, height, 1, m_APIFormat, 1, flags);
+
+	CreateRenderTargetView();
+
+	m_bIsInitialised = true;
+}
+
+void CAPITextureDX11::CreateRenderTargetView()
+{
+	D3D11_RENDER_TARGET_VIEW_DESC desc;
+	ZeroMemory(&desc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
+	desc.Format = m_DXGIFormat;
+	desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+	if (m_pRenderTargetView)
+		m_pRenderTargetView->Release();
+
+	HRESULT hr = g_pShaderDeviceDX11->GetDevice()->CreateRenderTargetView(m_pD3DTexture, &desc, &m_pRenderTargetView);
+	Assert(!FAILED(hr));
 }
 
 void CAPITextureDX11::LoadFromVTF(IVTFTexture* pVTF, int iVTFFrame)

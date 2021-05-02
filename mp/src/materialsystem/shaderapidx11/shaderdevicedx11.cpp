@@ -15,6 +15,7 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceDX11, IShaderDeviceDX11,
 IShaderDeviceDX11 *g_pShaderDevice = g_pShaderDeviceDX11;
 
 extern CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11;
+extern CShaderAPIDX11 *g_pShaderAPIDX11;
 
 CShaderDeviceDX11::CShaderDeviceDX11()
 {
@@ -46,7 +47,7 @@ bool CShaderDeviceDX11::Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t 
 
 	swapChainDesc.BufferDesc.Width = mode.m_DisplayMode.m_nWidth;
 	swapChainDesc.BufferDesc.Height = mode.m_DisplayMode.m_nHeight;
-	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB; // May need to change
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // May need to change
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = mode.m_DisplayMode.m_nRefreshRateDenominator;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = mode.m_DisplayMode.m_nRefreshRateNumerator;
 
@@ -79,6 +80,8 @@ bool CShaderDeviceDX11::Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t 
 	m_nAdapter = nAdapter;
 
 	m_bDeviceInitialized = true;
+
+	g_pShaderAPIDX11->OnDeviceInitialised();
 	return true;
 }
 
@@ -93,6 +96,8 @@ void CShaderDeviceDX11::Shutdown()
 	m_pD3DDeviceContext = NULL;
 
 	m_bDeviceInitialized = false;
+
+	g_pShaderAPIDX11->OnDeviceShutdown();
 }
 
 // Releases/reloads resources when other apps want some memory
@@ -111,7 +116,7 @@ void CShaderDeviceDX11::ReacquireResources()
 ImageFormat CShaderDeviceDX11::GetBackBufferFormat() const
 {
 	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
-	return IMAGE_FORMAT_RGB888;
+	return IMAGE_FORMAT_RGBA8888;
 }
 
 void CShaderDeviceDX11::GetBackBufferDimensions(int& width, int& height) const
@@ -163,7 +168,10 @@ bool CShaderDeviceDX11::IsAAEnabled() const
 // Does a page flip
 void CShaderDeviceDX11::Present()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	_AssertMsg(0, "Incomplete Implementation! " __FUNCTION__, 0, 0);
+
+	HRESULT hr = m_pDXGISwapChain->Present(0, 0);
+	Assert(!FAILED(hr));
 }
 
 

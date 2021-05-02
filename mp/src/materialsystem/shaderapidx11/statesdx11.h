@@ -16,6 +16,8 @@ struct DynamicStateDX11 {
 	int m_nViewportCount;
 	D3D11_VIEWPORT m_pViewports[MAX_DX11_VIEWPORTS];
 
+	FLOAT m_ClearColor[4];
+
 	DynamicStateDX11()
 	{
 		V_memset(this, 0, sizeof(*this));
@@ -26,6 +28,9 @@ struct DynamicStateDX11 {
 
 		m_pViewports[0].MinDepth = 0;
 		m_pViewports[0].MaxDepth = 1;
+
+		for (int i = 0; i < 4; ++i)
+			m_ClearColor[i] = 0;
 	}
 };
 

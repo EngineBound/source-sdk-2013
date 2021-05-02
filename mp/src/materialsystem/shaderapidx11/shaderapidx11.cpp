@@ -32,12 +32,15 @@ CShaderAPIDX11::CShaderAPIDX11()
 
 	m_vTextures.RemoveAll();
 	m_ModifyTextureHandle = 0;
+	m_BackBufferHandle = 0;
 }
 
 CShaderAPIDX11::~CShaderAPIDX11()
 {
 	if (m_pDynamicMesh)
 		delete m_pDynamicMesh;
+
+	OnDeviceShutdown();
 }
 
 // ------------------------------------------------------- //
@@ -642,17 +645,31 @@ void CShaderAPIDX11::SetDepthFeatheringPixelShaderConstant(int iConstant, float 
 // Buffer clearing
 void CShaderAPIDX11::ClearBuffers(bool bClearColor, bool bClearDepth, bool bClearStencil, int renderTargetWidth, int renderTargetHeight)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	if (!g_pShaderDeviceDX11->IsActivated()) return;
+
+	if (bClearColor)
+	{
+		ID3D11RenderTargetView* pRTView;
+
+		pRTView = m_vTextures[m_BackBufferHandle].GetRenderTargetView();
+		g_pShaderDeviceDX11->GetDeviceContext()->ClearRenderTargetView(pRTView, m_DynamicState.m_ClearColor);
+	}
 }
 
 void CShaderAPIDX11::ClearColor3ub(unsigned char r, unsigned char g, unsigned char b)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_DynamicState.m_ClearColor[0] = r / 255.f;
+	m_DynamicState.m_ClearColor[1] = g / 255.f;
+	m_DynamicState.m_ClearColor[2] = g / 255.f;
+	m_DynamicState.m_ClearColor[3] = 1.f;
 }
 
 void CShaderAPIDX11::ClearColor4ub(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_DynamicState.m_ClearColor[0] = r / 255.f;
+	m_DynamicState.m_ClearColor[1] = g / 255.f;
+	m_DynamicState.m_ClearColor[2] = g / 255.f;
+	m_DynamicState.m_ClearColor[3] = a / 255.f;
 }
 
 
@@ -951,7 +968,7 @@ const char *pTextureGroupName)
 
 void CShaderAPIDX11::DeleteTexture(ShaderAPITextureHandle_t textureHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_vTextures[textureHandle].Shutdown();
 }
 
 
@@ -1629,7 +1646,9 @@ void CShaderAPIDX11::BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBy
 
 void CShaderAPIDX11::Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	_AssertMsg(0, "Incomplete Implementation! " __FUNCTION__, 0, 0);
+
+	g_pShaderDevice->Present();
 }
 
 void CShaderAPIDX11::DrawMesh(IMesh *pMesh)
@@ -1721,6 +1740,19 @@ void CShaderAPIDX11::FogMaxDensity(float flMaxDensity)
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
+void CShaderAPIDX11::CreateTextureHandles(ShaderAPITextureHandle_t* pHandles, int count)
+{
+	int i = 0;
+	for (ShaderAPITextureHandle_t texHandle = 0; texHandle < m_vTextures.Count(); ++texHandle)
+	{
+		if (!m_vTextures[texHandle].IsActivated())
+			pHandles[i++] = texHandle;
+	}
+
+	while (i < count)
+		pHandles[i++] = m_vTextures.AddToTail();
+
+}
 
 // Create a multi-frame texture (equivalent to calling "CreateTexture" multiple times, but more efficient)
 void CShaderAPIDX11::CreateTextures(
@@ -1736,19 +1768,11 @@ void CShaderAPIDX11::CreateTextures(
 	const char *pDebugName,
 	const char *pTextureGroupName)
 {
-	bool requiresNewHandle = false;
+	CreateTextureHandles(pHandles, count);
+
 	for (int i = 0; i < count; ++i)
 	{
-		if (requiresNewHandle || i >= m_vTextures.Count())
-		{
-			requiresNewHandle = true;
-
-			pHandles[i] = m_vTextures.AddToTail();
-		}
-		else
-			pHandles[i] = i;
-
-		m_vTextures[i].InitTexture(width, height, depth, dstImageFormat, numMipLevels, numCopies, flags);
+		m_vTextures[pHandles[i]].InitTexture(width, height, depth, dstImageFormat, numMipLevels, numCopies, flags);
 	}
 }
 
@@ -1892,4 +1916,36 @@ bool CShaderAPIDX11::SetDebugTextureRendering(bool bEnable)
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return false;
+}
+
+void CShaderAPIDX11::OnDeviceInitialised()
+{
+	int w, h;
+	GetBackBufferDimensions(w, h);
+
+	// Create the backbuffer
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	HRESULT hr = g_pShaderDeviceDX11->GetSwapChain()->GetDesc(&swapChainDesc);
+	Assert(!FAILED(hr));
+
+	ID3D11Texture2D *pBackBuffer;
+	hr = g_pShaderDeviceDX11->GetSwapChain()->GetBuffer(0, __uuidof(ID3D11Texture2D), (void **)&pBackBuffer);
+	Assert(!FAILED(hr));
+
+	m_BackBufferHandle = 0;
+	CreateTextureHandles(&m_BackBufferHandle, 1);
+	CAPITextureDX11* pBackBufferTex = &m_vTextures[m_BackBufferHandle];
+	pBackBufferTex->InitRenderTarget(w, h, pBackBuffer, g_pShaderDevice->GetBackBufferFormat());
+
+	ClearBuffers(true, false, false, w, h);
+
+}
+
+void CShaderAPIDX11::OnDeviceShutdown()
+{
+	for (int i = 0; i < m_vTextures.Count(); ++i)
+	{
+		m_vTextures[i].~CAPITextureDX11();
+	}
+	m_vTextures.RemoveAll();
 }

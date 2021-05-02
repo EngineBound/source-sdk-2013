@@ -670,6 +670,13 @@ public:
 	// used during a frame. Returns the old state of debug texture rendering flag to use
 	// it for restoring the mode.
 	virtual bool SetDebugTextureRendering(bool bEnable);
+
+public:
+	void OnDeviceInitialised();
+	void OnDeviceShutdown();
+
+	void CreateTextureHandles(ShaderAPITextureHandle_t* pHandles, int count);
+
 private:
 	MaterialMatrixMode_t m_MatrixMode;
 	DirectX::XMMATRIX *m_pCurMatrix;
@@ -682,6 +689,8 @@ private:
 
 	CUtlVector<CAPITextureDX11> m_vTextures;
 	ShaderAPITextureHandle_t m_ModifyTextureHandle;
+
+	ShaderAPITextureHandle_t m_BackBufferHandle;
 };
 
 #endif
