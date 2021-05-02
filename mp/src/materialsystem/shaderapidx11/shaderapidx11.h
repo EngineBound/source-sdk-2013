@@ -7,6 +7,7 @@
 
 #include "ishaderapidx11.h"
 #include "statesdx11.h"
+#include "apitexturedx11.h"
 
 class IMeshDX11;
 
@@ -677,6 +678,10 @@ private:
 	ShaderStateDX11 m_ShaderState;
 
 	IMeshDX11 *m_pDynamicMesh;
+
+
+	CUtlVector<CAPITextureDX11> m_vTextures;
+	ShaderAPITextureHandle_t m_ModifyTextureHandle;
 };
 
 #endif

@@ -39,13 +39,6 @@ $Project "ShaderApiDX11 (DML)"
         $File	"dx11global.h"
         $File	"statesdx11.h"
         
-        $File	"ishaderapidx11.h"
-        $File	"ishaderdevicedx11.h"
-        $File	"ishaderdevicemgrdx11.h"
-        $File	"ishadershadowdx11.h"
-        $File	"imeshdx11.h"
-        $File	"imaterialdx11.h"
-        
         $File   "hardwareconfigdx11.h"
         $File   "hardwareconfigdx11.cpp"
         
@@ -72,6 +65,9 @@ $Project "ShaderApiDX11 (DML)"
         $File   "imaterialdx11.h"
         $File   "materialdx11.h"
         $File   "materialdx11.cpp"
+        
+        $File   "apitexturedx11.h"
+        $File   "apitexturedx11.cpp"
         
 	}
 }

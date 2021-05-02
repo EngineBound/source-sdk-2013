@@ -14,7 +14,6 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceDX11, IShaderDeviceDX11,
 
 IShaderDeviceDX11 *g_pShaderDevice = g_pShaderDeviceDX11;
 
-
 extern CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11;
 
 CShaderDeviceDX11::CShaderDeviceDX11()
@@ -321,28 +320,6 @@ void CShaderDeviceDX11::DestroyIndexBuffer(IIndexBuffer *pIndexBuffer)
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
-HRESULT CShaderDeviceDX11::CreateD3DBuffer(D3D11_BUFFER_DESC *pDesc, ID3D11Buffer **pOutBuffer)
-{
-	Assert(m_bDeviceInitialized);
-
-	return m_pD3DDevice->CreateBuffer(pDesc, NULL, pOutBuffer);
-}
-
-HRESULT CShaderDeviceDX11::MapD3DResource(ID3D11Resource *pResource, UINT Subresource, D3D11_MAP MapType, UINT MapFlags, D3D11_MAPPED_SUBRESOURCE *pMappedResource)
-{
-	Assert(m_bDeviceInitialized);
-
-	return m_pD3DDeviceContext->Map(pResource, Subresource, MapType, MapFlags, pMappedResource);
-}
-
-void CShaderDeviceDX11::UnmapD3DResource(ID3D11Resource *pResource, UINT Subresource)
-{
-	Assert(m_bDeviceInitialized);
-
-	return m_pD3DDeviceContext->Unmap(pResource, Subresource);
-}
-
-
 // Do we need to specify the stream here in the case of locking multiple dynamic VBs on different streams?
 IVertexBuffer *CShaderDeviceDX11::GetDynamicVertexBuffer(int nStreamID, VertexFormat_t vertexFormat, bool bBuffered)
 {
@@ -392,9 +369,4 @@ char *CShaderDeviceDX11::GetDisplayDeviceName()
 bool CShaderDeviceDX11::IsActivated() const
 {
 	return m_bDeviceInitialized;
-}
-
-ID3D11DeviceContext* CShaderDeviceDX11::GetDeviceContext() const
-{
-	return m_pD3DDeviceContext;
 }

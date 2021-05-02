@@ -66,7 +66,6 @@ public:
 private:
 	bool PopulateHWInfo(HWInfo_t *pHWInfo, IDXGIAdapter *pAdapter, IDXGIOutput *pOutput);
 
-	int m_nAdapter;
 	CUtlVector<HWInfo_t> m_vAdapterInfo;
 
 	IDXGIFactory *m_pDXGIFactory;

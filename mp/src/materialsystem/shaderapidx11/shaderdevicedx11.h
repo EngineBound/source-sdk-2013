@@ -112,11 +112,8 @@ public:
 	virtual bool IsActivated() const;
 public:
 
-	ID3D11DeviceContext* GetDeviceContext() const;
-
-	HRESULT CreateD3DBuffer(D3D11_BUFFER_DESC *pDesc, ID3D11Buffer **pOutBuffer);
-	HRESULT MapD3DResource(ID3D11Resource *pResource, UINT Subresource, D3D11_MAP MapType, UINT MapFlags, D3D11_MAPPED_SUBRESOURCE *pMappedResource);
-	void UnmapD3DResource(ID3D11Resource *pResource, UINT Subresource);
+	inline ID3D11Device *GetDevice() const { return m_pD3DDevice; }
+	inline ID3D11DeviceContext* GetDeviceContext() const { return m_pD3DDeviceContext; }
 
 private:
 	bool m_bDeviceInitialized;

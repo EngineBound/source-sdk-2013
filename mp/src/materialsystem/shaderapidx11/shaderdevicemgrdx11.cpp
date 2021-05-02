@@ -304,7 +304,7 @@ void CShaderDeviceMgrDX11::GetModeInfo(ShaderDisplayMode_t* pInfo, int nAdapter,
 // Returns the current mode info for the requested adapter
 void CShaderDeviceMgrDX11::GetCurrentModeInfo(ShaderDisplayMode_t* pInfo, int nAdapter) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	GetModeInfo(pInfo, g_pShaderDeviceDX11->m_nAdapter, nAdapter);
 }
 
 

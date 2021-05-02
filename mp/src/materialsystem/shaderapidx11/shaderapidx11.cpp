@@ -29,6 +29,9 @@ CShaderAPIDX11::CShaderAPIDX11()
 	m_pCurMatrix = &m_ShaderState.m_MatrixStacks[m_MatrixMode].Top();
 	
 	m_pDynamicMesh = NULL;
+
+	m_vTextures.RemoveAll();
+	m_ModifyTextureHandle = 0;
 }
 
 CShaderAPIDX11::~CShaderAPIDX11()
@@ -439,14 +442,13 @@ MorphFormat_t CShaderAPIDX11::GetBoundMorphFormat()
 // Binds a standard texture
 void CShaderAPIDX11::BindStandardTexture(Sampler_t sampler, StandardTextureId_t id)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	g_pShaderUtil->BindStandardTexture(sampler, id);
 }
 
 
 ITexture *CShaderAPIDX11::GetRenderTargetEx(int nRenderTargetID)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	return g_pShaderUtil->GetRenderTargetEx(nRenderTargetID);
 }
 
 
@@ -515,7 +517,7 @@ int CShaderAPIDX11::GetPixelFogCombo()
 
 void CShaderAPIDX11::BindStandardVertexTexture(VertexTextureSampler_t sampler, StandardTextureId_t id)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	g_pShaderUtil->BindStandardVertexTexture(sampler, id);
 }
 
 
@@ -947,8 +949,9 @@ int flags,
 const char *pDebugName,
 const char *pTextureGroupName)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	ShaderAPITextureHandle_t texHandle;
+	CreateTextures(&texHandle, 1, width, height, depth, dstImageFormat, numMipLevels, numCopies, flags, pDebugName, pTextureGroupName);
+	return texHandle;
 }
 
 void CShaderAPIDX11::DeleteTexture(ShaderAPITextureHandle_t textureHandle)
@@ -986,7 +989,7 @@ bool CShaderAPIDX11::IsTextureResident(ShaderAPITextureHandle_t textureHandle)
 // all use the texture specified by this function.
 void CShaderAPIDX11::ModifyTexture(ShaderAPITextureHandle_t textureHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_ModifyTextureHandle = textureHandle;
 }
 
 
@@ -1022,7 +1025,7 @@ void CShaderAPIDX11::TexSubImage2D(
 
 void CShaderAPIDX11::TexImageFromVTF(IVTFTexture* pVTF, int iVTFFrame)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	m_vTextures[m_ModifyTextureHandle].LoadFromVTF(pVTF, iVTFFrame);
 }
 
 
@@ -1738,7 +1741,20 @@ void CShaderAPIDX11::CreateTextures(
 	const char *pDebugName,
 	const char *pTextureGroupName)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	bool requiresNewHandle = false;
+	for (int i = 0; i < count; ++i)
+	{
+		if (requiresNewHandle || i >= m_vTextures.Count())
+		{
+			requiresNewHandle = true;
+
+			pHandles[i] = m_vTextures.AddToTail();
+		}
+		else
+			pHandles[i] = i;
+
+		m_vTextures[i].InitTexture(width, height, depth, dstImageFormat, numMipLevels, numCopies, flags);
+	}
 }
 
 void CShaderAPIDX11::AcquireThreadOwnership()

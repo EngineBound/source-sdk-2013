@@ -4,6 +4,8 @@
 
 #include "meshdx11.h"
 
+extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
+
 inline void ComputeVertexDesc(unsigned char *pBuffer, VertexFormat_t vertexFormat, VertexDesc_t &desc)
 {
 	// Static vertex data so meshbuilder can write to nothing
@@ -207,7 +209,7 @@ CVertexBufferDX11::CVertexBufferDX11(ShaderBufferType_t type, VertexFormat_t fmt
 	Assert(nVertexCount != 0);
 
 	m_bIsDynamic = IsDynamicBufferType(type);
-	m_nVertexCount = (fmt == VERTEX_FORMAT_UNKNOWN) ? 0 : nVertexCount;
+	m_nVertexCount = nVertexCount;
 	m_VertexFormat = fmt;
 
 	VertexDesc_t tmpDesc;
@@ -245,7 +247,7 @@ bool CVertexBufferDX11::CreateBuffer()
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.MiscFlags = 0;
 
-	HRESULT hr = g_pShaderDeviceDX11->CreateD3DBuffer(&bufferDesc, &m_pD3DBuffer);
+	HRESULT hr = g_pShaderDeviceDX11->GetDevice()->CreateBuffer(&bufferDesc, NULL, &m_pD3DBuffer);
 	Assert(!FAILED(hr));
 
 	m_nBufferPosition = 0;
@@ -316,7 +318,7 @@ bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 	}
 
 	// ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	HRESULT hr = g_pShaderDeviceDX11->MapD3DResource(m_pD3DBuffer, 0, bAppend ? D3D11_MAP_WRITE_NO_OVERWRITE : D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	HRESULT hr = g_pShaderDeviceDX11->GetDeviceContext()->Map(m_pD3DBuffer, 0, bAppend ? D3D11_MAP_WRITE_NO_OVERWRITE : D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(hr))
 	{
 		Assert(0);
@@ -345,7 +347,7 @@ void CVertexBufferDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 
 	Assert(nVertexCount <= m_nVertexCount);
 
-	g_pShaderDeviceDX11->UnmapD3DResource(m_pD3DBuffer, 0);
+	g_pShaderDeviceDX11->GetDeviceContext()->Unmap(m_pD3DBuffer, 0);
 
 	m_nBufferPosition += nVertexCount * m_nVertexSize;
 
@@ -409,7 +411,7 @@ bool CIndexBufferDX11::CreateBuffer()
 	bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bufferDesc.MiscFlags = 0;
 
-	HRESULT hr = g_pShaderDeviceDX11->CreateD3DBuffer(&bufferDesc, &m_pD3DBuffer);
+	HRESULT hr = g_pShaderDeviceDX11->GetDevice()->CreateBuffer(&bufferDesc, NULL, &m_pD3DBuffer);
 	Assert(!FAILED(hr));
 
 	m_nBufferPosition = 0;
@@ -479,7 +481,7 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 	}
 
 	// ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	HRESULT hr = g_pShaderDeviceDX11->MapD3DResource(m_pD3DBuffer, 0, bAppend ? D3D11_MAP_WRITE_NO_OVERWRITE : D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	HRESULT hr = g_pShaderDeviceDX11->GetDeviceContext()->Map(m_pD3DBuffer, 0, bAppend ? D3D11_MAP_WRITE_NO_OVERWRITE : D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(hr))
 	{
 		Assert(0);
@@ -507,7 +509,7 @@ void CIndexBufferDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 
 	Assert(nWrittenIndexCount <= m_nIndexCount); // probably incorrect :)
 
-	g_pShaderDeviceDX11->UnmapD3DResource(m_pD3DBuffer, 0);
+	g_pShaderDeviceDX11->GetDeviceContext()->Unmap(m_pD3DBuffer, 0);
 
 	m_nBufferPosition += nWrittenIndexCount * m_nIndexSize;
 
@@ -557,6 +559,10 @@ CMeshDX11::CMeshDX11(bool bIsDynamic)
 
 	if (m_bIsDynamic)
 	{
+		// REMOVE THIS MORON
+		//VertexFormat_t tmpFmt = VERTEX_POSITION | VERTEX_COLOR | VERTEX_NORMAL | 2 << TEX_COORD_SIZE_BIT |
+		//	VERTEX_BONEWEIGHT(2) | VERTEX_BONE_INDEX | VERTEX_USERDATA_SIZE(4) | VERTEX_SPECULAR;
+
 		m_pVertexBufferDX11 = new CVertexBufferDX11(SHADER_BUFFER_TYPE_DYNAMIC, VERTEX_FORMAT_UNKNOWN, DYNAMIC_VERTEX_BUFFER_MEMORY, "");
 		m_pIndexBufferDX11 = new CIndexBufferDX11(SHADER_BUFFER_TYPE_DYNAMIC, MATERIAL_INDEX_FORMAT_16BIT, INDEX_BUFFER_SIZE, "");
 
