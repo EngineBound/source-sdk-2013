@@ -287,13 +287,14 @@ PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(CUtlBuffer &buf, const 
 // Creates/destroys Mesh
 IMesh* CShaderDeviceDX11::CreateStaticMesh(VertexFormat_t vertexFormat, const char *pTextureBudgetGroup, IMaterial * pMaterial)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	return new CMeshDX11(false, vertexFormat);
 }
 
 void CShaderDeviceDX11::DestroyStaticMesh(IMesh* mesh)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	delete mesh;
 }
 
 // Creates/destroys static vertex + index buffers

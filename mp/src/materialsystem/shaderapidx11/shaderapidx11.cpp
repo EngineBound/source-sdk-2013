@@ -747,12 +747,7 @@ void CShaderAPIDX11::FlushBufferedPrimitives()
 IMesh* CShaderAPIDX11::GetDynamicMesh(IMaterial* pMaterial, int nHWSkinBoneCount, bool bBuffered,
 	IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
-	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
-
-	if (!m_pDynamicMesh)
-		m_pDynamicMesh = new CMeshDX11(true);
-
-	return m_pDynamicMesh;
+	return GetDynamicMeshEx(pMaterial, VERTEX_FORMAT_UNKNOWN, nHWSkinBoneCount, bBuffered, pVertexOverride, pIndexOverride);
 }
 
 IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t vertexFormat, int nHWSkinBoneCount,
@@ -761,7 +756,7 @@ IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t ver
 	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
 
 	if (!m_pDynamicMesh)
-		m_pDynamicMesh = new CMeshDX11(true);
+		m_pDynamicMesh = new CMeshDX11(true, vertexFormat);
 
 	return m_pDynamicMesh;
 }

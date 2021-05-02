@@ -56,7 +56,7 @@ private:
 
 	bool m_bIsLocked;
 
-	//unsigned char* m_VertBuffer;
+	unsigned char* m_pVertBuffer;
 
 	ID3D11Buffer *m_pD3DBuffer;
 };
@@ -114,13 +114,15 @@ private:
 
 	bool m_bIsLocked;
 
+	unsigned short *m_pIndBuffer;
+
 	ID3D11Buffer *m_pD3DBuffer;
 };
 
 class CMeshDX11 : public IMeshDX11
 {
 public:
-	CMeshDX11(bool bIsDynamic);
+	CMeshDX11(bool bIsDynamic, VertexFormat_t fmt);
 	~CMeshDX11();
 
 	// DX11 Buffer Commons
@@ -235,6 +237,8 @@ private:
 
 	CVertexBufferDX11 *m_pVertexBufferDX11;
 	CIndexBufferDX11 *m_pIndexBufferDX11;
+
+	VertexFormat_t m_VertFormat;
 
 };
 
