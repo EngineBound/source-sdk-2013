@@ -21,7 +21,7 @@ CHardwareConfigDX11::CHardwareConfigDX11()
 {
 	Q_memset(&m_HWInfo, 0, sizeof(m_HWInfo));
 	m_bHDREnabled = false;
-	m_HWInfo.m_nMaxDXSupportLevel = 110;
+	m_HWInfo.m_nMaxDXSupportLevel = 9;
 }
 
 // Sets up HWInfo_t struct (m_HWInfo) with system capabilities

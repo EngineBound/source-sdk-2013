@@ -7,7 +7,7 @@
 $Macro SRCDIR		"..\.."
 $Macro OUTBINDIR	"$SRCDIR\..\game\bin"
 $Macro OUTBINNAME	"shaderapidx11"
-$Macro GAMENAME "dml"
+$Macro GAMENAME     "enginebound"
 
 $Include "$SRCDIR\vpc_scripts\source_dll_base.vpc"
 
@@ -32,7 +32,7 @@ $Configuration
 	}
 }
 
-$Project "ShaderApiDX11 (DML)"
+$Project "ShaderApiDX11 (EngineBound)"
 {
 	$Folder "Source Files"
 	{

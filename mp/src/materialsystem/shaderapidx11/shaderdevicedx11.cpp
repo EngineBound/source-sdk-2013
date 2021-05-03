@@ -170,7 +170,10 @@ void CShaderDeviceDX11::Present()
 {
 	_AssertMsg(0, "Incomplete Implementation! " __FUNCTION__, 0, 0);
 
-	HRESULT hr = m_pDXGISwapChain->Present(0, 0);
+#ifdef DEBUG
+	HRESULT hr =
+#endif
+		m_pDXGISwapChain->Present(0, 0);
 	Assert(!FAILED(hr));
 }
 

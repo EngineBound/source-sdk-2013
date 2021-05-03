@@ -207,6 +207,8 @@ inline int SizeForIndex(MaterialIndexFormat_t indexFormat) {
 CVertexBufferDX11::CVertexBufferDX11(ShaderBufferType_t type, VertexFormat_t fmt, int nVertexCount, const char *pBudgetGroup)
 {
 	Assert(nVertexCount != 0);
+	if (nVertexCount == 0)
+		return;
 
 	m_bIsDynamic = IsDynamicBufferType(type);
 	m_nVertexCount = nVertexCount;
@@ -825,7 +827,7 @@ void CMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
 // Draws the mesh
 void CMeshDX11::Draw(int nFirstIndex, int nIndexCount)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
 }
 
 

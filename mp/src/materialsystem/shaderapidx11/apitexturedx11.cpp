@@ -100,8 +100,10 @@ ID3D11Texture2D *CAPITextureDX11::CreateD3DTexture(int width, int height, int de
 	desc.Usage = usage;
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
-
-	HRESULT hr = g_pShaderDeviceDX11->GetDevice()->CreateTexture2D(&desc, NULL, &m_pD3DTexture);
+#ifdef DEBUG
+	HRESULT hr = 
+#endif
+		g_pShaderDeviceDX11->GetDevice()->CreateTexture2D(&desc, NULL, &m_pD3DTexture);
 	Assert(!FAILED(hr));
 
 	return m_pD3DTexture;
@@ -134,7 +136,10 @@ void CAPITextureDX11::CreateRenderTargetView()
 	if (m_pRenderTargetView)
 		m_pRenderTargetView->Release();
 
-	HRESULT hr = g_pShaderDeviceDX11->GetDevice()->CreateRenderTargetView(m_pD3DTexture, &desc, &m_pRenderTargetView);
+#ifdef DEBUG
+	HRESULT hr =
+#endif
+		g_pShaderDeviceDX11->GetDevice()->CreateRenderTargetView(m_pD3DTexture, &desc, &m_pRenderTargetView);
 	Assert(!FAILED(hr));
 }
 

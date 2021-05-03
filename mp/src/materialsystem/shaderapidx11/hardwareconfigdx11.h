@@ -126,7 +126,7 @@ public:
 	virtual bool SupportsNormalMapCompression() const;
 
 	const char *GetHWSpecificShaderDLLName() const {
-		return 0;
+		return "stdshader_dx9";
 	}
 
 	virtual bool SupportsVertexAndPixelShaders() const;

@@ -1937,8 +1937,6 @@ void CShaderAPIDX11::OnDeviceInitialised()
 	CAPITextureDX11* pBackBufferTex = &m_vTextures[m_BackBufferHandle];
 	pBackBufferTex->InitRenderTarget(w, h, pBackBuffer, g_pShaderDevice->GetBackBufferFormat());
 
-	ClearBuffers(true, false, false, w, h);
-
 }
 
 void CShaderAPIDX11::OnDeviceShutdown()
