@@ -1,0 +1,45 @@
+//-----------------------------------------------------------------------------
+//	SHADERLIB.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$macro SRCDIR		"..\.."
+$Macro GAMENAME     "enginebound"
+ 
+$include "$SRCDIR\vpc_scripts\source_lib_base.vpc"
+
+$Configuration
+{
+	$Compiler
+	{
+		$PreprocessorDefinitions		"$BASE;"
+	}
+
+}
+
+$Project "ShaderLib (EngineBound)"
+{
+	$Folder	"Source Files"
+	{
+		$File	"BaseShader.cpp"
+		$File	"ShaderDLL.cpp"
+		$File	"shaderlib_cvar.cpp"
+	}
+
+	$Folder	"Header Files"
+	{
+		$Folder "Other"
+		{
+			$File	"../IShaderSystem.h"
+		}
+		
+		$File	"$SRCDIR\public\shaderlib\BaseShader.h"
+		$File	"$SRCDIR\public\shaderlib\cshader.h"
+		$File	"$SRCDIR\public\shaderlib\ShaderDLL.h"
+		
+		$File	"shaderDLL_Global.h"
+		$File	"shaderlib_cvar.h"
+		
+	}
+}

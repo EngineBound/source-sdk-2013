@@ -76,7 +76,17 @@ $Project "serverplugin_empty"
 
 $Project "shaderapidx11"
 {
-    "materialsystem\shaderapidx11\shaderapidx11.vpc" [$WIN32]
+    	"materialsystem\shaderapidx11\shaderapidx11.vpc" [$WIN32]
+}
+
+$Project "shaderlib"
+{
+    	"materialsystem\shaderlib\shaderlib.vpc" [$WIN32]
+}
+
+$Project "stdshader_dx11"
+{
+    	"materialsystem\stdshader_dx11\stdshader_dx11.vpc" [$WIN32]
 }
 
 $Project "tgadiff"

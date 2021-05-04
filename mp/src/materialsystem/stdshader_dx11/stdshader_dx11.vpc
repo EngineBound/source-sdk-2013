@@ -1,0 +1,77 @@
+//-----------------------------------------------------------------------------
+//	stdshader_dx11.vpc
+//
+//	Project script for stdshader_dx11
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro OUTBINDIR	"$SRCDIR\..\game\bin"
+$Macro OUTBINNAME	"stdshader_dx11"
+$Macro GAMENAME     "enginebound"
+
+$Include "$SRCDIR\vpc_scripts\source_dll_base.vpc"
+
+$Configuration	"Debug"
+{
+	$General
+	{
+		$OutputDirectory		"Debug_stdshader_dx11_$GAMENAME"			[$WIN32]
+		$IntermediateDirectory	"Debug_stdshader_dx11_$GAMENAME"			[$WIN32]
+	}
+}
+
+$Configuration	"Release"
+{
+	$General
+	{
+		$OutputDirectory		"Release_stdshader_dx11_$GAMENAME"		[$WIN32]
+		$IntermediateDirectory	"Release_stdshader_dx11_$GAMENAME"		[$WIN32]
+	}
+}
+
+$Configuration
+{
+	$General
+	{
+		$PlatformToolset "v120" // Minimum requirement for DX11
+	}
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;fxctmp9;vshtmp9;"	[$WIN32||$POSIX]
+		$PreprocessorDefinitions		"$BASE;DX11;STDSHADER_DX11_DLL_EXPORT;FAST_MATERIALVAR_ACCESS"
+	}
+
+	$Linker
+	{
+		$AdditionalDependencies			"$BASE version.lib winmm.lib"	[$WIN32]
+		$SystemLibraries				"iconv" [$OSXALL] // just leave this for now
+	}
+}
+
+$Project "STDShader_DX11 (EngineBound)"
+{
+	$Folder	"Source Files"
+	{
+        $File   "bypass_crc_check.cpp"
+    
+		$File	"BaseVSShader.cpp"
+		$File	"testshader_dx11.cpp"
+	}
+
+	$Folder	"Header Files"
+	{
+		$File	"BaseVSShader.h"
+	}
+
+	$Folder "Link Libraries"
+	{
+		$Lib	mathlib
+		$Lib	shaderlib
+	}
+
+	$File	"buildsdkshaders.bat"
+	$File	"buildshaders.bat"
+
+//	$Shaders	"stdshader_dx11.txt"
+}
