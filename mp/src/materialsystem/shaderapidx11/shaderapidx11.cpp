@@ -1945,7 +1945,7 @@ void CShaderAPIDX11::OnDeviceShutdown()
 {
 	for (int i = 0; i < m_vTextures.Count(); ++i)
 	{
-		m_vTextures[i].~CAPITextureDX11();
+		m_vTextures[i].Shutdown();
 	}
 	m_vTextures.RemoveAll();
 }

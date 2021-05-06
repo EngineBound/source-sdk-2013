@@ -45,10 +45,16 @@ void CAPITextureDX11::InitTexture(int width, int height, int depth, ImageFormat 
 void CAPITextureDX11::Shutdown()
 {
 	if (m_pD3DTexture)
+	{
 		m_pD3DTexture->Release();
+		m_pD3DTexture = NULL;
+	}
 
 	if (m_pRenderTargetView)
+	{
 		m_pRenderTargetView->Release();
+		m_pRenderTargetView = NULL;
+	}
 
 	m_bIsInitialised = false;
 }
@@ -134,7 +140,10 @@ void CAPITextureDX11::CreateRenderTargetView()
 	desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
 	if (m_pRenderTargetView)
+	{
 		m_pRenderTargetView->Release();
+		m_pRenderTargetView = NULL;
+	}
 
 #ifdef DEBUG
 	HRESULT hr =

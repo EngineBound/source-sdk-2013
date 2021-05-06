@@ -44,6 +44,8 @@ bool CShaderDeviceDX11::Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t 
 		return false;
 	m_pDXGIOutput->AddRef();
 
+	m_hWnd = (HWND)hWnd;
+
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	V_memset(&swapChainDesc, 0, sizeof(swapChainDesc));
 
@@ -60,7 +62,7 @@ bool CShaderDeviceDX11::Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t 
 
 	swapChainDesc.BufferCount = mode.m_nBackBufferCount;
 
-	swapChainDesc.OutputWindow = (HWND)hWnd;
+	swapChainDesc.OutputWindow = m_hWnd;
 
 	swapChainDesc.Windowed = mode.m_bWindowed;
 
@@ -183,7 +185,15 @@ void CShaderDeviceDX11::Present()
 // Returns the window size
 void CShaderDeviceDX11::GetWindowSize(int &nWidth, int &nHeight) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	if (!IsIconic(m_hWnd))
+	{
+		RECT rect;
+		GetClientRect((HWND)m_hWnd, &rect);
+		nWidth = rect.right - rect.left;
+		nHeight = rect.bottom - rect.top;
+	}
+	else
+		nWidth = nHeight = 0;
 }
 
 

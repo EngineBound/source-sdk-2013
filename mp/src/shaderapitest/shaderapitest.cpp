@@ -296,16 +296,31 @@ void CShaderAPITest::Destroy()
 	return;
 }
 
+#define NextTest(title) if (!WaitForKeypress()) \
+	{  \
+		Warning("Keypress check failed\n"); \
+		return false; \
+	} \
+	SetWindowText(m_hWnd, title);
+
 bool CShaderAPITest::RunTests()
 {
-	for (int i = 0; i < 100; i++)
-	{
-		m_pShaderAPI->ClearColor3ub(RandomInt(0, 255), RandomInt(0, 255), RandomInt(0, 255));
-		m_pShaderAPI->ClearBuffers(true, false, false, -1, -1);
-		m_pShaderDevice->Present();
+	SetWindowText(m_hWnd, "Test 1: Buffer clear");
 
-		WaitForKeypress();
-	}
+	m_pShaderAPI->ClearColor3ub(RandomInt(0, 255), RandomInt(0, 255), RandomInt(0, 255));
+	m_pShaderAPI->ClearBuffers(true, false, false, -1, -1);
+	m_pShaderDevice->Present();
+
+	NextTest("Test 2: Viewports");
+
+	int w, h;
+	m_pShaderDevice->GetWindowSize(w, h);
+
+	ShaderViewport_t viewport;
+	viewport.Init(0, 0, w, h);
+	m_pShaderAPI->SetViewports(1, &viewport);
+
+	NextTest("Tests Done! Press a key to exit");
 
 	return true;
 }

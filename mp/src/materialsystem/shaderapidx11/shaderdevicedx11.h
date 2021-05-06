@@ -126,6 +126,8 @@ private:
 	ID3D11Device* m_pD3DDevice;
 	ID3D11DeviceContext* m_pD3DDeviceContext;
 
+	HWND m_hWnd;
+
 	friend class CShaderDeviceMgrDX11;
 };
 
