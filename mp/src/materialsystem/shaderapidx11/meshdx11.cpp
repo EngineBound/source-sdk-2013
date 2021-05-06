@@ -4,6 +4,8 @@
 
 #include "meshdx11.h"
 
+#include "memdbgon.h"
+
 extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
 
 inline void ComputeVertexDesc(unsigned char *pBuffer, VertexFormat_t vertexFormat, VertexDesc_t &desc)

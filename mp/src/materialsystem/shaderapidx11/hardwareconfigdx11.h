@@ -108,7 +108,7 @@ class IMaterialSystemHardwareConfigDX11 : public IMaterialSystemHardwareConfig
 {
 public:
 	// Required for the system to run
-	virtual const char *GetHWSpecificShaderDLLName() const = 0;
+	virtual const char *GetStandardShaderDLLName() const = 0;
 };
 
 class CHardwareConfigDX11 : public IMaterialSystemHardwareConfigDX11
@@ -125,7 +125,7 @@ public:
 	virtual VertexCompressionType_t SupportsCompressedVertices() const;
 	virtual bool SupportsNormalMapCompression() const;
 
-	const char *GetHWSpecificShaderDLLName() const {
+	const char *GetStandardShaderDLLName() const {
 		return "stdshader_dx11";
 	}
 

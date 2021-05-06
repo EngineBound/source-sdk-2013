@@ -7,6 +7,7 @@
 #include "ishaderapidx11.h"
 #include "shaderdevicedx11.h"
 
+#include "memdbgon.h"
 
 static CShaderDeviceMgrDX11 s_ShaderDeviceMgrDX11;
 CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11 = &s_ShaderDeviceMgrDX11;
@@ -43,7 +44,8 @@ void CShaderDeviceMgrDX11::Disconnect()
 // Returns NULL if it doesn't implement the requested interface
 void *CShaderDeviceMgrDX11::QueryInterface(const char *pInterfaceName)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	if (!Q_stricmp(pInterfaceName, SHADER_DEVICE_MGR_INTERFACE_VERSION))
+		return static_cast<IShaderDeviceMgr*>(this);
 	return NULL;
 }
 
@@ -327,7 +329,9 @@ static void* ShaderInterfaceFactory(const char *pInterfaceName, int *pReturnCode
 	if (!V_stricmp(pInterfaceName, SHADERAPI_INTERFACE_VERSION))
 		return static_cast<IShaderAPI*>(g_pShaderAPI);
 	if (!V_stricmp(pInterfaceName, SHADERSHADOW_INTERFACE_VERSION))
-		return static_cast<IShaderShadow*>(g_pShaderShadow);
+		return static_cast<IShaderShadow*>(g_pShaderShadow);\
+	if (!V_stricmp(pInterfaceName, MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION))
+		return static_cast<IMaterialSystemHardwareConfig*>(g_pHardwareConfig);
 
 	if (pReturnCode)
 	{

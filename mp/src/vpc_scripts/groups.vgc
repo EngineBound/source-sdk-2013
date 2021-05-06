@@ -45,6 +45,7 @@ $Group "everything"
 	"server"
 	"serverplugin_empty"
     	"shaderapidx11"
+	"shaderapitest"
 	"shaderlib"
 	"stdshader_dx11"
 	"tgadiff"
@@ -58,6 +59,14 @@ $Group "everything"
 	"vtfdiff"
 	"vvis_dll"
 	"vvis_launcher"
+}
+
+$Group "shaderapi"
+{
+	"shaderapidx11"
+	"shaderapitest"
+	"shaderlib"
+	"stdshader_dx11"
 }
 
 $Group "dedicated"

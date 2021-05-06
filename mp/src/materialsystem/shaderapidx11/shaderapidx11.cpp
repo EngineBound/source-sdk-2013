@@ -7,6 +7,8 @@
 #include "meshdx11.h"
 #include "ishaderutil.h"
 
+#include "memdbgon.h"
+
 static CShaderAPIDX11 s_ShaderAPIDX11;
 CShaderAPIDX11 *g_pShaderAPIDX11 = &s_ShaderAPIDX11;
 
@@ -660,7 +662,7 @@ void CShaderAPIDX11::ClearColor3ub(unsigned char r, unsigned char g, unsigned ch
 {
 	m_DynamicState.m_ClearColor[0] = r / 255.f;
 	m_DynamicState.m_ClearColor[1] = g / 255.f;
-	m_DynamicState.m_ClearColor[2] = g / 255.f;
+	m_DynamicState.m_ClearColor[2] = b / 255.f;
 	m_DynamicState.m_ClearColor[3] = 1.f;
 }
 
@@ -668,7 +670,7 @@ void CShaderAPIDX11::ClearColor4ub(unsigned char r, unsigned char g, unsigned ch
 {
 	m_DynamicState.m_ClearColor[0] = r / 255.f;
 	m_DynamicState.m_ClearColor[1] = g / 255.f;
-	m_DynamicState.m_ClearColor[2] = g / 255.f;
+	m_DynamicState.m_ClearColor[2] = b / 255.f;
 	m_DynamicState.m_ClearColor[3] = a / 255.f;
 }
 

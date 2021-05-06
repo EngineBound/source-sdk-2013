@@ -6,6 +6,8 @@
 #include "shaderdevicemgrdx11.h"
 #include "shaderapidx11.h"
 
+#include "memdbgon.h"
+
 static CShaderDeviceDX11 s_ShaderDeviceDX11;
 CShaderDeviceDX11 *g_pShaderDeviceDX11 = &s_ShaderDeviceDX11;
 

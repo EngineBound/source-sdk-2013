@@ -1,0 +1,44 @@
+//-----------------------------------------------------------------------------
+//	shaderapitest.vpc
+//
+//	Project script for shaderapitest
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		".."
+$Macro OUTBINDIR	"$SRCDIR\..\game\bin"
+$Macro OUTBINNAME	"shaderapitest"
+
+$Include "$SRCDIR\vpc_scripts\source_exe_base.vpc"
+
+$Configuration
+{
+	$General
+	{
+		$PlatformToolset "v120" // Minimum requirement for DX11
+	}
+    
+    $Compiler
+	{
+//		$AdditionalIncludeDirectories	"$BASE;"	[$WIN32||$POSIX]
+		$PreprocessorDefinitions		"$BASE;SHADERAPITEST;"
+	}
+
+	$Linker
+	{
+//		$AdditionalDependencies			"$BASE;"	[$WIN32]
+	}
+}
+
+$Project "ShaderAPI Test (EngineBound)"
+{
+	$Folder	"Source Files"
+	{
+        $File   "shaderapitest.cpp"
+	}
+
+	$Folder "Link Libraries"
+	{
+        $Lib "appframework"
+        $Lib "tier2"
+	}
+}

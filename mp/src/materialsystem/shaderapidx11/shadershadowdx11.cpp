@@ -1,6 +1,8 @@
 
 #include "shadershadowdx11.h"
 
+#include "memdbgon.h"
+
 static CShaderShadowDX11 s_ShaderShadowDX11;
 CShaderShadowDX11 *g_pShaderShadowDX11 = &s_ShaderShadowDX11;
 

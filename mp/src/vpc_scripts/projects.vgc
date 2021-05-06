@@ -79,6 +79,11 @@ $Project "shaderapidx11"
     	"materialsystem\shaderapidx11\shaderapidx11.vpc" [$WIN32]
 }
 
+$Project "shaderapitest"
+{
+    	"shaderapitest\shaderapitest.vpc" [$WIN32]
+}
+
 $Project "shaderlib"
 {
     	"materialsystem\shaderlib\shaderlib.vpc" [$WIN32]

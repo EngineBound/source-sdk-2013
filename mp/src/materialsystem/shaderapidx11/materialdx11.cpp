@@ -1,5 +1,7 @@
 #include "materialdx11.h"
 
+#include "memdbgon.h"
+
 CMaterialDX11::CMaterialDX11(char const* materialName, const char *pTextureGroupName, KeyValues *pKeyValues)
 {
 	int nNameLen = Q_strlen(materialName);
