@@ -16,6 +16,19 @@ struct DynamicStateDX11 {
 	int m_nViewportCount;
 	D3D11_VIEWPORT m_pViewports[MAX_DX11_VIEWPORTS];
 
+	ID3D11VertexShader* m_pVertexShader;
+	ID3D11PixelShader* m_pPixelShader;
+
+	ID3D11InputLayout* m_pInputLayout;
+
+	ID3D11Buffer* m_pVertexBuffer;
+	UINT m_VBStride;
+	UINT m_VBOffset;
+
+	ID3D11Buffer* m_pIndexBuffer;
+	DXGI_FORMAT m_IBFmt;
+	UINT m_IBOffset;
+
 	FLOAT m_ClearColor[4];
 
 	DynamicStateDX11()

@@ -2,6 +2,7 @@
 
 #include "appframework/tier2app.h"
 #include "tier0/ICommandLine.h"
+#include "materialsystem/imesh.h"
 
 #include "bitmap/imageformat.h"
 #include "shaderapi/ishaderapi.h"
@@ -147,8 +148,11 @@ private:
 
 	bool CreateTestWindow(int width, int height);
 	bool WaitForKeypress();
+	bool WaitForQuit();
 
 	bool RunTests();
+
+	void CreateShaders();
 
 private:
 	HWND m_hWnd;
@@ -159,6 +163,8 @@ private:
 	IShaderDevice *m_pShaderDevice;
 	IShaderShadow *m_pShaderShadow;
 
+	VertexShaderHandle_t m_hVertexShader;
+	PixelShaderHandle_t m_hPixelShader;
 };
 
 DEFINE_WINDOWED_STEAM_APPLICATION_OBJECT(CShaderAPITest);
@@ -192,8 +198,8 @@ bool CShaderAPITest::PreInit()
 	if (!g_pFullFileSystem)
 		return false;
 
-	if (!SetupSearchPaths(NULL, false, true))
-		return false;
+// 	if (!SetupSearchPaths(NULL, false, true))
+// 		return false;
 
 	if (!CreateTestWindow(1024, 768))
 		return false;
@@ -202,13 +208,31 @@ bool CShaderAPITest::PreInit()
 
 }
 
+static bool s_bWindowClosed = false;
+static LRESULT CALLBACK ShaderAPITestWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_DESTROY:
+	case WM_CLOSE:
+		s_bWindowClosed = true;
+		PostQuitMessage(0);
+		break;
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+
+	return 0;
+}
+
 bool CShaderAPITest::CreateTestWindow(int width, int height)
 {
 
 	WNDCLASS wndClass;
 	memset(&wndClass, 0, sizeof(wndClass));
 	wndClass.style = CS_OWNDC | CS_DBLCLKS;
-	wndClass.lpfnWndProc = DefWindowProc;
+	wndClass.lpfnWndProc = ShaderAPITestWndProc;
 	wndClass.hInstance = (HINSTANCE)GetAppInstance();
 	wndClass.lpszClassName = "SHADERAPITEST";
 	RegisterClass(&wndClass);
@@ -252,6 +276,23 @@ bool CShaderAPITest::WaitForKeypress()
 		}
 
 		if (msg.message == WM_KEYDOWN)
+			return true;
+	}
+	return false;
+}
+
+bool CShaderAPITest::WaitForQuit()
+{
+	MSG msg = { 0 };
+	while (msg.message != WM_QUIT)
+	{
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		if (s_bWindowClosed)
 			return true;
 	}
 	return false;
@@ -311,7 +352,7 @@ bool CShaderAPITest::RunTests()
 	m_pShaderAPI->ClearBuffers(true, false, false, -1, -1);
 	m_pShaderDevice->Present();
 
-	NextTest("Test 2: Viewports");
+	NextTest("Test 2: Dynamic Mesh");
 
 	int w, h;
 	m_pShaderDevice->GetWindowSize(w, h);
@@ -320,7 +361,123 @@ bool CShaderAPITest::RunTests()
 	viewport.Init(0, 0, w, h);
 	m_pShaderAPI->SetViewports(1, &viewport);
 
-	NextTest("Tests Done! Press a key to exit");
+	VertexFormat_t fmt = VERTEX_POSITION | VERTEX_COLOR;
+
+	IVertexBuffer* pVertexBuffer = m_pShaderDevice->CreateVertexBuffer(
+		SHADER_BUFFER_TYPE_DYNAMIC, fmt, 256, "");
+	IIndexBuffer* pIndexBuffer = m_pShaderDevice->CreateIndexBuffer(
+		SHADER_BUFFER_TYPE_DYNAMIC, MATERIAL_INDEX_FORMAT_16BIT, 30, "");
+
+	CreateShaders();
+
+	m_pShaderAPI->ClearBuffers(true, false, false, -1, -1);
+	
+	const int nNumRects = 8;
+	float flRectWidth = 2.0f / nNumRects;
+	for (int i = 0; i < nNumRects; ++i)
+	{
+		float flXOffset = i * flRectWidth;
+
+		CVertexBuilder vertexBuilder(pVertexBuffer, fmt);
+		vertexBuilder.Lock(4);
+
+		vertexBuilder.Position3f(-1.0f + flXOffset, -1.0f, 0.5f);
+		vertexBuilder.Color4ub(255, 0, 0, 255);
+		vertexBuilder.AdvanceVertex();
+
+		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, -1.0f, 0.5f);
+		vertexBuilder.Color4ub(0, 255, 0, 255);
+		vertexBuilder.AdvanceVertex();
+
+		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, 1.0f, 0.5f);
+		vertexBuilder.Color4ub(0, 0, 255, 255);
+		vertexBuilder.AdvanceVertex();
+
+		vertexBuilder.Position3f(-1.0f + flXOffset, 1.0f, 0.5f);
+		vertexBuilder.Color4ub(0, 0, 0, 255);
+		vertexBuilder.AdvanceVertex();
+
+		vertexBuilder.Unlock();
+
+		CIndexBuilder indexBuilder(pIndexBuffer, MATERIAL_INDEX_FORMAT_16BIT);
+		indexBuilder.Lock(6, vertexBuilder.GetFirstVertex());
+
+		indexBuilder.FastIndex(0);
+		indexBuilder.FastIndex(2);
+		indexBuilder.FastIndex(1);
+		indexBuilder.FastIndex(0);
+		indexBuilder.FastIndex(3);
+		indexBuilder.FastIndex(2);
+		indexBuilder.SpewData();
+
+		indexBuilder.Unlock();
+
+		m_pShaderAPI->BindVertexBuffer(0, pVertexBuffer, vertexBuilder.Offset(), vertexBuilder.GetFirstVertex(), vertexBuilder.TotalVertexCount(), fmt);
+		m_pShaderAPI->BindIndexBuffer(pIndexBuffer, indexBuilder.Offset());
+		m_pShaderAPI->Draw(MATERIAL_TRIANGLES, indexBuilder.GetFirstIndex(), indexBuilder.TotalIndexCount());
+	}
+
+	m_pShaderDevice->Present();
+
+	m_pShaderDevice->DestroyVertexShader(m_hVertexShader);
+	m_pShaderDevice->DestroyPixelShader(m_hPixelShader);
+
+	m_hVertexShader = VERTEX_SHADER_HANDLE_INVALID;
+	m_hPixelShader = PIXEL_SHADER_HANDLE_INVALID;
+
+	m_pShaderDevice->DestroyVertexBuffer(pVertexBuffer);
+	m_pShaderDevice->DestroyIndexBuffer(pIndexBuffer);
+
+	SetWindowText(m_hWnd, "Tests Done! Close window to exit.");
+
+	WaitForQuit();
 
 	return true;
+}
+
+static const char s_pDebugVertexShader[] =
+"struct VS_INPUT {"
+"	float3 vPos : POSITION;"
+"   float4 vColor : COLOR;"
+"};"
+""
+"struct VS_OUTPUT {"
+"	float4 projPos : SV_POSITION;"
+"   float4 vColor : COLOR;"
+"};"
+""
+"VS_OUTPUT main( const VS_INPUT v ) {"
+"	VS_OUTPUT o = (VS_OUTPUT)0;"
+"	o.projPos = float4(v.vPos, 1.0);"
+"	o.vColor = v.vColor;"
+"	return o;"
+"}"
+"";
+
+static const char s_pDebugPixelShader[] =
+"struct PS_INPUT"
+"{"
+"	float4 projPos : SV_POSITION;"
+"	float4 vColor : COLOR;"
+"};"
+""
+"float4 main( const PS_INPUT i ) : SV_TARGET"
+"{"
+"	return i.vColor;"
+"}"
+"";
+
+
+void CShaderAPITest::CreateShaders()
+{
+	m_hVertexShader = m_pShaderDevice->CreateVertexShader(s_pDebugVertexShader, sizeof(s_pDebugVertexShader), "vs_5_0");
+	Assert(m_hVertexShader != VERTEX_SHADER_HANDLE_INVALID);
+
+	m_hPixelShader = m_pShaderDevice->CreatePixelShader(s_pDebugPixelShader, sizeof(s_pDebugPixelShader), "ps_5_0");
+	Assert(m_hPixelShader != PIXEL_SHADER_HANDLE_INVALID);
+
+	m_pShaderAPI->BindVertexShader(m_hVertexShader);
+	m_pShaderAPI->BindGeometryShader(GEOMETRY_SHADER_HANDLE_INVALID);
+	m_pShaderAPI->BindPixelShader(m_hPixelShader);
+
 }

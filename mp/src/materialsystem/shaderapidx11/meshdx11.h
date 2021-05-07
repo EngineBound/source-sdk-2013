@@ -7,7 +7,8 @@
 
 #include "imeshdx11.h"
 #include "ishaderdevice.h"
-#include <d3d11.h>
+
+struct ID3D11Buffer;
 
 class CVertexBufferDX11 : public IVertexBufferDX11
 {
@@ -43,6 +44,21 @@ public:
 
 	// Call this in debug mode to make sure our data is good.
 	virtual void ValidateData(int nVertexCount, const VertexDesc_t & desc);
+public:
+	inline ID3D11Buffer* GetBuffer()
+	{
+		return m_pD3DBuffer;
+	}
+
+	inline UINT GetBufferSize()
+	{
+		return m_nBufferSize;
+	}
+	
+	inline UINT VertexSize()
+	{
+		return m_nVertexSize;
+	}
 
 private:
 
@@ -101,6 +117,21 @@ public:
 
 	// Ensures the data in the index buffer is valid
 	virtual void ValidateData(int nIndexCount, const IndexDesc_t &desc);
+public:
+	inline ID3D11Buffer* GetBuffer()
+	{
+		return m_pD3DBuffer;
+	}
+
+	inline UINT GetBufferSize()
+	{
+		return m_nBufferSize;
+	}
+
+	inline UINT IndexSize()
+	{
+		return m_nIndexSize;
+	}
 
 private:
 

@@ -6,12 +6,20 @@
 #endif
 
 #include "ishaderdevicedx11.h"
-
-#include <d3d11.h>
+#include "utllinkedlist.h"
+#include <windows.h>
 
 class CShaderDeviceDX11;
-
 extern CShaderDeviceDX11* g_pShaderDeviceDX11;
+
+struct IDXGIOutput;
+struct IDXGISwapChain;
+struct ID3D11Device;
+struct ID3D11DeviceContext;
+struct ID3D11VertexShader;
+struct ID3D11PixelShader;
+struct ID3D11ShaderReflection;
+struct ID3D11InputLayout;
 
 class CShaderDeviceDX11 : public IShaderDeviceDX11
 {
@@ -116,6 +124,21 @@ public:
 	inline ID3D11DeviceContext* GetDeviceContext() const { return m_pD3DDeviceContext; }
 	inline IDXGISwapChain* GetSwapChain() const { return m_pDXGISwapChain; }
 
+	inline ID3D11VertexShader *GetVertexShader(VertexShaderHandle_t hVertexShader)
+	{
+		return m_VertexShaders[(VertexRepIndex_t)hVertexShader].m_pShader;
+	}
+
+	inline ID3D11PixelShader *GetPixelShader(PixelShaderHandle_t hPixelShader)
+	{
+		return m_PixelShaders[(PixelRepIndex_t)hPixelShader].m_pShader;
+	}
+
+	inline ID3D11InputLayout *GetInputLayout(VertexShaderHandle_t hVertexShader)
+	{
+		return m_VertexShaders[(VertexRepIndex_t)hVertexShader].m_pInputLayout;
+	}
+
 private:
 	bool m_bDeviceInitialized;
 	int m_nAdapter;
@@ -127,6 +150,25 @@ private:
 	ID3D11DeviceContext* m_pD3DDeviceContext;
 
 	HWND m_hWnd;
+
+	struct VertexShaderRep_t
+	{
+		ID3D11VertexShader *m_pShader;
+		ID3D11ShaderReflection *m_pReflection;
+		ID3D11InputLayout *m_pInputLayout;
+	};
+
+	struct PixelShaderRep_t
+	{
+		ID3D11PixelShader *m_pShader;
+		ID3D11ShaderReflection *m_pReflection;
+	};
+
+	CUtlFixedLinkedList<VertexShaderRep_t> m_VertexShaders;
+	CUtlFixedLinkedList<PixelShaderRep_t> m_PixelShaders;
+
+	typedef CUtlFixedLinkedList<VertexShaderRep_t>::IndexType_t VertexRepIndex_t;
+	typedef CUtlFixedLinkedList<PixelShaderRep_t>::IndexType_t PixelRepIndex_t;
 
 	friend class CShaderDeviceMgrDX11;
 };

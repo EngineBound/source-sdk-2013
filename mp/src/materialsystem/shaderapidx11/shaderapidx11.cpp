@@ -20,8 +20,6 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IDebugTextureInfoDX11,
 
 IShaderAPIDX11 *g_pShaderAPI = g_pShaderAPIDX11;
 
-extern CShaderDeviceDX11* g_pShaderDeviceDX11;
-
 CShaderAPIDX11::CShaderAPIDX11()
 {
 	m_MatrixMode = MATERIAL_VIEW;
@@ -678,17 +676,63 @@ void CShaderAPIDX11::ClearColor4ub(unsigned char r, unsigned char g, unsigned ch
 // Methods related to binding shaders
 void CShaderAPIDX11::BindVertexShader(VertexShaderHandle_t hVertexShader)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	if (hVertexShader == VERTEX_SHADER_HANDLE_INVALID)
+		return;
+
+	ID3D11VertexShader* pVertexShader = g_pShaderDeviceDX11->GetVertexShader(hVertexShader);
+	if (pVertexShader != m_DynamicState.m_pVertexShader)
+	{
+		m_DynamicState.m_pVertexShader = pVertexShader;
+		m_DynamicState.m_pInputLayout = g_pShaderDeviceDX11->GetInputLayout(hVertexShader);
+
+		g_pShaderDeviceDX11->GetDeviceContext()->VSSetShader(m_DynamicState.m_pVertexShader, NULL, 0);
+		g_pShaderDeviceDX11->GetDeviceContext()->IASetInputLayout(m_DynamicState.m_pInputLayout);
+	}
+}
+
+void CShaderAPIDX11::UnbindVertexShader(VertexShaderHandle_t hVertexShader)
+{
+	if (hVertexShader == VERTEX_SHADER_HANDLE_INVALID)
+		return;
+
+	ID3D11VertexShader* pVertexShader = g_pShaderDeviceDX11->GetVertexShader(hVertexShader);
+	if (pVertexShader == m_DynamicState.m_pVertexShader)
+	{
+		BindVertexShader(VERTEX_SHADER_HANDLE_INVALID);
+	}
 }
 
 void CShaderAPIDX11::BindGeometryShader(GeometryShaderHandle_t hGeometryShader)
 {
+	if (hGeometryShader == GEOMETRY_SHADER_HANDLE_INVALID)
+		return;
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::BindPixelShader(PixelShaderHandle_t hPixelShader)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	if (hPixelShader == PIXEL_SHADER_HANDLE_INVALID)
+		return;
+
+	ID3D11PixelShader* pPixelShader = g_pShaderDeviceDX11->GetPixelShader(hPixelShader);
+	if (pPixelShader != m_DynamicState.m_pPixelShader)
+	{
+		m_DynamicState.m_pPixelShader = pPixelShader;
+		g_pShaderDeviceDX11->GetDeviceContext()->PSSetShader(m_DynamicState.m_pPixelShader, NULL, 0);
+	}
+}
+
+void CShaderAPIDX11::UnbindPixelShader(PixelShaderHandle_t hPixelShader)
+{
+	if (hPixelShader == PIXEL_SHADER_HANDLE_INVALID)
+		return;
+
+	ID3D11PixelShader* pPixelShader = g_pShaderDeviceDX11->GetPixelShader(hPixelShader);
+	if (pPixelShader == m_DynamicState.m_pPixelShader)
+	{
+		BindPixelShader(PIXEL_SHADER_HANDLE_INVALID);
+	}
 }
 
 
@@ -1638,19 +1682,60 @@ void CShaderAPIDX11::SetShadowDepthBiasFactors(float fShadowSlopeScaleDepthBias,
 // ------------ New Vertex/Index Buffer interface ----------------------------
 void CShaderAPIDX11::BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffer, int nOffsetInBytes, int nFirstVertex, int nVertexCount, VertexFormat_t fmt, int nRepetitions)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	CVertexBufferDX11 *pVertexBufferDX11 = static_cast<CVertexBufferDX11*>(pVertexBuffer);
+	ID3D11Buffer *pBuffer = NULL;
+	UINT bufStride = 0;
+	UINT nOffset = nOffsetInBytes;
+	if (pVertexBufferDX11)
+	{
+		pBuffer = pVertexBufferDX11->GetBuffer();
+		bufStride = pVertexBufferDX11->VertexSize();
+	}
+
+	if (nOffsetInBytes < 0)
+	{
+		nOffset = nFirstVertex * bufStride;
+	}
+
+	if (m_DynamicState.m_pVertexBuffer != pBuffer || m_DynamicState.m_VBStride != bufStride || m_DynamicState.m_VBOffset != nOffset)
+	{
+		m_DynamicState.m_pVertexBuffer = pBuffer;
+		m_DynamicState.m_VBStride = bufStride;
+		m_DynamicState.m_VBOffset = nOffset;
+
+		g_pShaderDeviceDX11->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_DynamicState.m_pVertexBuffer, &m_DynamicState.m_VBStride, &m_DynamicState.m_VBOffset);
+	}
 }
 
 void CShaderAPIDX11::BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBytes)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	CIndexBufferDX11 *pVertexBufferDX11 = static_cast<CIndexBufferDX11*>(pIndexBuffer);
+	ID3D11Buffer *pBuffer = NULL;
+	UINT indexSize = 0;
+	UINT nOffset = nOffsetInBytes;
+	if (pVertexBufferDX11)
+	{
+		pBuffer = pVertexBufferDX11->GetBuffer();
+		indexSize = pVertexBufferDX11->IndexSize();
+	}
+
+	DXGI_FORMAT indexFormat = (indexSize == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+
+	if (m_DynamicState.m_pIndexBuffer != pBuffer || m_DynamicState.m_IBFmt != indexFormat || m_DynamicState.m_IBOffset != nOffset)
+	{
+		m_DynamicState.m_pIndexBuffer = pBuffer;
+		m_DynamicState.m_IBFmt = indexFormat;
+		m_DynamicState.m_IBOffset = nOffset;
+
+		g_pShaderDeviceDX11->GetDeviceContext()->IASetIndexBuffer(m_DynamicState.m_pIndexBuffer, m_DynamicState.m_IBFmt, m_DynamicState.m_IBOffset);
+	}
 }
 
 void CShaderAPIDX11::Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount)
 {
 	_AssertMsg(0, "Incomplete Implementation! " __FUNCTION__, 0, 0);
-
-	g_pShaderDevice->Present();
+	g_pShaderDeviceDX11->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	g_pShaderDeviceDX11->GetDeviceContext()->DrawIndexed(nIndexCount, nFirstIndex, 0);
 }
 
 void CShaderAPIDX11::DrawMesh(IMesh *pMesh)
@@ -1931,13 +2016,16 @@ void CShaderAPIDX11::OnDeviceInitialised()
 	Assert(!FAILED(hr));
 
 	ID3D11Texture2D *pBackBuffer;
-	hr = g_pShaderDeviceDX11->GetSwapChain()->GetBuffer(0, __uuidof(ID3D11Texture2D), (void **)&pBackBuffer);
+	hr = g_pShaderDeviceDX11->GetSwapChain()->GetBuffer(0, IID_ID3D11Texture2D, (void **)&pBackBuffer);
 	Assert(!FAILED(hr));
 
 	m_BackBufferHandle = 0;
 	CreateTextureHandles(&m_BackBufferHandle, 1);
 	CAPITextureDX11* pBackBufferTex = &m_vTextures[m_BackBufferHandle];
 	pBackBufferTex->InitRenderTarget(w, h, pBackBuffer, g_pShaderDevice->GetBackBufferFormat());
+
+	ID3D11RenderTargetView *pRTView = pBackBufferTex->GetRenderTargetView();
+	g_pShaderDeviceDX11->GetDeviceContext()->OMSetRenderTargets(1, &pRTView, NULL);
 
 }
 

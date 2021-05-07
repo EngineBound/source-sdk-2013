@@ -7,6 +7,9 @@
 
 #include "ishadershadowdx11.h"
 
+class CShaderShadowDX11;
+extern CShaderShadowDX11* g_pShaderShadowDX11;
+
 class CShaderShadowDX11 : public IShaderShadowDX11
 {
 public:

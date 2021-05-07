@@ -5,6 +5,8 @@
 
 #include "shaderdevicedx11.h"
 
+#include <d3d11.h>
+
 extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
 
 CAPITextureDX11::CAPITextureDX11()
@@ -113,6 +115,13 @@ ID3D11Texture2D *CAPITextureDX11::CreateD3DTexture(int width, int height, int de
 	Assert(!FAILED(hr));
 
 	return m_pD3DTexture;
+}
+
+void CAPITextureDX11::DestroyD3DTexture()
+{
+	if (m_pD3DTexture)
+		m_pD3DTexture->Release();
+	m_pD3DTexture = NULL;
 }
 
 void CAPITextureDX11::InitRenderTarget(int width, int height, ID3D11Texture2D* pRenderTarget, ImageFormat dstImageFormat)

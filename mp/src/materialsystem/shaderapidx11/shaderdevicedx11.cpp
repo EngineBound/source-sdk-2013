@@ -6,7 +6,39 @@
 #include "shaderdevicemgrdx11.h"
 #include "shaderapidx11.h"
 
+#include <d3d11.h>
+#include <d3dcompiler.h>
+
 #include "memdbgon.h"
+
+class CShaderBufferDX11 : public IShaderBuffer
+{
+public:
+	CShaderBufferDX11(ID3DBlob *pBlob)
+	{
+		m_pBlob = pBlob;
+	}
+
+	virtual size_t GetSize() const
+	{
+		if (!m_pBlob) return 0;
+		return m_pBlob->GetBufferSize();
+	}
+	virtual const void* GetBits() const
+	{
+		if (!m_pBlob) return NULL;
+		return m_pBlob->GetBufferPointer();
+	}
+	virtual void Release()
+	{
+		if (!m_pBlob) return;
+		m_pBlob->Release();
+		m_pBlob = NULL;
+		delete this;
+	}
+private:
+	ID3DBlob *m_pBlob;
+};
 
 static CShaderDeviceDX11 s_ShaderDeviceDX11;
 CShaderDeviceDX11 *g_pShaderDeviceDX11 = &s_ShaderDeviceDX11;
@@ -15,9 +47,6 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceDX11, IShaderDeviceDX11,
 	SHADER_DEVICE_INTERFACE_VERSION, s_ShaderDeviceDX11)
 
 IShaderDeviceDX11 *g_pShaderDevice = g_pShaderDeviceDX11;
-
-extern CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11;
-extern CShaderAPIDX11 *g_pShaderAPIDX11;
 
 CShaderDeviceDX11::CShaderDeviceDX11()
 {
@@ -85,6 +114,7 @@ bool CShaderDeviceDX11::Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t 
 
 	m_bDeviceInitialized = true;
 
+	g_pShaderDevice = g_pShaderDeviceDX11;
 	g_pShaderAPIDX11->OnDeviceInitialised();
 	return true;
 }
@@ -94,10 +124,30 @@ void CShaderDeviceDX11::Shutdown()
 	if (!m_bDeviceInitialized) return;
 
 	m_nAdapter = -1;
-	m_pDXGIOutput = NULL;
-	m_pDXGISwapChain = NULL;
-	m_pD3DDevice = NULL;
-	m_pD3DDeviceContext = NULL;
+
+	if (m_pDXGIOutput)
+	{
+		m_pDXGIOutput->Release();
+		m_pDXGIOutput = NULL;
+	}
+
+	if (m_pDXGISwapChain)
+	{
+		m_pDXGISwapChain->Release();
+		m_pDXGISwapChain = NULL;
+	}
+
+	if (m_pD3DDevice)
+	{
+		m_pD3DDevice->Release();
+		m_pD3DDevice = NULL;
+	}
+
+	if (m_pD3DDeviceContext)
+	{
+		m_pD3DDeviceContext->Release();
+		m_pD3DDeviceContext = NULL;
+	}
 
 	m_bDeviceInitialized = false;
 
@@ -227,21 +277,54 @@ void CShaderDeviceDX11::SetView(void* hWnd)
 // Shader compilation
 IShaderBuffer* CShaderDeviceDX11::CompileShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	UINT nCompileFlags = D3DCOMPILE_AVOID_FLOW_CONTROL | D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY;
+
+#ifdef DEBUG
+	nCompileFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+	ID3DBlob* pCode;
+	ID3DBlob* pErrorMsgs;
+	HRESULT hr = D3DCompile(pProgram, nBufLen, "", NULL, NULL, "main", pShaderVersion, nCompileFlags, 0, &pCode, &pErrorMsgs);
+	if (FAILED(hr))
+	{
+		if (pErrorMsgs)
+		{
+			const char *pMsg = (const char *)pErrorMsgs->GetBufferPointer();
+			Warning("Shader compilation failed:\n\t%s\n", pMsg);
+			pErrorMsgs->Release();
+		}
+		return NULL;
+	}
+
+	CShaderBufferDX11 *pShaderBuffer = new CShaderBufferDX11(pCode);
+	if (pErrorMsgs)
+	{
+		pErrorMsgs->Release();
+	}
+
+	return pShaderBuffer;
 }
 
 
 // Shader creation, destruction
 VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(IShaderBuffer* pShaderBuffer)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	return CreateVertexShader((const char *)pShaderBuffer->GetBits(), pShaderBuffer->GetSize(), "vs_5_0");
 }
 
 void CShaderDeviceDX11::DestroyVertexShader(VertexShaderHandle_t hShader)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	if (hShader == VERTEX_SHADER_HANDLE_INVALID)
+		return;
+
+	g_pShaderAPIDX11->UnbindVertexShader(hShader);
+
+	VertexRepIndex_t ind = (VertexRepIndex_t)hShader;
+	VertexShaderRep_t &rep = m_VertexShaders[ind];
+	rep.m_pShader->Release();
+	rep.m_pReflection->Release();
+	rep.m_pInputLayout->Release();
 }
 
 GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(IShaderBuffer* pShaderBuffer)
@@ -257,23 +340,70 @@ void CShaderDeviceDX11::DestroyGeometryShader(GeometryShaderHandle_t hShader)
 
 PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(IShaderBuffer* pShaderBuffer)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	return CreatePixelShader((const char *)pShaderBuffer->GetBits(), pShaderBuffer->GetSize(), "ps_5_0");
 }
 
 void CShaderDeviceDX11::DestroyPixelShader(PixelShaderHandle_t hShader)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	if (hShader == PIXEL_SHADER_HANDLE_INVALID)
+		return;
+
+	g_pShaderAPIDX11->UnbindPixelShader(hShader);
+
+	PixelRepIndex_t ind = (PixelRepIndex_t)hShader;
+	PixelShaderRep_t &rep = m_PixelShaders[ind];
+	rep.m_pShader->Release();
+	rep.m_pReflection->Release();
 }
 
+
+static D3D11_INPUT_ELEMENT_DESC s_pInputDescs[] =
+{
+	{ "POSITION",		0,	DXGI_FORMAT_R32G32B32_FLOAT,	0,	 0,	 D3D11_INPUT_PER_VERTEX_DATA,	0 },
+	{ "COLOR",		0,	DXGI_FORMAT_B8G8R8A8_UNORM,	        0,	 12, D3D11_INPUT_PER_VERTEX_DATA,	0 },
+};
 
 // Utility methods to make shader creation simpler
 // NOTE: For the utlbuffer version, use a binary buffer for a compiled shader
 // and a text buffer for a source-code (.fxc) shader
 VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	ID3D11VertexShader* pVertexShader = NULL;
+	HRESULT hr = m_pD3DDevice->CreateVertexShader(pProgram, nBufLen, NULL, &pVertexShader);
+	if (FAILED(hr) || !pVertexShader)
+	{
+		Assert(0);
+		return VERTEX_SHADER_HANDLE_INVALID;
+	}
+
+	ID3D11ShaderReflection* pReflection = NULL;
+	hr = D3DReflect(pProgram, nBufLen, IID_ID3D11ShaderReflection, (void **)&pReflection);
+	if (FAILED(hr) || !pReflection)
+	{
+		Assert(0);
+		pVertexShader->Release();
+		return VERTEX_SHADER_HANDLE_INVALID;
+	}
+
+
+	ID3D11InputLayout *pInputLayout = NULL;
+	hr = m_pD3DDevice->CreateInputLayout(s_pInputDescs, 2, pProgram, nBufLen, &pInputLayout);
+	if (FAILED(hr) || !pInputLayout)
+	{
+		Assert(0);
+		pReflection->Release();
+		pVertexShader->Release();
+		return VERTEX_SHADER_HANDLE_INVALID;
+	}
+
+	VertexRepIndex_t ind = m_VertexShaders.AddToTail();
+	VertexShaderRep_t& rep = m_VertexShaders[ind];
+
+	rep.m_pShader = pVertexShader;
+	rep.m_pReflection = pReflection;
+	rep.m_pInputLayout = pInputLayout;
+
+	return (VertexShaderHandle_t)ind;
 }
 
 VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(CUtlBuffer &buf, const char *pShaderVersion)
@@ -296,8 +426,30 @@ GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(CUtlBuffer &buf, 
 
 PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	ID3D11PixelShader* pPixelShader = NULL;
+	HRESULT hr = m_pD3DDevice->CreatePixelShader(pProgram, nBufLen, NULL, &pPixelShader);
+	if (FAILED(hr) || !pPixelShader)
+	{
+		Assert(0);
+		return PIXEL_SHADER_HANDLE_INVALID;
+	}
+
+	ID3D11ShaderReflection* pReflection;
+	hr = D3DReflect(pProgram, nBufLen, IID_ID3D11ShaderReflection, (void **)&pReflection);
+	if (FAILED(hr) || !pReflection)
+	{
+		Assert(0);
+		pPixelShader->Release();
+		return PIXEL_SHADER_HANDLE_INVALID;
+	}
+
+	PixelRepIndex_t ind = m_PixelShaders.AddToTail();
+	PixelShaderRep_t& rep = m_PixelShaders[ind];
+
+	rep.m_pShader = pPixelShader;
+	rep.m_pReflection = pReflection;
+
+	return (PixelShaderHandle_t)ind;
 }
 
 PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(CUtlBuffer &buf, const char *pShaderVersion)
@@ -323,25 +475,28 @@ void CShaderDeviceDX11::DestroyStaticMesh(IMesh* mesh)
 // Creates/destroys static vertex + index buffers
 IVertexBuffer *CShaderDeviceDX11::CreateVertexBuffer(ShaderBufferType_t type, VertexFormat_t fmt, int nVertexCount, const char *pBudgetGroup)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	CVertexBufferDX11 *outBuf = new CVertexBufferDX11(type, fmt, nVertexCount, pBudgetGroup);
+	outBuf->CreateBuffer();
+	return outBuf;
 }
 
 void CShaderDeviceDX11::DestroyVertexBuffer(IVertexBuffer *pVertexBuffer)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	delete pVertexBuffer;
 }
 
 
 IIndexBuffer *CShaderDeviceDX11::CreateIndexBuffer(ShaderBufferType_t bufferType, MaterialIndexFormat_t fmt, int nIndexCount, const char *pBudgetGroup)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return NULL;
+	CIndexBufferDX11 *outBuf = new CIndexBufferDX11(bufferType, fmt, nIndexCount, pBudgetGroup);
+	outBuf->CreateBuffer();
+
+	return outBuf;
 }
 
 void CShaderDeviceDX11::DestroyIndexBuffer(IIndexBuffer *pIndexBuffer)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	delete pIndexBuffer;
 }
 
 // Do we need to specify the stream here in the case of locking multiple dynamic VBs on different streams?

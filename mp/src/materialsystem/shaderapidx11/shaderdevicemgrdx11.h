@@ -10,7 +10,12 @@
 
 #include "tier1.h"
 
-#include <d3d11.h>
+class CShaderDeviceMgrDX11;
+extern CShaderDeviceMgrDX11* g_pShaderDeviceMgrDX11;
+
+struct IDXGIAdapter;
+struct IDXGIOutput;
+struct IDXGIFactory;
 
 class CShaderDeviceMgrDX11 : public IShaderDeviceMgrDX11
 {

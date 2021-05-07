@@ -111,6 +111,9 @@ public:
 	virtual const char *GetStandardShaderDLLName() const = 0;
 };
 
+class CHardwareConfigDX11;
+extern CHardwareConfigDX11* g_pHardwareConfigDX11;
+
 class CHardwareConfigDX11 : public IMaterialSystemHardwareConfigDX11
 {
 public:

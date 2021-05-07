@@ -11,6 +11,9 @@
 
 class IMeshDX11;
 
+class CShaderAPIDX11;
+extern CShaderAPIDX11* g_pShaderAPIDX11;
+
 class CShaderAPIDX11 : public IShaderAPIDX11, public IDebugTextureInfoDX11
 {
 public:
@@ -676,6 +679,9 @@ public:
 	void OnDeviceShutdown();
 
 	void CreateTextureHandles(ShaderAPITextureHandle_t* pHandles, int count);
+
+	void UnbindVertexShader(VertexShaderHandle_t hVertexShader);
+	void UnbindPixelShader(PixelShaderHandle_t hPixelShader);
 
 private:
 	MaterialMatrixMode_t m_MatrixMode;

@@ -4,9 +4,9 @@
 
 #include "meshdx11.h"
 
-#include "memdbgon.h"
+#include <d3d11.h>
 
-extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
+#include "memdbgon.h"
 
 inline void ComputeVertexDesc(unsigned char *pBuffer, VertexFormat_t vertexFormat, VertexDesc_t &desc)
 {
@@ -545,7 +545,7 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 
 		desc.m_nFirstIndex = m_nBufferPosition == 0 ? 0 : m_nBufferPosition / m_nIndexSize;
 		desc.m_nOffset = m_nBufferPosition;
-		desc.m_nIndexSize = m_nIndexSize;
+		desc.m_nIndexSize = 1; // For some reason indexdesc requires this and not actual size
 		desc.m_pIndices = (unsigned short *)mappedResource.pData + m_nBufferPosition;
 	}
 	else
@@ -566,7 +566,7 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 
 		desc.m_nFirstIndex = 0;
 		desc.m_nOffset = 0;
-		desc.m_nIndexSize = m_nIndexSize;
+		desc.m_nIndexSize = 1;
 		desc.m_pIndices = m_pIndBuffer;
 	}
 

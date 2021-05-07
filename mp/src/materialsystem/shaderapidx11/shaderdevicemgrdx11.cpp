@@ -3,9 +3,11 @@
 #include "dx11global.h"
 
 #include "ishaderutil.h"
-#include "ishadershadowdx11.h"
-#include "ishaderapidx11.h"
+#include "shadershadowdx11.h"
+#include "shaderapidx11.h"
 #include "shaderdevicedx11.h"
+
+#include <d3d11.h>
 
 #include "memdbgon.h"
 
@@ -23,7 +25,7 @@ bool CShaderDeviceMgrDX11::Connect(CreateInterfaceFn factory)
 {
 	ConnectTier1Libraries(&factory, 1);
 
-	HRESULT hr = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&m_pDXGIFactory);
+	HRESULT hr = CreateDXGIFactory(IID_IDXGIFactory, (void**)&m_pDXGIFactory);
 	if (FAILED(hr))
 		return false;
 
@@ -73,7 +75,11 @@ InitReturnVal_t CShaderDeviceMgrDX11::Init()
 
 void CShaderDeviceMgrDX11::Shutdown()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	if (g_pShaderDeviceDX11)
+	{
+		g_pShaderDeviceDX11->Shutdown();
+		g_pShaderDevice = NULL;
+	}
 }
 
 bool CShaderDeviceMgrDX11::PopulateHWInfo(HWInfo_t *pHWInfo, IDXGIAdapter *pAdapter, IDXGIOutput *pOutput)
@@ -346,9 +352,17 @@ static void* ShaderInterfaceFactory(const char *pInterfaceName, int *pReturnCode
 // A returned factory of NULL indicates the mode was not set properly.
 CreateInterfaceFn CShaderDeviceMgrDX11::SetMode(void *hWnd, int nAdapter, const ShaderDeviceInfo_t& mode)
 {
+	g_pShaderDevice = NULL;
+	g_pShaderAPI = NULL;
+	g_pShaderShadow = NULL;
+
 	g_pShaderDeviceDX11->Shutdown();
 	if (!g_pShaderDeviceDX11->Init(hWnd, nAdapter, mode))
 		return NULL;
+
+//	g_pShaderDevice = g_pShaderDeviceDX11;
+	g_pShaderAPI = g_pShaderAPIDX11;
+	g_pShaderShadow = g_pShaderShadowDX11;
 
 	return ShaderInterfaceFactory;
 }

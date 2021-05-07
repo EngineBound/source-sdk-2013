@@ -7,7 +7,10 @@
 
 #include "bitmap/imageformat.h"
 #include "vtf/vtf.h"
-#include <d3d11.h>
+
+struct ID3D11Texture2D;
+struct ID3D11RenderTargetView;
+enum DXGI_FORMAT;
 
 class CAPITextureDX11
 {
