@@ -151,6 +151,7 @@ private:
 	bool WaitForQuit();
 
 	bool RunTests();
+	void RunDynamicBufferTest(bool bTestFallback);
 
 	void CreateShaders();
 
@@ -352,7 +353,7 @@ bool CShaderAPITest::RunTests()
 	m_pShaderAPI->ClearBuffers(true, false, false, -1, -1);
 	m_pShaderDevice->Present();
 
-	NextTest("Test 2: Dynamic Mesh");
+	NextTest("Test 2: Dynamic Mesh - No fallback");
 
 	int w, h;
 	m_pShaderDevice->GetWindowSize(w, h);
@@ -361,7 +362,25 @@ bool CShaderAPITest::RunTests()
 	viewport.Init(0, 0, w, h);
 	m_pShaderAPI->SetViewports(1, &viewport);
 
-	VertexFormat_t fmt = VERTEX_POSITION | VERTEX_COLOR | VERTEX_NORMAL;
+	RunDynamicBufferTest(false);
+
+	NextTest("Test 3: Dynamic Mesh - Fallback");
+
+	RunDynamicBufferTest(true);
+
+	NextTest("Tests Done! Close window to exit.");
+
+	WaitForQuit();
+
+	return true;
+}
+
+void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback)
+{
+	VertexFormat_t fmt = VERTEX_POSITION | VERTEX_COLOR;
+
+	if (!bTestFallback)
+		fmt |= VERTEX_NORMAL;
 
 	IVertexBuffer* pVertexBuffer = m_pShaderDevice->CreateVertexBuffer(
 		SHADER_BUFFER_TYPE_DYNAMIC, fmt, 256, "");
@@ -371,7 +390,7 @@ bool CShaderAPITest::RunTests()
 	CreateShaders();
 
 	m_pShaderAPI->ClearBuffers(true, false, false, -1, -1);
-	
+
 	const int nNumRects = 8;
 	float flRectWidth = 2.0f / nNumRects;
 	for (int i = 0; i < nNumRects; ++i)
@@ -382,22 +401,26 @@ bool CShaderAPITest::RunTests()
 		vertexBuilder.Lock(4);
 
 		vertexBuilder.Position3f(-1.0f + flXOffset, -1.0f, 0.5f);
-		vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
+		if (!bTestFallback) 
+			vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
 		vertexBuilder.Color4ub(255, 0, 0, 255);
 		vertexBuilder.AdvanceVertex();
 
 		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, -1.0f, 0.5f);
-		vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
+		if (!bTestFallback) 
+			vertexBuilder.Normal3f(0.0f, 1.0f, 0.0f);
 		vertexBuilder.Color4ub(0, 255, 0, 255);
 		vertexBuilder.AdvanceVertex();
 
 		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, 1.0f, 0.5f);
-		vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
+		if (!bTestFallback) 
+			vertexBuilder.Normal3f(1.0f, 0.0f, 0.0f);
 		vertexBuilder.Color4ub(0, 0, 255, 255);
 		vertexBuilder.AdvanceVertex();
 
 		vertexBuilder.Position3f(-1.0f + flXOffset, 1.0f, 0.5f);
-		vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
+		if (!bTestFallback) 
+			vertexBuilder.Normal3f(1.0f, 1.0f, 1.0f);
 		vertexBuilder.Color4ub(0, 0, 0, 255);
 		vertexBuilder.AdvanceVertex();
 
@@ -431,12 +454,6 @@ bool CShaderAPITest::RunTests()
 
 	m_pShaderDevice->DestroyVertexBuffer(pVertexBuffer);
 	m_pShaderDevice->DestroyIndexBuffer(pIndexBuffer);
-
-	SetWindowText(m_hWnd, "Tests Done! Close window to exit.");
-
-	WaitForQuit();
-
-	return true;
 }
 
 static const char s_pDebugVertexShader[] =
@@ -471,7 +488,7 @@ static const char s_pDebugPixelShader[] =
 ""
 "float4 main( const PS_INPUT i ) : SV_TARGET"
 "{"
-"	return i.vColor * float4(i.vNormal, 1.0);"
+"	return i.vColor + float4(i.vNormal, 0.0);"
 "}"
 "";
 

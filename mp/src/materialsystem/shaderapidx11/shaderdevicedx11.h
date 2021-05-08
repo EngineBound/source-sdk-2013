@@ -20,6 +20,8 @@ struct ID3D11VertexShader;
 struct ID3D11PixelShader;
 struct ID3D11ShaderReflection;
 struct ID3D11InputLayout;
+struct InputElementRep_t;
+struct D3D11_INPUT_ELEMENT_DESC;
 
 class CShaderDeviceDX11 : public IShaderDeviceDX11
 {
@@ -135,6 +137,11 @@ public:
 	}
 
 	ID3D11InputLayout *GetInputLayout(VertexShaderHandle_t hVertexShader, VertexFormat_t fmt);
+
+private:
+
+	int PopulateProvidedDesc(InputElementRep_t &element, VertexFormat_t fmt, int nOffset, D3D11_INPUT_ELEMENT_DESC &desc);
+	void PopulateFallbackDesc(InputElementRep_t &element, D3D11_INPUT_ELEMENT_DESC &desc);
 
 private:
 	bool m_bDeviceInitialized;
