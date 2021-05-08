@@ -684,6 +684,28 @@ public:
 	void UnbindPixelShader(PixelShaderHandle_t hPixelShader);
 
 private:
+
+	void HandleStateChanges();
+
+	void SetPrimitiveTopology(MaterialPrimitiveType_t primitiveType);
+
+private:
+
+	enum StateChangeFlags {
+		STATE_CHANGED_NONE = 0x0,
+		STATE_CHANGED_VIEWPORTS = 0x1,
+		STATE_CHANGED_VERTEX_BUFFER = 0x2,
+		STATE_CHANGED_INDEX_BUFFER = 0x4,
+		STATE_CHANGED_PRIMITIVE_TOPOLOGY = 0x8,
+		STATE_CHANGED_VERTEX_SHADER = 0x10,
+		STATE_CHANGED_GEOMETRY_SHADER = 0x20, // TODO: For later
+		STATE_CHANGED_PIXEL_SHADER = 0x40,
+		STATE_CHANGED_INPUT_LAYOUT = 0x80,
+		STATE_CHANGED_RENDER_TARGETS = 0x100
+	};
+
+	unsigned int m_StateChanges;
+
 	MaterialMatrixMode_t m_MatrixMode;
 	DirectX::XMMATRIX *m_pCurMatrix;
 

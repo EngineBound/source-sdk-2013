@@ -324,7 +324,12 @@ void CShaderDeviceDX11::DestroyVertexShader(VertexShaderHandle_t hShader)
 	VertexShaderRep_t &rep = m_VertexShaders[ind];
 	rep.m_pShader->Release();
 	rep.m_pReflection->Release();
-	rep.m_pInputLayout->Release();
+	
+	if (rep.m_pInputLayout)
+		rep.m_pInputLayout->Release();
+	free(rep.m_pShaderByteCode);
+
+	m_VertexShaders.Remove(ind);
 }
 
 GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(IShaderBuffer* pShaderBuffer)
@@ -354,14 +359,111 @@ void CShaderDeviceDX11::DestroyPixelShader(PixelShaderHandle_t hShader)
 	PixelShaderRep_t &rep = m_PixelShaders[ind];
 	rep.m_pShader->Release();
 	rep.m_pReflection->Release();
+
+	m_PixelShaders.Remove(ind);
 }
 
-
-static D3D11_INPUT_ELEMENT_DESC s_pInputDescs[] =
+struct InputElementRep_t
 {
-	{ "POSITION",		0,	DXGI_FORMAT_R32G32B32_FLOAT,	0,	 0,	 D3D11_INPUT_PER_VERTEX_DATA,	0 },
-	{ "COLOR",		0,	DXGI_FORMAT_B8G8R8A8_UNORM,	        0,	 12, D3D11_INPUT_PER_VERTEX_DATA,	0 },
+	VertexFormat_t m_VertexFormatMask;
+	char *m_pSemanticName;
+	int m_nSemanticIndex;
+	DXGI_FORMAT m_Format;
+	int m_nElementSize;
 };
+
+static InputElementRep_t s_pInputElements[]
+{
+	{ VERTEX_POSITION,			"POSITION",		0,	DXGI_FORMAT_R32G32B32_FLOAT,	12	}, // sizeof won't work here because the number of bits is specified
+	{ VERTEX_BONE_WEIGHT_MASK,	"BLENDWEIGHT",	0,	DXGI_FORMAT_UNKNOWN,			0	},
+	{ VERTEX_BONE_INDEX,		"BLENDINDICES",	0,	DXGI_FORMAT_R8G8B8A8_UINT,		4	},
+	{ VERTEX_NORMAL,			"NORMAL",		0,	DXGI_FORMAT_R32G32B32_FLOAT,	12	},
+	{ VERTEX_COLOR,				"COLOR",		0,	DXGI_FORMAT_B8G8R8A8_UNORM,		4	},
+	{ VERTEX_SPECULAR,			"SPECULAR",		0,	DXGI_FORMAT_B8G8R8A8_UNORM,		4	},
+	{ VERTEX_TEXCOORD_MASK(0),	"TEXCOORD",		0,	DXGI_FORMAT_UNKNOWN,			-1	},
+	{ VERTEX_TEXCOORD_MASK(1),	"TEXCOORD",		1,	DXGI_FORMAT_UNKNOWN,			-1	},
+	{ VERTEX_TEXCOORD_MASK(2),	"TEXCOORD",		2,	DXGI_FORMAT_UNKNOWN,			-1	},
+	{ VERTEX_TEXCOORD_MASK(3),	"TEXCOORD",		3,	DXGI_FORMAT_UNKNOWN,			-1	},
+	{ VERTEX_TEXCOORD_MASK(4),	"TEXCOORD",		4,	DXGI_FORMAT_UNKNOWN,			-1	},
+	{ VERTEX_TEXCOORD_MASK(5),	"TEXCOORD",		5,	DXGI_FORMAT_UNKNOWN,			-1	},
+	{ VERTEX_TEXCOORD_MASK(6),	"TEXCOORD",		6,	DXGI_FORMAT_UNKNOWN,			-1	},
+	{ VERTEX_TEXCOORD_MASK(7),	"TEXCOORD",		7,	DXGI_FORMAT_UNKNOWN,			-1	},
+	{ VERTEX_TANGENT_S,			"TANGENT",		0,	DXGI_FORMAT_R32G32B32_FLOAT,	12	},
+	{ VERTEX_TANGENT_T,			"BINORMAL",		0,	DXGI_FORMAT_R32G32B32_FLOAT,	12	},
+	{ USER_DATA_SIZE_MASK,		"USERDATA",		0,	DXGI_FORMAT_UNKNOWN,			-1	},
+};
+
+static DXGI_FORMAT s_pSizeToFormat[]
+{
+	DXGI_FORMAT_UNKNOWN,
+	DXGI_FORMAT_R32_FLOAT,
+	DXGI_FORMAT_R32G32_FLOAT,
+	DXGI_FORMAT_R32G32B32_FLOAT,
+	DXGI_FORMAT_R32G32B32A32_FLOAT,
+};
+
+ID3D11InputLayout *CShaderDeviceDX11::GetInputLayout(VertexShaderHandle_t hVertexShader, VertexFormat_t fmt)
+{
+	ID3D11InputLayout *pInputLayout = m_VertexShaders[(VertexRepIndex_t)hVertexShader].m_pInputLayout;
+	if (!pInputLayout)
+	{
+		D3D11_INPUT_ELEMENT_DESC pDescs[32];
+
+		int nNumDescs = 0;
+		int nOffset = 0;
+		for (int i = 0; i < sizeof(s_pInputElements) / sizeof(InputElementRep_t); ++i)
+		{
+			InputElementRep_t &element = s_pInputElements[i];
+			D3D11_INPUT_ELEMENT_DESC &desc = pDescs[nNumDescs];
+
+			if (fmt & element.m_VertexFormatMask)
+			{
+				int elementSize = element.m_nElementSize;
+				DXGI_FORMAT format = element.m_Format;
+				if (elementSize < 0)
+				{
+					if (element.m_VertexFormatMask & USER_DATA_SIZE_MASK)
+					{
+						elementSize = UserDataSize(fmt);
+					}
+					else
+					{
+						elementSize = TexCoordSize(element.m_nSemanticIndex, fmt);
+					}
+
+					format = s_pSizeToFormat[elementSize];
+					elementSize *= 4; // 32 bit float
+				}
+
+				desc.SemanticName = element.m_pSemanticName;
+				desc.SemanticIndex = element.m_nSemanticIndex;
+				desc.Format = format;
+				desc.InputSlot = 0;
+				desc.AlignedByteOffset = nOffset;
+				desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+				desc.InstanceDataStepRate = 0;
+
+				nOffset += elementSize;
+				nNumDescs++;
+			}
+		}
+
+		VertexShaderRep_t& rep = m_VertexShaders[(VertexRepIndex_t)hVertexShader];
+
+		HRESULT hr = m_pD3DDevice->CreateInputLayout(pDescs, nNumDescs, rep.m_pShaderByteCode, rep.m_nByteCodeSize, &pInputLayout);
+		if (FAILED(hr) || !pInputLayout)
+		{
+			Assert(0);
+			rep.m_pReflection->Release();
+			rep.m_pShader->Release();
+			return NULL;
+		}
+
+		m_VertexShaders[(VertexRepIndex_t)hVertexShader].m_pInputLayout = pInputLayout;
+	}
+
+	return pInputLayout;
+}
 
 // Utility methods to make shader creation simpler
 // NOTE: For the utlbuffer version, use a binary buffer for a compiled shader
@@ -385,23 +487,16 @@ VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(const char *pProgram,
 		return VERTEX_SHADER_HANDLE_INVALID;
 	}
 
-
-	ID3D11InputLayout *pInputLayout = NULL;
-	hr = m_pD3DDevice->CreateInputLayout(s_pInputDescs, 2, pProgram, nBufLen, &pInputLayout);
-	if (FAILED(hr) || !pInputLayout)
-	{
-		Assert(0);
-		pReflection->Release();
-		pVertexShader->Release();
-		return VERTEX_SHADER_HANDLE_INVALID;
-	}
-
 	VertexRepIndex_t ind = m_VertexShaders.AddToTail();
 	VertexShaderRep_t& rep = m_VertexShaders[ind];
 
 	rep.m_pShader = pVertexShader;
 	rep.m_pReflection = pReflection;
-	rep.m_pInputLayout = pInputLayout;
+	rep.m_pInputLayout = NULL;
+
+	rep.m_nByteCodeSize = nBufLen;
+	rep.m_pShaderByteCode = malloc(rep.m_nByteCodeSize * sizeof(char));
+	memcpy(rep.m_pShaderByteCode, pProgram, rep.m_nByteCodeSize);
 
 	return (VertexShaderHandle_t)ind;
 }

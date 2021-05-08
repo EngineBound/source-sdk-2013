@@ -134,10 +134,7 @@ public:
 		return m_PixelShaders[(PixelRepIndex_t)hPixelShader].m_pShader;
 	}
 
-	inline ID3D11InputLayout *GetInputLayout(VertexShaderHandle_t hVertexShader)
-	{
-		return m_VertexShaders[(VertexRepIndex_t)hVertexShader].m_pInputLayout;
-	}
+	ID3D11InputLayout *GetInputLayout(VertexShaderHandle_t hVertexShader, VertexFormat_t fmt);
 
 private:
 	bool m_bDeviceInitialized;
@@ -156,6 +153,9 @@ private:
 		ID3D11VertexShader *m_pShader;
 		ID3D11ShaderReflection *m_pReflection;
 		ID3D11InputLayout *m_pInputLayout;
+
+		void *m_pShaderByteCode;
+		size_t m_nByteCodeSize;
 	};
 
 	struct PixelShaderRep_t

@@ -33,6 +33,8 @@ CShaderAPIDX11::CShaderAPIDX11()
 	m_vTextures.RemoveAll();
 	m_ModifyTextureHandle = 0;
 	m_BackBufferHandle = 0;
+
+	m_StateChanges = STATE_CHANGED_PRIMITIVE_TOPOLOGY;
 }
 
 CShaderAPIDX11::~CShaderAPIDX11()
@@ -41,6 +43,61 @@ CShaderAPIDX11::~CShaderAPIDX11()
 		delete m_pDynamicMesh;
 
 	OnDeviceShutdown();
+}
+
+void CShaderAPIDX11::HandleStateChanges()
+{
+	if (m_StateChanges & STATE_CHANGED_VIEWPORTS)
+	{
+		g_pShaderDeviceDX11->GetDeviceContext()->RSSetViewports(m_DynamicState.m_nViewportCount, m_DynamicState.m_pViewports);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_VERTEX_BUFFER)
+	{
+		g_pShaderDeviceDX11->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_DynamicState.m_pVertexBuffer, &m_DynamicState.m_VBStride, &m_DynamicState.m_VBOffset);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_INDEX_BUFFER)
+	{
+		g_pShaderDeviceDX11->GetDeviceContext()->IASetIndexBuffer(m_DynamicState.m_pIndexBuffer, m_DynamicState.m_IBFmt, m_DynamicState.m_IBOffset);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_PRIMITIVE_TOPOLOGY)
+	{
+		g_pShaderDeviceDX11->GetDeviceContext()->IASetPrimitiveTopology(m_DynamicState.m_PrimitiveTopology);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_VERTEX_SHADER)
+	{
+		g_pShaderDeviceDX11->GetDeviceContext()->VSSetShader(m_DynamicState.m_pVertexShader, NULL, 0);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_GEOMETRY_SHADER)
+	{
+		Assert(0); // TODO
+	}
+
+	if (m_StateChanges & STATE_CHANGED_PIXEL_SHADER)
+	{
+		g_pShaderDeviceDX11->GetDeviceContext()->PSSetShader(m_DynamicState.m_pPixelShader, NULL, 0);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_INPUT_LAYOUT)
+	{
+		m_DynamicState.m_pInputLayout = g_pShaderDeviceDX11->GetInputLayout(m_DynamicState.m_hVertexShader, m_DynamicState.m_VertexFormat);
+
+		g_pShaderDeviceDX11->GetDeviceContext()->IASetInputLayout(m_DynamicState.m_pInputLayout);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_RENDER_TARGETS)
+	{
+		// TODO
+
+		ID3D11RenderTargetView *pRTView = m_vTextures[m_BackBufferHandle].GetRenderTargetView();
+		g_pShaderDeviceDX11->GetDeviceContext()->OMSetRenderTargets(1, &pRTView, NULL);
+	}
+
+	m_StateChanges = STATE_CHANGED_NONE;
 }
 
 // ------------------------------------------------------- //
@@ -68,8 +125,7 @@ void CShaderAPIDX11::SetViewports(int nCount, const ShaderViewport_t* pViewports
 
 	m_DynamicState.m_nViewportCount = nCount;
 
-	// May be better to do this only on each draw if needed
-	g_pShaderDeviceDX11->GetDeviceContext()->RSSetViewports(nCount, m_DynamicState.m_pViewports);
+	m_StateChanges |= STATE_CHANGED_VIEWPORTS;
 }
 
 int CShaderAPIDX11::GetViewports(ShaderViewport_t* pViewports, int nMax) const
@@ -680,13 +736,12 @@ void CShaderAPIDX11::BindVertexShader(VertexShaderHandle_t hVertexShader)
 		return;
 
 	ID3D11VertexShader* pVertexShader = g_pShaderDeviceDX11->GetVertexShader(hVertexShader);
-	if (pVertexShader != m_DynamicState.m_pVertexShader)
+	if (m_DynamicState.m_pVertexShader != pVertexShader || m_DynamicState.m_hVertexShader != hVertexShader)
 	{
 		m_DynamicState.m_pVertexShader = pVertexShader;
-		m_DynamicState.m_pInputLayout = g_pShaderDeviceDX11->GetInputLayout(hVertexShader);
+		m_DynamicState.m_hVertexShader = hVertexShader;
 
-		g_pShaderDeviceDX11->GetDeviceContext()->VSSetShader(m_DynamicState.m_pVertexShader, NULL, 0);
-		g_pShaderDeviceDX11->GetDeviceContext()->IASetInputLayout(m_DynamicState.m_pInputLayout);
+		m_StateChanges |= STATE_CHANGED_VERTEX_SHADER | STATE_CHANGED_INPUT_LAYOUT;
 	}
 }
 
@@ -719,7 +774,7 @@ void CShaderAPIDX11::BindPixelShader(PixelShaderHandle_t hPixelShader)
 	if (pPixelShader != m_DynamicState.m_pPixelShader)
 	{
 		m_DynamicState.m_pPixelShader = pPixelShader;
-		g_pShaderDeviceDX11->GetDeviceContext()->PSSetShader(m_DynamicState.m_pPixelShader, NULL, 0);
+		m_StateChanges |= STATE_CHANGED_PIXEL_SHADER;
 	}
 }
 
@@ -1703,7 +1758,14 @@ void CShaderAPIDX11::BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffe
 		m_DynamicState.m_VBStride = bufStride;
 		m_DynamicState.m_VBOffset = nOffset;
 
-		g_pShaderDeviceDX11->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_DynamicState.m_pVertexBuffer, &m_DynamicState.m_VBStride, &m_DynamicState.m_VBOffset);
+		m_StateChanges |= STATE_CHANGED_VERTEX_BUFFER;
+	}
+
+	if (m_DynamicState.m_VertexFormat != fmt)
+	{
+		m_DynamicState.m_VertexFormat = fmt;
+	
+		m_StateChanges |= STATE_CHANGED_INPUT_LAYOUT;
 	}
 }
 
@@ -1727,15 +1789,57 @@ void CShaderAPIDX11::BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBy
 		m_DynamicState.m_IBFmt = indexFormat;
 		m_DynamicState.m_IBOffset = nOffset;
 
-		g_pShaderDeviceDX11->GetDeviceContext()->IASetIndexBuffer(m_DynamicState.m_pIndexBuffer, m_DynamicState.m_IBFmt, m_DynamicState.m_IBOffset);
+		m_StateChanges |= STATE_CHANGED_INDEX_BUFFER;
 	}
 }
 
 void CShaderAPIDX11::Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount)
 {
 	_AssertMsg(0, "Incomplete Implementation! " __FUNCTION__, 0, 0);
-	g_pShaderDeviceDX11->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	SetPrimitiveTopology(primitiveType);
+
+	HandleStateChanges();
+
 	g_pShaderDeviceDX11->GetDeviceContext()->DrawIndexed(nIndexCount, nFirstIndex, 0);
+}
+
+void CShaderAPIDX11::SetPrimitiveTopology(MaterialPrimitiveType_t primitiveType)
+{
+	D3D11_PRIMITIVE_TOPOLOGY d3dTopology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
+	switch (primitiveType)
+	{
+
+	case MATERIAL_POINTS:
+		d3dTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+		break;
+
+	case MATERIAL_LINES:
+		d3dTopology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+		break;
+
+	case MATERIAL_TRIANGLES:
+		d3dTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		break;
+
+	case MATERIAL_TRIANGLE_STRIP:
+		d3dTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+		break;
+
+	case MATERIAL_LINE_STRIP:
+		d3dTopology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
+		break;
+
+	default:
+		d3dTopology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
+		break;
+
+	}
+
+	if (m_DynamicState.m_PrimitiveTopology == d3dTopology)
+		return;
+
+	m_DynamicState.m_PrimitiveTopology = d3dTopology;
+	m_StateChanges |= STATE_CHANGED_PRIMITIVE_TOPOLOGY;
 }
 
 void CShaderAPIDX11::DrawMesh(IMesh *pMesh)
@@ -2024,8 +2128,7 @@ void CShaderAPIDX11::OnDeviceInitialised()
 	CAPITextureDX11* pBackBufferTex = &m_vTextures[m_BackBufferHandle];
 	pBackBufferTex->InitRenderTarget(w, h, pBackBuffer, g_pShaderDevice->GetBackBufferFormat());
 
-	ID3D11RenderTargetView *pRTView = pBackBufferTex->GetRenderTargetView();
-	g_pShaderDeviceDX11->GetDeviceContext()->OMSetRenderTargets(1, &pRTView, NULL);
+	m_StateChanges |= STATE_CHANGED_RENDER_TARGETS;
 
 }
 

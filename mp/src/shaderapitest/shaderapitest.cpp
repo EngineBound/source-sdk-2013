@@ -361,7 +361,7 @@ bool CShaderAPITest::RunTests()
 	viewport.Init(0, 0, w, h);
 	m_pShaderAPI->SetViewports(1, &viewport);
 
-	VertexFormat_t fmt = VERTEX_POSITION | VERTEX_COLOR;
+	VertexFormat_t fmt = VERTEX_POSITION | VERTEX_COLOR | VERTEX_NORMAL;
 
 	IVertexBuffer* pVertexBuffer = m_pShaderDevice->CreateVertexBuffer(
 		SHADER_BUFFER_TYPE_DYNAMIC, fmt, 256, "");
@@ -382,18 +382,22 @@ bool CShaderAPITest::RunTests()
 		vertexBuilder.Lock(4);
 
 		vertexBuilder.Position3f(-1.0f + flXOffset, -1.0f, 0.5f);
+		vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
 		vertexBuilder.Color4ub(255, 0, 0, 255);
 		vertexBuilder.AdvanceVertex();
 
 		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, -1.0f, 0.5f);
+		vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
 		vertexBuilder.Color4ub(0, 255, 0, 255);
 		vertexBuilder.AdvanceVertex();
 
 		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, 1.0f, 0.5f);
+		vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
 		vertexBuilder.Color4ub(0, 0, 255, 255);
 		vertexBuilder.AdvanceVertex();
 
 		vertexBuilder.Position3f(-1.0f + flXOffset, 1.0f, 0.5f);
+		vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
 		vertexBuilder.Color4ub(0, 0, 0, 255);
 		vertexBuilder.AdvanceVertex();
 
@@ -439,17 +443,20 @@ static const char s_pDebugVertexShader[] =
 "struct VS_INPUT {"
 "	float3 vPos : POSITION;"
 "   float4 vColor : COLOR;"
+"   float3 vNormal : NORMAL;"
 "};"
 ""
 "struct VS_OUTPUT {"
 "	float4 projPos : SV_POSITION;"
 "   float4 vColor : COLOR;"
+"   float3 vNormal : NORMAL;"
 "};"
 ""
 "VS_OUTPUT main( const VS_INPUT v ) {"
 "	VS_OUTPUT o = (VS_OUTPUT)0;"
 "	o.projPos = float4(v.vPos, 1.0);"
 "	o.vColor = v.vColor;"
+"	o.vNormal = v.vNormal;"
 "	return o;"
 "}"
 "";
@@ -459,11 +466,12 @@ static const char s_pDebugPixelShader[] =
 "{"
 "	float4 projPos : SV_POSITION;"
 "	float4 vColor : COLOR;"
+"   float3 vNormal : NORMAL;"
 "};"
 ""
 "float4 main( const PS_INPUT i ) : SV_TARGET"
 "{"
-"	return i.vColor;"
+"	return i.vColor * float4(i.vNormal, 1.0);"
 "}"
 "";
 

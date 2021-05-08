@@ -19,7 +19,10 @@ struct DynamicStateDX11 {
 	ID3D11VertexShader* m_pVertexShader;
 	ID3D11PixelShader* m_pPixelShader;
 
+	VertexShaderHandle_t m_hVertexShader;
+
 	ID3D11InputLayout* m_pInputLayout;
+	VertexFormat_t m_VertexFormat;
 
 	ID3D11Buffer* m_pVertexBuffer;
 	UINT m_VBStride;
@@ -28,6 +31,8 @@ struct DynamicStateDX11 {
 	ID3D11Buffer* m_pIndexBuffer;
 	DXGI_FORMAT m_IBFmt;
 	UINT m_IBOffset;
+
+	D3D11_PRIMITIVE_TOPOLOGY m_PrimitiveTopology;
 
 	FLOAT m_ClearColor[4];
 
@@ -41,6 +46,8 @@ struct DynamicStateDX11 {
 
 		m_pViewports[0].MinDepth = 0;
 		m_pViewports[0].MaxDepth = 1;
+
+		m_PrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
 
 		for (int i = 0; i < 4; ++i)
 			m_ClearColor[i] = 0;
