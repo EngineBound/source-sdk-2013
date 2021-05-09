@@ -47,29 +47,31 @@ CShaderAPIDX11::~CShaderAPIDX11()
 
 void CShaderAPIDX11::HandleStateChanges()
 {
+	ID3D11DeviceContext *pDeviceContext = g_pShaderDeviceDX11->GetDeviceContext();
+
 	if (m_StateChanges & STATE_CHANGED_VIEWPORTS)
 	{
-		g_pShaderDeviceDX11->GetDeviceContext()->RSSetViewports(m_DynamicState.m_nViewportCount, m_DynamicState.m_pViewports);
+		pDeviceContext->RSSetViewports(m_DynamicState.m_nViewportCount, m_DynamicState.m_pViewports);
 	}
 
 	if (m_StateChanges & STATE_CHANGED_VERTEX_BUFFER)
 	{
-		g_pShaderDeviceDX11->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_DynamicState.m_pVertexBuffer, &m_DynamicState.m_VBStride, &m_DynamicState.m_VBOffset);
+		pDeviceContext->IASetVertexBuffers(0, 1, &m_DynamicState.m_pVertexBuffer, &m_DynamicState.m_VBStride, &m_DynamicState.m_VBOffset);
 	}
 
 	if (m_StateChanges & STATE_CHANGED_INDEX_BUFFER)
 	{
-		g_pShaderDeviceDX11->GetDeviceContext()->IASetIndexBuffer(m_DynamicState.m_pIndexBuffer, m_DynamicState.m_IBFmt, m_DynamicState.m_IBOffset);
+		pDeviceContext->IASetIndexBuffer(m_DynamicState.m_pIndexBuffer, m_DynamicState.m_IBFmt, m_DynamicState.m_IBOffset);
 	}
 
 	if (m_StateChanges & STATE_CHANGED_PRIMITIVE_TOPOLOGY)
 	{
-		g_pShaderDeviceDX11->GetDeviceContext()->IASetPrimitiveTopology(m_DynamicState.m_PrimitiveTopology);
+		pDeviceContext->IASetPrimitiveTopology(m_DynamicState.m_PrimitiveTopology);
 	}
 
 	if (m_StateChanges & STATE_CHANGED_VERTEX_SHADER)
 	{
-		g_pShaderDeviceDX11->GetDeviceContext()->VSSetShader(m_DynamicState.m_pVertexShader, NULL, 0);
+		pDeviceContext->VSSetShader(m_DynamicState.m_pVertexShader, NULL, 0);
 	}
 
 	if (m_StateChanges & STATE_CHANGED_GEOMETRY_SHADER)
@@ -79,14 +81,14 @@ void CShaderAPIDX11::HandleStateChanges()
 
 	if (m_StateChanges & STATE_CHANGED_PIXEL_SHADER)
 	{
-		g_pShaderDeviceDX11->GetDeviceContext()->PSSetShader(m_DynamicState.m_pPixelShader, NULL, 0);
+		pDeviceContext->PSSetShader(m_DynamicState.m_pPixelShader, NULL, 0);
 	}
 
 	if (m_StateChanges & STATE_CHANGED_INPUT_LAYOUT)
 	{
 		m_DynamicState.m_pInputLayout = g_pShaderDeviceDX11->GetInputLayout(m_DynamicState.m_hVertexShader, m_DynamicState.m_VertexFormat);
 
-		g_pShaderDeviceDX11->GetDeviceContext()->IASetInputLayout(m_DynamicState.m_pInputLayout);
+		pDeviceContext->IASetInputLayout(m_DynamicState.m_pInputLayout);
 	}
 
 	if (m_StateChanges & STATE_CHANGED_RENDER_TARGETS)
@@ -94,7 +96,19 @@ void CShaderAPIDX11::HandleStateChanges()
 		// TODO
 
 		ID3D11RenderTargetView *pRTView = m_vTextures[m_BackBufferHandle].GetRenderTargetView();
-		g_pShaderDeviceDX11->GetDeviceContext()->OMSetRenderTargets(1, &pRTView, NULL);
+		pDeviceContext->OMSetRenderTargets(1, &pRTView, NULL);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_TEXTURES)
+	{
+		// TODO: Vertex textures
+		pDeviceContext->PSSetShaderResources(0, m_DynamicState.m_nNumSamplers, m_DynamicState.m_ppTextures);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_SAMPLERS)
+	{
+		// TODO: Vertex samplers
+		pDeviceContext->PSSetSamplers(0, m_DynamicState.m_nNumSamplers, m_DynamicState.m_ppSamplers);
 	}
 
 	m_StateChanges = STATE_CHANGED_NONE;
@@ -1117,7 +1131,7 @@ void CShaderAPIDX11::TexImage2D(
 	bool bSrcIsTiled,		// NOTE: for X360 only
 	void *imageData) 
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	TexSubImage2D(level, cubeFaceID, 0, 0, zOffset, width, height, srcFormat, 0, bSrcIsTiled, imageData);
 }
 
 void CShaderAPIDX11::TexSubImage2D(
@@ -1133,12 +1147,19 @@ void CShaderAPIDX11::TexSubImage2D(
 	bool bSrcIsTiled,		// NOTE: for X360 only
 	void *imageData)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	CAPITextureDX11 &tex = m_vTextures[m_ModifyTextureHandle];
+
+	tex.LoadImage2D(level, cubeFaceID, xOffset, yOffset, zOffset, width, height, srcFormat, srcStride, bSrcIsTiled, imageData);
 }
 
 void CShaderAPIDX11::TexImageFromVTF(IVTFTexture* pVTF, int iVTFFrame)
 {
-	m_vTextures[m_ModifyTextureHandle].LoadFromVTF(pVTF, iVTFFrame);
+	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	// Needs miplevel and cubemap/volume support
+
+	unsigned char *imageData = pVTF->ImageData( iVTFFrame, 0, 0);
+
+	TexSubImage2D(0, 0, 0, 0, 0, pVTF->Width(), pVTF->Height(), pVTF->Format(), 0, false, imageData);
 }
 
 
@@ -1169,7 +1190,34 @@ void CShaderAPIDX11::TexSetPriority(int priority)
 // Sets the texture state
 void CShaderAPIDX11::BindTexture(Sampler_t sampler, ShaderAPITextureHandle_t textureHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	if (sampler >= MAX_DX11_SAMPLERS)
+		return;
+
+	CAPITextureDX11 *pTexture = &m_vTextures[textureHandle];
+	if (!pTexture)
+		return;
+
+	ID3D11ShaderResourceView *pResourceView = pTexture->GetResourceView();
+	ID3D11SamplerState *pSamplerState = pTexture->GetSamplerState();
+	if (pResourceView != m_DynamicState.m_ppTextures[sampler])
+	{
+		m_DynamicState.m_ppTextures[sampler] = pResourceView;
+
+		m_StateChanges |= STATE_CHANGED_TEXTURES;
+	}
+
+	if (pSamplerState != m_DynamicState.m_ppSamplers[sampler])
+	{
+		m_DynamicState.m_ppSamplers[sampler] = pSamplerState;
+
+		m_StateChanges |= STATE_CHANGED_SAMPLERS;
+	}
+
+	if (sampler >= m_DynamicState.m_nNumSamplers)
+	{
+		m_DynamicState.m_nNumSamplers = sampler + 1;
+		m_StateChanges |= STATE_CHANGED_TEXTURES | STATE_CHANGED_SAMPLERS;
+	}
 }
 
 

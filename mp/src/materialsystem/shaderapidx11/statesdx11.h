@@ -11,6 +11,7 @@
 #include <DirectXMath.h>
 
 #define MAX_DX11_VIEWPORTS 16
+#define MAX_DX11_SAMPLERS 16
 
 struct DynamicStateDX11 {
 	int m_nViewportCount;
@@ -33,6 +34,10 @@ struct DynamicStateDX11 {
 	UINT m_IBOffset;
 
 	D3D11_PRIMITIVE_TOPOLOGY m_PrimitiveTopology;
+	
+	ID3D11ShaderResourceView *m_ppTextures[MAX_DX11_SAMPLERS];
+	ID3D11SamplerState *m_ppSamplers[MAX_DX11_SAMPLERS];
+	int m_nNumSamplers;
 
 	FLOAT m_ClearColor[4];
 
