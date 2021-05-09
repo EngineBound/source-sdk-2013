@@ -3,8 +3,10 @@
 #include "appframework/tier2app.h"
 #include "tier0/ICommandLine.h"
 #include "materialsystem/imesh.h"
+#include "filesystem.h"
 
 #include "bitmap/imageformat.h"
+#include "vtf/vtf.h"
 #include "shaderapi/ishaderapi.h"
 #include "shaderapi/IShaderDevice.h"
 #include "shaderapi/ishadershadow.h"
@@ -27,6 +29,14 @@ public:
 		unsigned char *dst, enum ImageFormat dstImageFormat,
 		int width, int height, int srcStride = 0, int dstStride = 0)
 	{
+		if (srcStride == dstStride && srcImageFormat == dstImageFormat)
+		{
+			int nMemRequired = ImageLoader::GetMemRequired(width, height, 1, dstImageFormat, false);
+
+			V_memcpy(dst, src, nMemRequired);
+			return true;
+		}
+
 		return false;
 	}
 
@@ -151,9 +161,10 @@ private:
 	bool WaitForQuit();
 
 	bool RunTests();
-	void RunDynamicBufferTest(bool bTestFallback);
+	void RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord = false);
+	void RunStaticBufferTest();
 
-	void CreateShaders();
+	void CreateShaders(bool useTexture = false);
 
 private:
 	HWND m_hWnd;
@@ -199,8 +210,10 @@ bool CShaderAPITest::PreInit()
 	if (!g_pFullFileSystem)
 		return false;
 
-// 	if (!SetupSearchPaths(NULL, false, true))
-// 		return false;
+ 	if (!SetupSearchPaths(NULL, false, true))
+ 		return false;
+
+	g_pFullFileSystem->AddSearchPath(GetGameInfoPath(), "GAMEINFO", PATH_ADD_TO_TAIL);
 
 	if (!CreateTestWindow(1024, 768))
 		return false;
@@ -353,7 +366,7 @@ bool CShaderAPITest::RunTests()
 	m_pShaderAPI->ClearBuffers(true, false, false, -1, -1);
 	m_pShaderDevice->Present();
 
-	NextTest("Test 2: Dynamic Mesh - No fallback");
+	NextTest("Test 2: Dynamic Buffers - No fallback");
 
 	int w, h;
 	m_pShaderDevice->GetWindowSize(w, h);
@@ -364,9 +377,65 @@ bool CShaderAPITest::RunTests()
 
 	RunDynamicBufferTest(false);
 
-	NextTest("Test 3: Dynamic Mesh - Fallback");
+	NextTest("Test 3: Dynamic Buffers - Fallback");
 
 	RunDynamicBufferTest(true);
+
+	NextTest("Test 4: Static Buffers");
+
+	RunStaticBufferTest();
+
+	NextTest("Test 5: Texture Sampling");
+
+	const char* pTestTextureName = "testtexture_dxt.vtf";
+
+	FileHandle_t hTestVTF = g_pFullFileSystem->Open(pTestTextureName, "rb");
+	Assert(hTestVTF);
+
+	int nHeaderSize = VTFFileHeaderSize(VTF_MAJOR_VERSION);
+	CUtlBuffer VTFBuf;
+	VTFBuf.EnsureCapacity(nHeaderSize);
+	int nBytesRead = g_pFullFileSystem->Read(VTFBuf.Base(), nHeaderSize, hTestVTF);
+	VTFBuf.SeekPut(CUtlBuffer::SEEK_HEAD, nBytesRead);
+
+	IVTFTexture *pVTFTexture = CreateVTFTexture();
+
+	if (!pVTFTexture->Unserialize(VTFBuf, true))
+	{
+		Assert(0);
+	}
+
+	int width, height;
+	ImageFormat fmt;
+	float gamma;
+
+	width = pVTFTexture->Width();
+	height = pVTFTexture->Height();
+	fmt = pVTFTexture->Format();
+	gamma = 2.6f;
+
+	int nVTFOffset, nVTFSize;
+	pVTFTexture->ImageFileInfo(0, 0, 0, &nVTFOffset, &nVTFSize);
+	VTFBuf.EnsureCapacity(nVTFSize);
+
+	VTFBuf.SeekPut(CUtlBuffer::SEEK_HEAD, 0);
+	g_pFullFileSystem->Seek(hTestVTF, nVTFOffset, FILESYSTEM_SEEK_HEAD);
+	g_pFullFileSystem->Read(VTFBuf.Base(), nVTFSize, hTestVTF);
+	g_pFullFileSystem->Close(hTestVTF);
+
+	ShaderAPITextureHandle_t handle = m_pShaderAPI->CreateTexture(width, height, 1, fmt, 0, 0, 0, "testtexture", "test");
+	m_pShaderAPI->ModifyTexture(handle);
+
+	m_pShaderAPI->TexImage2D(0, 0, fmt, 0, width, height, fmt, false, VTFBuf.Base());
+
+	DestroyVTFTexture(pVTFTexture);
+
+	m_pShaderAPI->BindTexture(SHADER_SAMPLER0, handle);
+
+	RunDynamicBufferTest(false, true);
+	m_pShaderDevice->Present(); // Allow renderdoc to capture
+
+	m_pShaderAPI->DeleteTexture(handle);
 
 	NextTest("Tests Done! Close window to exit.");
 
@@ -375,17 +444,108 @@ bool CShaderAPITest::RunTests()
 	return true;
 }
 
-void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback)
+void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord)
 {
 	VertexFormat_t fmt = VERTEX_POSITION | VERTEX_COLOR;
 
 	if (!bTestFallback)
 		fmt |= VERTEX_NORMAL;
 
+	if (bUseTexCoord)
+		fmt |= (2 << TEX_COORD_SIZE_BIT);
+
 	IVertexBuffer* pVertexBuffer = m_pShaderDevice->CreateVertexBuffer(
 		SHADER_BUFFER_TYPE_DYNAMIC, fmt, 256, "");
 	IIndexBuffer* pIndexBuffer = m_pShaderDevice->CreateIndexBuffer(
 		SHADER_BUFFER_TYPE_DYNAMIC, MATERIAL_INDEX_FORMAT_16BIT, 30, "");
+
+	CreateShaders(bUseTexCoord);
+
+	m_pShaderAPI->ClearBuffers(true, false, false, -1, -1);
+
+	const int nNumRects = 8;
+	float flRectWidth = 2.0f / nNumRects;
+	float flNormPerRect = 1.0f / (nNumRects - 1);
+	for (int i = 0; i < nNumRects; ++i)
+	{
+		float flXOffset = i * flRectWidth;
+		float flNormAmount = i * flNormPerRect;
+
+		CVertexBuilder vertexBuilder(pVertexBuffer, fmt);
+		vertexBuilder.Lock(4);
+
+		vertexBuilder.Position3f(-1.0f + flXOffset, -1.0f, 0.5f);
+		if (!bTestFallback) 
+			vertexBuilder.Normal3f(0.0f, 0.0f, flNormAmount);
+		if (bUseTexCoord)
+			vertexBuilder.TexCoord2f(0, 0.0f, 1.0f);
+		vertexBuilder.Color4ub(255, 0, 0, 255);
+		vertexBuilder.AdvanceVertex();
+
+		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, -1.0f, 0.5f);
+		if (!bTestFallback) 
+			vertexBuilder.Normal3f(0.0f, flNormAmount, 0.0f);
+		if (bUseTexCoord)
+			vertexBuilder.TexCoord2f(0, 1.0f, 1.0f);
+		vertexBuilder.Color4ub(0, 255, 0, 255);
+		vertexBuilder.AdvanceVertex();
+
+		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, 1.0f, 0.5f);
+		if (!bTestFallback) 
+			vertexBuilder.Normal3f(flNormAmount, 0.0f, 0.0f);
+		if (bUseTexCoord)
+			vertexBuilder.TexCoord2f(0, 1.0f, 0.0f);
+		vertexBuilder.Color4ub(0, 0, 255, 255);
+		vertexBuilder.AdvanceVertex();
+
+		vertexBuilder.Position3f(-1.0f + flXOffset, 1.0f, 0.5f);
+		if (!bTestFallback) 
+			vertexBuilder.Normal3f(flNormAmount, flNormAmount, flNormAmount);
+		if (bUseTexCoord)
+			vertexBuilder.TexCoord2f(0, 0.0f, 0.0f);
+		vertexBuilder.Color4ub(0, 0, 0, 255);
+		vertexBuilder.AdvanceVertex();
+
+		vertexBuilder.Unlock();
+
+		CIndexBuilder indexBuilder(pIndexBuffer, MATERIAL_INDEX_FORMAT_16BIT);
+		indexBuilder.Lock(6, vertexBuilder.GetFirstVertex());
+
+		indexBuilder.FastIndex(0);
+		indexBuilder.FastIndex(2);
+		indexBuilder.FastIndex(1);
+		indexBuilder.FastIndex(0);
+		indexBuilder.FastIndex(3);
+		indexBuilder.FastIndex(2);
+		indexBuilder.SpewData();
+
+		indexBuilder.Unlock();
+
+		m_pShaderAPI->BindVertexBuffer(0, pVertexBuffer, vertexBuilder.Offset(), vertexBuilder.GetFirstVertex(), vertexBuilder.TotalVertexCount(), fmt);
+		m_pShaderAPI->BindIndexBuffer(pIndexBuffer, indexBuilder.Offset());
+		m_pShaderAPI->Draw(MATERIAL_TRIANGLES, indexBuilder.GetFirstIndex(), indexBuilder.TotalIndexCount());
+	}
+
+	m_pShaderDevice->Present();
+
+	m_pShaderDevice->DestroyVertexShader(m_hVertexShader);
+	m_pShaderDevice->DestroyPixelShader(m_hPixelShader);
+
+	m_hVertexShader = VERTEX_SHADER_HANDLE_INVALID;
+	m_hPixelShader = PIXEL_SHADER_HANDLE_INVALID;
+
+	m_pShaderDevice->DestroyVertexBuffer(pVertexBuffer);
+	m_pShaderDevice->DestroyIndexBuffer(pIndexBuffer);
+}
+
+void CShaderAPITest::RunStaticBufferTest()
+{
+	VertexFormat_t fmt = VERTEX_POSITION | VERTEX_COLOR | VERTEX_NORMAL;
+
+	IVertexBuffer* pVertexBuffer = m_pShaderDevice->CreateVertexBuffer(
+		SHADER_BUFFER_TYPE_STATIC, fmt, 256, "");
+	IIndexBuffer* pIndexBuffer = m_pShaderDevice->CreateIndexBuffer(
+		SHADER_BUFFER_TYPE_STATIC, MATERIAL_INDEX_FORMAT_16BIT, 30, "");
 
 	CreateShaders();
 
@@ -393,34 +553,32 @@ void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback)
 
 	const int nNumRects = 8;
 	float flRectWidth = 2.0f / nNumRects;
+	float flNormPerRect = 1.0f / (nNumRects - 1);
 	for (int i = 0; i < nNumRects; ++i)
 	{
 		float flXOffset = i * flRectWidth;
+		float flNormAmount = i * flNormPerRect;
 
 		CVertexBuilder vertexBuilder(pVertexBuffer, fmt);
 		vertexBuilder.Lock(4);
 
 		vertexBuilder.Position3f(-1.0f + flXOffset, -1.0f, 0.5f);
-		if (!bTestFallback) 
-			vertexBuilder.Normal3f(0.0f, 0.0f, 1.0f);
+		vertexBuilder.Normal3f(0.0f, 0.0f, flNormAmount);
 		vertexBuilder.Color4ub(255, 0, 0, 255);
 		vertexBuilder.AdvanceVertex();
 
 		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, -1.0f, 0.5f);
-		if (!bTestFallback) 
-			vertexBuilder.Normal3f(0.0f, 1.0f, 0.0f);
+		vertexBuilder.Normal3f(0.0f, flNormAmount, 0.0f);
 		vertexBuilder.Color4ub(0, 255, 0, 255);
 		vertexBuilder.AdvanceVertex();
 
 		vertexBuilder.Position3f(-1.0f + flXOffset + flRectWidth, 1.0f, 0.5f);
-		if (!bTestFallback) 
-			vertexBuilder.Normal3f(1.0f, 0.0f, 0.0f);
+		vertexBuilder.Normal3f(flNormAmount, 0.0f, 0.0f);
 		vertexBuilder.Color4ub(0, 0, 255, 255);
 		vertexBuilder.AdvanceVertex();
 
 		vertexBuilder.Position3f(-1.0f + flXOffset, 1.0f, 0.5f);
-		if (!bTestFallback) 
-			vertexBuilder.Normal3f(1.0f, 1.0f, 1.0f);
+		vertexBuilder.Normal3f(flNormAmount, flNormAmount, flNormAmount);
 		vertexBuilder.Color4ub(0, 0, 0, 255);
 		vertexBuilder.AdvanceVertex();
 
@@ -461,12 +619,14 @@ static const char s_pDebugVertexShader[] =
 "	float3 vPos : POSITION;"
 "   float4 vColor : COLOR;"
 "   float3 vNormal : NORMAL;"
+"   float2 vTexCoord0 : TEXCOORD0;"
 "};"
 ""
 "struct VS_OUTPUT {"
 "	float4 projPos : SV_POSITION;"
 "   float4 vColor : COLOR;"
 "   float3 vNormal : NORMAL;"
+"   float2 vTexCoord0 : TEXCOORD0;"
 "};"
 ""
 "VS_OUTPUT main( const VS_INPUT v ) {"
@@ -474,6 +634,7 @@ static const char s_pDebugVertexShader[] =
 "	o.projPos = float4(v.vPos, 1.0);"
 "	o.vColor = v.vColor;"
 "	o.vNormal = v.vNormal;"
+"   o.vTexCoord0 = v.vTexCoord0;"
 "	return o;"
 "}"
 "";
@@ -484,21 +645,56 @@ static const char s_pDebugPixelShader[] =
 "	float4 projPos : SV_POSITION;"
 "	float4 vColor : COLOR;"
 "   float3 vNormal : NORMAL;"
+"   float2 vTexCoord0 : TEXCOORD0;"
 "};"
 ""
 "float4 main( const PS_INPUT i ) : SV_TARGET"
 "{"
-"	return i.vColor + float4(i.vNormal, 0.0);"
+"   const int INT_FLOAT_PRECISION = (256.0);"
+"   int3 normalInt = (int3)(i.vNormal * INT_FLOAT_PRECISION);"
+"   normalInt = (normalInt << 2) & 53;"
+"	return i.vColor + float4(((float3)normalInt) / INT_FLOAT_PRECISION, 0.0);"
+"}"
+"";
+
+static const char s_pDebugPixelShaderWithTexture[] =
+"struct PS_INPUT"
+"{"
+"	float4 projPos : SV_POSITION;"
+"	float4 vColor : COLOR;"
+"   float3 vNormal : NORMAL;"
+"   float2 vTexCoord0 : TEXCOORD0;"
+"};"
+""
+"sampler testSampler : register(s0);"
+"Texture2D testTexture : register(t0);"
+""
+"float4 main( const PS_INPUT i ) : SV_TARGET"
+"{"
+"	return (float4(0.5, 0.5, 0.5, 1.0) + i.vColor * 0.2) * float4(testTexture.Sample(testSampler, i.vTexCoord0.xy).xyz, 1.0);"
 "}"
 "";
 
 
-void CShaderAPITest::CreateShaders()
+void CShaderAPITest::CreateShaders(bool useTexture)
 {
 	m_hVertexShader = m_pShaderDevice->CreateVertexShader(s_pDebugVertexShader, sizeof(s_pDebugVertexShader), "vs_5_0");
 	Assert(m_hVertexShader != VERTEX_SHADER_HANDLE_INVALID);
 
-	m_hPixelShader = m_pShaderDevice->CreatePixelShader(s_pDebugPixelShader, sizeof(s_pDebugPixelShader), "ps_5_0");
+	const char *pPixelShader;
+	int nPixelShaderSize;
+	if (useTexture)
+	{
+		pPixelShader = s_pDebugPixelShaderWithTexture;
+		nPixelShaderSize = sizeof(s_pDebugPixelShaderWithTexture);
+	}
+	else
+	{
+		pPixelShader = s_pDebugPixelShader;
+		nPixelShaderSize = sizeof(s_pDebugPixelShader);
+	}
+
+	m_hPixelShader = m_pShaderDevice->CreatePixelShader(pPixelShader, nPixelShaderSize, "ps_5_0");
 	Assert(m_hPixelShader != PIXEL_SHADER_HANDLE_INVALID);
 
 	m_pShaderAPI->BindVertexShader(m_hVertexShader);

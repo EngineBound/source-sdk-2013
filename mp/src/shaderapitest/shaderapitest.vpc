@@ -25,7 +25,7 @@ $Configuration
 
 	$Linker
 	{
-//		$AdditionalDependencies			"$BASE;"	[$WIN32]
+//		$AdditionalDependencies			"$BASE"	[$WIN32]
 	}
 }
 
@@ -38,6 +38,9 @@ $Project "ShaderAPI Test (EngineBound)"
 
 	$Folder "Link Libraries"
 	{
+        $Lib "vtf"
+        $Lib "mathlib"
+        $Lib "bitmap"
         $Lib "appframework"
         $Lib "tier2"
 	}
