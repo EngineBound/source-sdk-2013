@@ -320,6 +320,8 @@ bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 {
 	Assert(!m_bIsLocked);
 
+	g_ShaderAPIMutex.Lock();
+
 	if (m_bIsDynamic)
 	{
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -340,6 +342,8 @@ bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 			desc.m_nFirstVertex = 0;
 			desc.m_nOffset = 0;
 
+			g_ShaderAPIMutex.Unlock();
+
 			return false;
 		}
 
@@ -355,6 +359,8 @@ bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 			ComputeVertexDesc(0, 0, desc);
 			desc.m_nFirstVertex = 0;
 			desc.m_nOffset = 0;
+
+			g_ShaderAPIMutex.Unlock();
 
 			return false;
 		}
@@ -400,12 +406,16 @@ void CVertexBufferDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 
 	m_nBufferPosition += nMemWritten;
 	m_bIsLocked = false;
+
+	g_ShaderAPIMutex.Unlock();
 }
 
 
 // Spews the mesh data
 void CVertexBufferDX11::Spew(int nVertexCount, const VertexDesc_t &desc)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -632,6 +642,8 @@ void CIndexBufferDX11::ModifyEnd(IndexDesc_t& desc)
 // Spews the mesh data
 void CIndexBufferDX11::Spew(int nIndexCount, const IndexDesc_t &desc)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -725,6 +737,8 @@ void CMeshDX11::BeginCastBuffer(VertexFormat_t format)
 
 bool CMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 {
+	g_ShaderAPIMutex.Lock();
+
 	if (!m_pVertexBufferDX11)
 	{
 		m_pVertexBufferDX11 = new CVertexBufferDX11(SHADER_BUFFER_TYPE_STATIC, m_VertFormat, nVertexCount, "");
@@ -738,6 +752,8 @@ bool CMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 void CMeshDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 {
 	m_pVertexBufferDX11->Unlock(nVertexCount, desc);
+
+	g_ShaderAPIMutex.Unlock();
 }
 
 
@@ -781,6 +797,8 @@ void CMeshDX11::BeginCastBuffer(MaterialIndexFormat_t format)
 // Locks, unlocks the index buffer
 bool CMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 {
+	g_ShaderAPIMutex.Lock();
+
 	if (!m_pIndexBufferDX11)
 	{
 		m_pIndexBufferDX11 = new CIndexBufferDX11(SHADER_BUFFER_TYPE_STATIC, MATERIAL_INDEX_FORMAT_16BIT, nMaxIndexCount, "");
@@ -794,6 +812,8 @@ bool CMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 void CMeshDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 {
 	m_pIndexBufferDX11->Unlock(nWrittenIndexCount, desc);
+
+	g_ShaderAPIMutex.Unlock();
 }
 
 
@@ -873,6 +893,8 @@ void CMeshDX11::CopyToMeshBuilder(
 // Spews the mesh data
 void CMeshDX11::Spew(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -890,6 +912,8 @@ void CMeshDX11::ValidateData(int nVertexCount, int nIndexCount, const MeshDesc_t
 // nIndexCount of -1 means don't lock the index buffer...
 void CMeshDX11::LockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
+	g_ShaderAPIMutex.Lock();
+
 	Lock(nVertexCount, false, static_cast<VertexDesc_t &>(desc));
 	if (nIndexCount > -1)
 		Lock(nIndexCount, false, static_cast<IndexDesc_t &>(desc));
@@ -909,6 +933,8 @@ void CMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
 	Unlock(nVertexCount, static_cast<VertexDesc_t &>(desc));
 	Unlock(nIndexCount, static_cast<IndexDesc_t &>(desc));
+
+	g_ShaderAPIMutex.Unlock();
 }
 
 

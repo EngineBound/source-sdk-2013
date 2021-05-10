@@ -8,6 +8,8 @@
 #define VENDORID_NVIDIA	0x10DE
 #define VENDORID_ATI	0x1002
 
+#include "tier0/threadtools.h"
+
 class IShaderUtil;
 class IShaderAPIDX11;
 class IShaderDeviceMgrDX11;
@@ -21,5 +23,7 @@ extern IShaderDeviceMgrDX11* g_pShaderDeviceMgr;
 extern IShaderDeviceDX11* g_pShaderDevice;
 extern IShaderShadowDX11* g_pShaderShadow;
 extern IMaterialSystemHardwareConfigDX11* g_pHardwareConfig;
+
+extern CThreadFastMutex g_ShaderAPIMutex;
 
 #endif

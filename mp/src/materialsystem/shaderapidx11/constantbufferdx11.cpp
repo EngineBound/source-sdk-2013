@@ -88,6 +88,8 @@ bool CConstantBufferDX11::Lock(int nSize, bool bAppend, ConstantDesc_t &desc)
 {
 	Assert(!m_bIsLocked);
 
+	g_ShaderAPIMutex.Lock();
+
 	if (m_bIsDynamic)
 	{
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -105,6 +107,8 @@ bool CConstantBufferDX11::Lock(int nSize, bool bAppend, ConstantDesc_t &desc)
 			Assert(0);
 			desc.m_pData = NULL;
 
+			g_ShaderAPIMutex.Unlock();
+
 			return false;
 		}
 
@@ -116,6 +120,8 @@ bool CConstantBufferDX11::Lock(int nSize, bool bAppend, ConstantDesc_t &desc)
 		{
 			AssertMsg(0, "%d < %d !", GetRoomRemaining(), nSize);
 			desc.m_pData = NULL;
+
+			g_ShaderAPIMutex.Unlock();
 
 			return false;
 		}
@@ -157,4 +163,6 @@ void CConstantBufferDX11::Unlock(int nBytesWritten)
 
 	m_nBufferPosition += nBytesWritten;
 	m_bIsLocked = false;
+
+	g_ShaderAPIMutex.Unlock();
 }

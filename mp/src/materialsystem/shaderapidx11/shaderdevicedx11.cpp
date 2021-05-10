@@ -51,6 +51,8 @@ IShaderDeviceDX11 *g_pShaderDevice = g_pShaderDeviceDX11;
 
 CShaderDeviceDX11::CShaderDeviceDX11()
 {
+	Shutdown();
+
 	m_nAdapter = -1;
 	m_pDXGIOutput = NULL;
 	m_pDXGISwapChain = NULL;
@@ -64,6 +66,8 @@ bool CShaderDeviceDX11::Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t 
 {
 	if (m_bDeviceInitialized) 
 		return false;
+
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
 	IDXGIAdapter *pAdapter = g_pShaderDeviceMgrDX11->GetAdapter(nAdapter);
 	if (!pAdapter)
@@ -148,6 +152,21 @@ void CShaderDeviceDX11::Shutdown()
 	{
 		m_pD3DDeviceContext->Release();
 		m_pD3DDeviceContext = NULL;
+	}
+
+	for (int i = 0; i < m_VertexShaders.Count(); ++i)
+	{
+		m_VertexShaders[i].m_pInputLayout->Release();
+		m_VertexShaders[i].m_pReflection->Release();
+		m_VertexShaders[i].m_pShader->Release();
+
+		free(m_VertexShaders[i].m_pShaderByteCode);
+	}
+
+	for (int i = 0; i < m_PixelShaders.Count(); ++i)
+	{
+		m_PixelShaders[i].m_pReflection->Release();
+		m_PixelShaders[i].m_pShader->Release();
 	}
 
 	m_bDeviceInitialized = false;
@@ -597,12 +616,16 @@ PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(CUtlBuffer &buf, const 
 // Creates/destroys Mesh
 IMesh* CShaderDeviceDX11::CreateStaticMesh(VertexFormat_t vertexFormat, const char *pTextureBudgetGroup, IMaterial * pMaterial)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
 	return new CMeshDX11(false, vertexFormat);
 }
 
 void CShaderDeviceDX11::DestroyStaticMesh(IMesh* mesh)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
 	delete mesh;
 }
@@ -610,6 +633,8 @@ void CShaderDeviceDX11::DestroyStaticMesh(IMesh* mesh)
 // Creates/destroys static vertex + index buffers
 IVertexBuffer *CShaderDeviceDX11::CreateVertexBuffer(ShaderBufferType_t type, VertexFormat_t fmt, int nVertexCount, const char *pBudgetGroup)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	CVertexBufferDX11 *outBuf = new CVertexBufferDX11(type, fmt, nVertexCount, pBudgetGroup);
 	outBuf->CreateBuffer();
 	return outBuf;
@@ -617,12 +642,15 @@ IVertexBuffer *CShaderDeviceDX11::CreateVertexBuffer(ShaderBufferType_t type, Ve
 
 void CShaderDeviceDX11::DestroyVertexBuffer(IVertexBuffer *pVertexBuffer)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
 	delete pVertexBuffer;
 }
 
 
 IIndexBuffer *CShaderDeviceDX11::CreateIndexBuffer(ShaderBufferType_t bufferType, MaterialIndexFormat_t fmt, int nIndexCount, const char *pBudgetGroup)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	CIndexBufferDX11 *outBuf = new CIndexBufferDX11(bufferType, fmt, nIndexCount, pBudgetGroup);
 	outBuf->CreateBuffer();
 
@@ -631,11 +659,15 @@ IIndexBuffer *CShaderDeviceDX11::CreateIndexBuffer(ShaderBufferType_t bufferType
 
 void CShaderDeviceDX11::DestroyIndexBuffer(IIndexBuffer *pIndexBuffer)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	delete pIndexBuffer;
 }
 
 IConstantBufferDX11 *CShaderDeviceDX11::CreateConstantBuffer(ShaderBufferType_t bufferType, int nBufferSize, const char *pBudgetGroup)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	CConstantBufferDX11 *outBuf = new CConstantBufferDX11(bufferType, nBufferSize, pBudgetGroup);
 	outBuf->CreateBuffer();
 
@@ -644,18 +676,24 @@ IConstantBufferDX11 *CShaderDeviceDX11::CreateConstantBuffer(ShaderBufferType_t 
 
 void CShaderDeviceDX11::DestroyConstantBuffer(IConstantBufferDX11 *pConstantBuffer)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	delete pConstantBuffer;
 }
 
 // Do we need to specify the stream here in the case of locking multiple dynamic VBs on different streams?
 IVertexBuffer *CShaderDeviceDX11::GetDynamicVertexBuffer(int nStreamID, VertexFormat_t vertexFormat, bool bBuffered)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
 }
 
 IIndexBuffer *CShaderDeviceDX11::GetDynamicIndexBuffer(MaterialIndexFormat_t fmt, bool bBuffered)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
 }

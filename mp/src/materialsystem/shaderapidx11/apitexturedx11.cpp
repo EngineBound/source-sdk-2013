@@ -86,6 +86,15 @@ ID3D11Texture2D *CAPITextureDX11::CreateD3DTexture(int width, int height, int de
 	bool bIsDepthBuffer = (flags & TEXTURE_CREATE_DEPTHBUFFER) != 0;
 	bool bIsDynamic = (flags & TEXTURE_CREATE_DYNAMIC) != 0;
 
+	m_APIFormat = ResolveToSupportedFormat(dstImageFormat);
+	m_DXGIFormat = GetDXGIFormat(m_APIFormat);
+
+	if (m_DXGIFormat == DXGI_FORMAT_UNKNOWN)
+	{
+		Assert(0);
+		return NULL;
+	}
+
 	m_nNumMipLevels = numMipLevels;
 
 	if (bIsCubemap)
@@ -240,6 +249,9 @@ void CAPITextureDX11::LoadImage2D(
 	bool bSrcIsTiled,		// NOTE: for X360 only
 	void *imageData)
 {
+	if (srcFormat == IMAGE_FORMAT_UNKNOWN)
+		srcFormat = m_APIFormat;
+
 	bool isDXT1 = (m_APIFormat == IMAGE_FORMAT_DXT1 || m_APIFormat == IMAGE_FORMAT_DXT1_ONEBITALPHA || m_APIFormat == IMAGE_FORMAT_DXT1_RUNTIME);
 	bool isDXTAbove1 = (m_APIFormat == IMAGE_FORMAT_DXT3 || m_APIFormat == IMAGE_FORMAT_DXT5 || m_APIFormat == IMAGE_FORMAT_DXT5_RUNTIME);
 	bool isDXT = isDXT1 || isDXTAbove1;
@@ -266,6 +278,8 @@ void CAPITextureDX11::LoadImage2D(
 	if (!g_pShaderUtil->ConvertImageFormat((unsigned char *)imageData, srcFormat, pConvImage, m_APIFormat, width, height, srcStride))
 	{
 		_AssertMsg(0, "Unable to convert image!", 0, 0);
+
+		free(pConvImage);
 		return;
 	}
 

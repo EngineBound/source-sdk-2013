@@ -846,16 +846,22 @@ StateSnapshot_t	 CShaderAPIDX11::TakeSnapshot()
 
 void CShaderAPIDX11::TexMinFilter(ShaderTexFilterMode_t texFilterMode)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::TexMagFilter(ShaderTexFilterMode_t texFilterMode)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::TexWrap(ShaderTexCoordComponent_t coord, ShaderTexWrapMode_t wrapMode)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -869,6 +875,8 @@ void CShaderAPIDX11::CopyRenderTargetToTexture(ShaderAPITextureHandle_t textureH
 // Binds a particular material to render with
 void CShaderAPIDX11::Bind(IMaterial* pMaterial)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -876,6 +884,8 @@ void CShaderAPIDX11::Bind(IMaterial* pMaterial)
 // Flushes any primitives that are buffered
 void CShaderAPIDX11::FlushBufferedPrimitives()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -904,12 +914,16 @@ IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t ver
 // Methods to ask about particular state snapshots
 bool CShaderAPIDX11::IsTranslucent(StateSnapshot_t id) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return false;
 }
 
 bool CShaderAPIDX11::IsAlphaTested(StateSnapshot_t id) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return false;
 }
@@ -917,11 +931,13 @@ bool CShaderAPIDX11::IsAlphaTested(StateSnapshot_t id) const
 bool CShaderAPIDX11::UsesVertexAndPixelShaders(StateSnapshot_t id) const
 {
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	return true;
 }
 
 bool CShaderAPIDX11::IsDepthWriteEnabled(StateSnapshot_t id) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return false;
 }
@@ -930,6 +946,8 @@ bool CShaderAPIDX11::IsDepthWriteEnabled(StateSnapshot_t id) const
 // Gets the vertex format for a set of snapshot ids
 VertexFormat_t CShaderAPIDX11::ComputeVertexFormat(int numSnapshots, StateSnapshot_t* pIds) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return VERTEX_FORMAT_UNKNOWN;
 }
@@ -938,6 +956,8 @@ VertexFormat_t CShaderAPIDX11::ComputeVertexFormat(int numSnapshots, StateSnapsh
 // What fields in the vertex do we actually use?
 VertexFormat_t CShaderAPIDX11::ComputeVertexUsage(int numSnapshots, StateSnapshot_t* pIds) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return VERTEX_FORMAT_UNKNOWN;
 }
@@ -960,6 +980,8 @@ void CShaderAPIDX11::RenderPass(int nPass, int nPassCount)
 // Set the number of bone weights
 void CShaderAPIDX11::SetNumBoneWeights(int numBones)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -967,6 +989,8 @@ void CShaderAPIDX11::SetNumBoneWeights(int numBones)
 // Sets the lights
 void CShaderAPIDX11::SetLight(int lightNum, const LightDesc_t& desc)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -985,6 +1009,8 @@ void CShaderAPIDX11::SetAmbientLight(float r, float g, float b)
 
 void CShaderAPIDX11::SetAmbientLightCube(Vector4D cube[6])
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1090,6 +1116,8 @@ const char *pTextureGroupName)
 
 void CShaderAPIDX11::DeleteTexture(ShaderAPITextureHandle_t textureHandle)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	m_vTextures[textureHandle].Shutdown();
 }
 
@@ -1101,6 +1129,8 @@ int height,
 const char *pDebugName,
 bool bTexture)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return NULL;
 }
@@ -1123,6 +1153,8 @@ bool CShaderAPIDX11::IsTextureResident(ShaderAPITextureHandle_t textureHandle)
 // all use the texture specified by this function.
 void CShaderAPIDX11::ModifyTexture(ShaderAPITextureHandle_t textureHandle)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	m_ModifyTextureHandle = textureHandle;
 }
 
@@ -1138,6 +1170,8 @@ void CShaderAPIDX11::TexImage2D(
 	bool bSrcIsTiled,		// NOTE: for X360 only
 	void *imageData) 
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	TexSubImage2D(level, cubeFaceID, 0, 0, zOffset, width, height, srcFormat, 0, bSrcIsTiled, imageData);
 }
 
@@ -1154,6 +1188,8 @@ void CShaderAPIDX11::TexSubImage2D(
 	bool bSrcIsTiled,		// NOTE: for X360 only
 	void *imageData)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	CAPITextureDX11 &tex = m_vTextures[m_ModifyTextureHandle];
 
 	tex.LoadImage2D(level, cubeFaceID, xOffset, yOffset, zOffset, width, height, srcFormat, srcStride, bSrcIsTiled, imageData);
@@ -1161,12 +1197,18 @@ void CShaderAPIDX11::TexSubImage2D(
 
 void CShaderAPIDX11::TexImageFromVTF(IVTFTexture* pVTF, int iVTFFrame)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
 	// Needs miplevel and cubemap/volume support
 
 	unsigned char *imageData = pVTF->ImageData( iVTFFrame, 0, 0);
 
-	TexSubImage2D(0, 0, 0, 0, 0, pVTF->Width(), pVTF->Height(), pVTF->Format(), 0, false, imageData);
+	if (!imageData) return;
+
+	ImageFormat format = pVTF->Format();
+
+	TexSubImage2D(0, 0, 0, 0, 0, pVTF->Width(), pVTF->Height(), format, 0, false, imageData);
 }
 
 
@@ -1177,12 +1219,16 @@ void CShaderAPIDX11::TexImageFromVTF(IVTFTexture* pVTF, int iVTFFrame)
 bool CShaderAPIDX11::TexLock(int level, int cubeFaceID, int xOffset, int yOffset,
 	int width, int height, CPixelWriter& writer)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return false;
 }
 
 void CShaderAPIDX11::TexUnlock()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1240,6 +1286,8 @@ void CShaderAPIDX11::SetRenderTarget(ShaderAPITextureHandle_t colorTextureHandle
 // stuff that isn't to be used from within a shader
 void CShaderAPIDX11::ClearBuffersObeyStencil(bool bClearColor, bool bClearDepth)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1275,32 +1323,44 @@ void CShaderAPIDX11::EndFrame()
 // Selection mode methods
 int  CShaderAPIDX11::SelectionMode(bool selectionMode)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return -1;
 }
 
 void CShaderAPIDX11::SelectionBuffer(unsigned int* pBuffer, int size)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::ClearSelectionNames()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::LoadSelectionName(int name)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::PushSelectionName(int name)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::PopSelectionName()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1315,6 +1375,8 @@ void CShaderAPIDX11::ForceHardwareSync()
 // Used to clear the transition table when we know it's become invalid.
 void CShaderAPIDX11::ClearSnapshots()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1368,6 +1430,8 @@ int  CShaderAPIDX11::GetCurrentDynamicVBSize(void)
 
 void CShaderAPIDX11::DestroyVertexBuffers(bool bExitingLevel)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1381,6 +1445,8 @@ void CShaderAPIDX11::EvictManagedResources()
 // Level of anisotropic filtering
 void CShaderAPIDX11::SetAnisotropicLevel(int nAnisotropyLevel)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1447,17 +1513,23 @@ int CShaderAPIDX11::OcclusionQuery_GetNumPixelsRendered(ShaderAPIOcclusionQuery_
 
 void CShaderAPIDX11::SetFlashlightState(const FlashlightState_t &state, const VMatrix &worldToTexture)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 void CShaderAPIDX11::ClearVertexAndPixelShaderRefCounts()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::PurgeUnusedVertexAndPixelShaders()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1492,6 +1564,8 @@ void CShaderAPIDX11::UserClipTransform(const VMatrix &worldToView)
 // What fields in the morph do we actually use?
 MorphFormat_t CShaderAPIDX11::ComputeMorphFormat(int numSnapshots, StateSnapshot_t* pIds) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return MORPH_NORMAL;
 }
@@ -1509,11 +1583,15 @@ ShaderAPITextureHandle_t depthTextureHandle)
 
 void CShaderAPIDX11::CopyRenderTargetToTextureEx(ShaderAPITextureHandle_t textureHandle, int nRenderTargetID, Rect_t *pSrcRect, Rect_t *pDstRect)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::CopyTextureToRenderTargetEx(int nRenderTargetID, ShaderAPITextureHandle_t textureHandle, Rect_t *pSrcRect, Rect_t *pDstRect)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1542,34 +1620,46 @@ void CShaderAPIDX11::SetFullScreenTextureHandle(ShaderAPITextureHandle_t h)
 // system, shaders, and engine. renderparm.h has their definitions.
 void CShaderAPIDX11::SetFloatRenderingParameter(int parm_number, float value)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::SetIntRenderingParameter(int parm_number, int value)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 void CShaderAPIDX11::SetVectorRenderingParameter(int parm_number, Vector const &value)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 
 float CShaderAPIDX11::GetFloatRenderingParameter(int parm_number) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return -1.f;
 }
 
 int CShaderAPIDX11::GetIntRenderingParameter(int parm_number) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return -1;
 }
 
 Vector CShaderAPIDX11::GetVectorRenderingParameter(int parm_number) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return s_tmpVec;
 }
@@ -1662,11 +1752,15 @@ void CShaderAPIDX11::ClearStencilBufferRectangle(int xmin, int ymin, int xmax, i
 // disables all local lights
 void CShaderAPIDX11::DisableAllLocalLights()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
 int CShaderAPIDX11::CompareSnapshots(StateSnapshot_t snapshot0, StateSnapshot_t snapshot1)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 	return -1;
 }
@@ -1681,6 +1775,8 @@ IMesh *CShaderAPIDX11::GetFlexMesh()
 
 void CShaderAPIDX11::SetFlashlightStateEx(const FlashlightState_t &state, const VMatrix &worldToTexture, ITexture *pFlashlightDepthTexture)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -1996,6 +2092,8 @@ void CShaderAPIDX11::EnableHWMorphing(bool bEnable)
 // Sets flexweights for rendering
 void CShaderAPIDX11::SetFlexWeights(int nFirstWeight, int nCount, const MorphWeight_t* pWeights)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -2007,6 +2105,8 @@ void CShaderAPIDX11::FogMaxDensity(float flMaxDensity)
 
 void CShaderAPIDX11::CreateTextureHandles(ShaderAPITextureHandle_t* pHandles, int count)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	int i = 0;
 	for (ShaderAPITextureHandle_t texHandle = 0; texHandle < m_vTextures.Count(); ++texHandle)
 	{
@@ -2033,6 +2133,10 @@ void CShaderAPIDX11::CreateTextures(
 	const char *pDebugName,
 	const char *pTextureGroupName)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
+	if (dstImageFormat == IMAGE_FORMAT_UNKNOWN) return;
+
 	CreateTextureHandles(pHandles, count);
 
 	for (int i = 0; i < count; ++i)
@@ -2099,6 +2203,8 @@ void CShaderAPIDX11::OverrideColorWriteEnable(bool bOverrideEnable, bool bColorW
 //extended clear buffers function with alpha independent from color
 void CShaderAPIDX11::ClearBuffersObeyStencilEx(bool bClearColor, bool bClearAlpha, bool bClearDepth)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
 }
 
@@ -2185,6 +2291,8 @@ bool CShaderAPIDX11::SetDebugTextureRendering(bool bEnable)
 
 void CShaderAPIDX11::OnDeviceInitialised()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	int w, h;
 	GetBackBufferDimensions(w, h);
 

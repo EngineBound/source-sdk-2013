@@ -11,6 +11,8 @@
 
 #include "memdbgon.h"
 
+CThreadFastMutex g_ShaderAPIMutex;
+
 static CShaderDeviceMgrDX11 s_ShaderDeviceMgrDX11;
 CShaderDeviceMgrDX11 *g_pShaderDeviceMgrDX11 = &s_ShaderDeviceMgrDX11;
 
@@ -23,6 +25,8 @@ IShaderUtil *g_pShaderUtil;
 // Here's where the app systems get to learn about each other 
 bool CShaderDeviceMgrDX11::Connect(CreateInterfaceFn factory)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	ConnectTier1Libraries(&factory, 1);
 
 	HRESULT hr = CreateDXGIFactory(IID_IDXGIFactory, (void**)&m_pDXGIFactory);
@@ -37,8 +41,18 @@ bool CShaderDeviceMgrDX11::Connect(CreateInterfaceFn factory)
 
 void CShaderDeviceMgrDX11::Disconnect()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	DisconnectTier1Libraries();
 	g_pShaderUtil = NULL;
+
+	if (m_pDXGIFactory)
+	{
+		m_pDXGIFactory->Release();
+		m_pDXGIFactory = NULL;
+	}
+
+	m_vAdapterInfo.RemoveAll();
 }
 
 
@@ -55,6 +69,8 @@ void *CShaderDeviceMgrDX11::QueryInterface(const char *pInterfaceName)
 // Init, shutdown
 InitReturnVal_t CShaderDeviceMgrDX11::Init()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	m_vAdapterInfo.RemoveAll();
 
 	IDXGIAdapter *pAdapter;
@@ -75,6 +91,8 @@ InitReturnVal_t CShaderDeviceMgrDX11::Init()
 
 void CShaderDeviceMgrDX11::Shutdown()
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	if (g_pShaderDeviceDX11)
 	{
 		g_pShaderDeviceDX11->Shutdown();
@@ -216,6 +234,8 @@ IDXGIAdapter *CShaderDeviceMgrDX11::GetAdapter(int nAdapter) const
 
 IDXGIOutput *CShaderDeviceMgrDX11::GetAdapterOutput(int nAdapter) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	IDXGIAdapter *pAdapter = GetAdapter(nAdapter);
 	if (!pAdapter)
 		return NULL;
@@ -261,6 +281,8 @@ bool CShaderDeviceMgrDX11::GetRecommendedConfigurationInfo(int nAdapter, int nDX
 // Returns the number of modes
 int	 CShaderDeviceMgrDX11::GetModeCount(int nAdapter) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	IDXGIOutput *pOutput = GetAdapterOutput(nAdapter);
 	if (!pOutput)
 		return 0;
@@ -279,6 +301,8 @@ int	 CShaderDeviceMgrDX11::GetModeCount(int nAdapter) const
 // Returns mode information..
 void CShaderDeviceMgrDX11::GetModeInfo(ShaderDisplayMode_t* pInfo, int nAdapter, int nMode) const
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	memset(pInfo, 0, sizeof(*pInfo));
 	pInfo->m_Format = IMAGE_FORMAT_UNKNOWN;
 
@@ -352,6 +376,8 @@ static void* ShaderInterfaceFactory(const char *pInterfaceName, int *pReturnCode
 // A returned factory of NULL indicates the mode was not set properly.
 CreateInterfaceFn CShaderDeviceMgrDX11::SetMode(void *hWnd, int nAdapter, const ShaderDeviceInfo_t& mode)
 {
+	AUTO_LOCK_FM(g_ShaderAPIMutex);
+
 	g_pShaderDevice = NULL;
 	g_pShaderAPI = NULL;
 	g_pShaderShadow = NULL;
