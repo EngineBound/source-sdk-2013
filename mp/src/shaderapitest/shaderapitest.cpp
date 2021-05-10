@@ -7,9 +7,9 @@
 
 #include "bitmap/imageformat.h"
 #include "vtf/vtf.h"
-#include "shaderapi/ishaderapi.h"
-#include "shaderapi/IShaderDevice.h"
-#include "shaderapi/ishadershadow.h"
+#include "shaderapidx11/ishaderapidx11.h"
+#include "shaderapidx11/ishaderdevicedx11.h"
+#include "shaderapidx11/ishadershadowdx11.h"
 #include "shaderapi/ishaderutil.h"
 #include "materialsystem/materialsystem_config.h"
 
@@ -161,19 +161,24 @@ private:
 	bool WaitForQuit();
 
 	bool RunTests();
-	void RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord = false);
+	void RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord = false, bool bTestConstantBuffer = false);
 	void RunStaticBufferTest();
+	void RunLightingTest();
 
-	void CreateShaders(bool useTexture = false);
+	void CreateShaders(bool useTexture = false, bool useConstant = false);
+
+	void BindShaderFromFile(const char *path, bool bIsVertexShader);
+
+	ShaderAPITextureHandle_t LoadTextureFromFile(const char *path);
 
 private:
 	HWND m_hWnd;
 
 	IShaderDeviceMgr *m_pShaderDeviceMgr;
 
-	IShaderAPI *m_pShaderAPI;
-	IShaderDevice *m_pShaderDevice;
-	IShaderShadow *m_pShaderShadow;
+	IShaderAPIDX11 *m_pShaderAPI;
+	IShaderDeviceDX11 *m_pShaderDevice;
+	IShaderShadowDX11 *m_pShaderShadow;
 
 	VertexShaderHandle_t m_hVertexShader;
 	PixelShaderHandle_t m_hPixelShader;
@@ -326,9 +331,9 @@ int CShaderAPITest::Main()
 	CreateInterfaceFn factory = m_pShaderDeviceMgr->SetMode(m_hWnd, 0, mode);
 	if (!factory) return false;
 
-	m_pShaderAPI = (IShaderAPI *)factory(SHADERAPI_INTERFACE_VERSION, NULL);
-	m_pShaderDevice = (IShaderDevice *)factory(SHADER_DEVICE_INTERFACE_VERSION, NULL);
-	m_pShaderShadow = (IShaderShadow *)factory(SHADERSHADOW_INTERFACE_VERSION, NULL);
+	m_pShaderAPI = (IShaderAPIDX11 *)factory(SHADERAPI_INTERFACE_VERSION, NULL);
+	m_pShaderDevice = (IShaderDeviceDX11 *)factory(SHADER_DEVICE_INTERFACE_VERSION, NULL);
+	m_pShaderShadow = (IShaderShadowDX11 *)factory(SHADERSHADOW_INTERFACE_VERSION, NULL);
 
 	if (m_pShaderAPI == NULL || m_pShaderDevice == NULL || m_pShaderShadow == NULL)
 	{
@@ -389,53 +394,23 @@ bool CShaderAPITest::RunTests()
 
 	const char* pTestTextureName = "testtexture_dxt.vtf";
 
-	FileHandle_t hTestVTF = g_pFullFileSystem->Open(pTestTextureName, "rb");
-	Assert(hTestVTF);
-
-	int nHeaderSize = VTFFileHeaderSize(VTF_MAJOR_VERSION);
-	CUtlBuffer VTFBuf;
-	VTFBuf.EnsureCapacity(nHeaderSize);
-	int nBytesRead = g_pFullFileSystem->Read(VTFBuf.Base(), nHeaderSize, hTestVTF);
-	VTFBuf.SeekPut(CUtlBuffer::SEEK_HEAD, nBytesRead);
-
-	IVTFTexture *pVTFTexture = CreateVTFTexture();
-
-	if (!pVTFTexture->Unserialize(VTFBuf, true))
-	{
-		Assert(0);
-	}
-
-	int width, height;
-	ImageFormat fmt;
-	float gamma;
-
-	width = pVTFTexture->Width();
-	height = pVTFTexture->Height();
-	fmt = pVTFTexture->Format();
-	gamma = 2.6f;
-
-	int nVTFOffset, nVTFSize;
-	pVTFTexture->ImageFileInfo(0, 0, 0, &nVTFOffset, &nVTFSize);
-	VTFBuf.EnsureCapacity(nVTFSize);
-
-	VTFBuf.SeekPut(CUtlBuffer::SEEK_HEAD, 0);
-	g_pFullFileSystem->Seek(hTestVTF, nVTFOffset, FILESYSTEM_SEEK_HEAD);
-	g_pFullFileSystem->Read(VTFBuf.Base(), nVTFSize, hTestVTF);
-	g_pFullFileSystem->Close(hTestVTF);
-
-	ShaderAPITextureHandle_t handle = m_pShaderAPI->CreateTexture(width, height, 1, fmt, 0, 0, 0, "testtexture", "test");
-	m_pShaderAPI->ModifyTexture(handle);
-
-	m_pShaderAPI->TexImage2D(0, 0, fmt, 0, width, height, fmt, false, VTFBuf.Base());
-
-	DestroyVTFTexture(pVTFTexture);
+	ShaderAPITextureHandle_t handle = LoadTextureFromFile(pTestTextureName);
 
 	m_pShaderAPI->BindTexture(SHADER_SAMPLER0, handle);
 
 	RunDynamicBufferTest(false, true);
 	m_pShaderDevice->Present(); // Allow renderdoc to capture
 
+	NextTest("Test 5: Constant Buffer");
+
+	RunDynamicBufferTest(false, true, true);
+	m_pShaderDevice->Present(); // Allow renderdoc to capture
+
 	m_pShaderAPI->DeleteTexture(handle);
+
+	NextTest("Test 5: Lighting test");
+
+	RunLightingTest();
 
 	NextTest("Tests Done! Close window to exit.");
 
@@ -444,7 +419,12 @@ bool CShaderAPITest::RunTests()
 	return true;
 }
 
-void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord)
+struct testConstStruct {
+	float factor;
+	float factor2;
+};
+
+void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord, bool bTestConstantBuffer)
 {
 	VertexFormat_t fmt = VERTEX_POSITION | VERTEX_COLOR;
 
@@ -459,11 +439,20 @@ void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord)
 	IIndexBuffer* pIndexBuffer = m_pShaderDevice->CreateIndexBuffer(
 		SHADER_BUFFER_TYPE_DYNAMIC, MATERIAL_INDEX_FORMAT_16BIT, 30, "");
 
-	CreateShaders(bUseTexCoord);
+	IConstantBufferDX11* pConstantBuffer = NULL;
+	if (bTestConstantBuffer)
+	{
+		pConstantBuffer = m_pShaderDevice->CreateConstantBuffer(
+			SHADER_BUFFER_TYPE_DYNAMIC, 64, "");
+	}
+
+	CreateShaders(bUseTexCoord, bTestConstantBuffer);
 
 	m_pShaderAPI->ClearBuffers(true, false, false, -1, -1);
 
-	const int nNumRects = 8;
+	int nNumRects = 8;
+	if (bUseTexCoord && !bTestConstantBuffer)
+		nNumRects = 2;
 	float flRectWidth = 2.0f / nNumRects;
 	float flNormPerRect = 1.0f / (nNumRects - 1);
 	for (int i = 0; i < nNumRects; ++i)
@@ -521,8 +510,24 @@ void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord)
 
 		indexBuilder.Unlock();
 
+		if (bTestConstantBuffer)
+		{
+			testConstStruct constStruct;
+			constStruct.factor = flNormAmount;
+			constStruct.factor2 = (i == 0) ? 0.2f : 0.0f;
+
+			ConstantDesc_t constDesc;
+			pConstantBuffer->Lock(sizeof(testConstStruct), false, constDesc);
+			V_memcpy(constDesc.m_pData, &constStruct, sizeof(testConstStruct));
+			pConstantBuffer->Unlock(sizeof(testConstStruct));
+		}
+
 		m_pShaderAPI->BindVertexBuffer(0, pVertexBuffer, vertexBuilder.Offset(), vertexBuilder.GetFirstVertex(), vertexBuilder.TotalVertexCount(), fmt);
 		m_pShaderAPI->BindIndexBuffer(pIndexBuffer, indexBuilder.Offset());
+
+		if (bTestConstantBuffer)
+			m_pShaderAPI->BindConstantBuffer(pConstantBuffer, 0);
+
 		m_pShaderAPI->Draw(MATERIAL_TRIANGLES, indexBuilder.GetFirstIndex(), indexBuilder.TotalIndexCount());
 	}
 
@@ -536,6 +541,9 @@ void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord)
 
 	m_pShaderDevice->DestroyVertexBuffer(pVertexBuffer);
 	m_pShaderDevice->DestroyIndexBuffer(pIndexBuffer);
+
+	if (bTestConstantBuffer)
+		m_pShaderDevice->DestroyConstantBuffer(pConstantBuffer);
 }
 
 void CShaderAPITest::RunStaticBufferTest()
@@ -614,6 +622,100 @@ void CShaderAPITest::RunStaticBufferTest()
 	m_pShaderDevice->DestroyIndexBuffer(pIndexBuffer);
 }
 
+struct lightData_t
+{
+	float pos[3];
+};
+
+void CShaderAPITest::RunLightingTest()
+{
+	BindShaderFromFile("test_lighting_ps50.fxc", false);
+	BindShaderFromFile("test_lighting_vs50.fxc", true);
+
+	ShaderAPITextureHandle_t hAlbedo = LoadTextureFromFile("redbricks_albedo.vtf");
+	ShaderAPITextureHandle_t hNrm = LoadTextureFromFile("redbricks_nrm.vtf");
+
+	m_pShaderAPI->BindTexture(SHADER_SAMPLER0, hAlbedo);
+	m_pShaderAPI->BindTexture(SHADER_SAMPLER1, hNrm);
+
+	VertexFormat_t fmt = VERTEX_POSITION | (2 << TEX_COORD_SIZE_BIT);
+
+	IVertexBuffer* pVertexBuffer = m_pShaderDevice->CreateVertexBuffer(
+		SHADER_BUFFER_TYPE_DYNAMIC, fmt, 256, "");
+	IIndexBuffer* pIndexBuffer = m_pShaderDevice->CreateIndexBuffer(
+		SHADER_BUFFER_TYPE_DYNAMIC, MATERIAL_INDEX_FORMAT_16BIT, 30, "");
+	IConstantBufferDX11* pConstantBuffer = m_pShaderDevice->CreateConstantBuffer(
+		SHADER_BUFFER_TYPE_DYNAMIC, 64, "");
+
+	CVertexBuilder vertexBuilder(pVertexBuffer, fmt);
+	vertexBuilder.Lock(4);
+
+	vertexBuilder.Position3f(-1.0f, -1.0f, 0.5f);
+	vertexBuilder.TexCoord2f(0, 0.0f, 1.0f);
+	vertexBuilder.AdvanceVertex();
+
+	vertexBuilder.Position3f(1.0f, -1.0f, 0.5f);
+	vertexBuilder.TexCoord2f(0, 1.0f, 1.0f);
+	vertexBuilder.AdvanceVertex();
+
+	vertexBuilder.Position3f(1.0f, 1.0f, 0.5f);
+	vertexBuilder.TexCoord2f(0, 1.0f, 0.0f);
+	vertexBuilder.AdvanceVertex();
+
+	vertexBuilder.Position3f(-1.0f, 1.0f, 0.5f);
+	vertexBuilder.TexCoord2f(0, 0.0f, 0.0f);
+	vertexBuilder.AdvanceVertex();
+
+	vertexBuilder.Unlock();
+	vertexBuilder.End();
+
+	CIndexBuilder indexBuilder(pIndexBuffer, MATERIAL_INDEX_FORMAT_16BIT);
+	indexBuilder.Lock(6, vertexBuilder.GetFirstVertex());
+
+	indexBuilder.FastIndex(0);
+	indexBuilder.FastIndex(2);
+	indexBuilder.FastIndex(1);
+	indexBuilder.FastIndex(0);
+	indexBuilder.FastIndex(3);
+	indexBuilder.FastIndex(2);
+	indexBuilder.SpewData();
+
+	indexBuilder.Unlock();
+	indexBuilder.End();
+
+	m_pShaderAPI->BindVertexBuffer(0, pVertexBuffer, vertexBuilder.Offset(), vertexBuilder.GetFirstVertex(), vertexBuilder.TotalVertexCount(), fmt);
+	m_pShaderAPI->BindIndexBuffer(pIndexBuffer, indexBuilder.Offset());
+
+	for (int i = 0; i < 10; ++i)
+	{
+		lightData_t lightData;
+		lightData.pos[0] = sin((float)i) / 2.0f;
+		lightData.pos[1] = cos((float)i) / 2.0f;
+		lightData.pos[2] = 0.4f;
+
+		ConstantDesc_t constDesc;
+		pConstantBuffer->Lock(sizeof(lightData_t), false, constDesc);
+		V_memcpy(constDesc.m_pData, &lightData, sizeof(lightData_t));
+		pConstantBuffer->Unlock(sizeof(lightData_t));
+
+		m_pShaderAPI->BindConstantBuffer(pConstantBuffer, 0);
+		m_pShaderAPI->Draw(MATERIAL_TRIANGLES, indexBuilder.GetFirstIndex(), indexBuilder.TotalIndexCount());
+		m_pShaderDevice->Present();
+
+		WaitForKeypress();
+	}
+
+	m_pShaderDevice->DestroyVertexShader(m_hVertexShader);
+	m_pShaderDevice->DestroyPixelShader(m_hPixelShader);
+
+	m_hVertexShader = VERTEX_SHADER_HANDLE_INVALID;
+	m_hPixelShader = PIXEL_SHADER_HANDLE_INVALID;
+
+	m_pShaderDevice->DestroyVertexBuffer(pVertexBuffer);
+	m_pShaderDevice->DestroyIndexBuffer(pIndexBuffer);
+	m_pShaderDevice->DestroyConstantBuffer(pConstantBuffer);
+}
+
 static const char s_pDebugVertexShader[] =
 "struct VS_INPUT {"
 "	float3 vPos : POSITION;"
@@ -650,9 +752,9 @@ static const char s_pDebugPixelShader[] =
 ""
 "float4 main( const PS_INPUT i ) : SV_TARGET"
 "{"
-"   const int INT_FLOAT_PRECISION = (256.0);"
+"   const int INT_FLOAT_PRECISION = (256);"
 "   int3 normalInt = (int3)(i.vNormal * INT_FLOAT_PRECISION);"
-"   normalInt = (normalInt << 2) & 53;"
+"   normalInt = (normalInt << 2) & 12;"
 "	return i.vColor + float4(((float3)normalInt) / INT_FLOAT_PRECISION, 0.0);"
 "}"
 "";
@@ -671,19 +773,58 @@ static const char s_pDebugPixelShaderWithTexture[] =
 ""
 "float4 main( const PS_INPUT i ) : SV_TARGET"
 "{"
-"	return (float4(0.5, 0.5, 0.5, 1.0) + i.vColor * 0.2) * float4(testTexture.Sample(testSampler, i.vTexCoord0.xy).xyz, 1.0);"
+"   const int INT_FLOAT_PRECISION = (128);"
+"   int3 normalInt = (int3)(i.vNormal * INT_FLOAT_PRECISION);"
+"   normalInt = (normalInt << 2) & 35;"
+"   int2 messedUpCoords = (int2)(i.vTexCoord0.xy * INT_FLOAT_PRECISION);"
+"   messedUpCoords = (messedUpCoords ^ 14) & ~normalInt;"
+"	return (float4(0.5, 0.5, 0.5, 1.0) + i.vColor * 0.2) * float4(testTexture.Sample(testSampler, (float2)(messedUpCoords)/INT_FLOAT_PRECISION).xyz, 1.0);"
+"}"
+"";
+
+static const char s_pDebugPixelShaderWithTextureAndConstantBuffer[] =
+"cbuffer testBuffer : register(b0)"
+"{"
+"	float1 factor : packoffset(c0);"
+"   float1 factor2 : packoffset(c0.y);"
+"};"
+""
+"struct PS_INPUT"
+"{"
+"	float4 projPos : SV_POSITION;"
+"	float4 vColor : COLOR;"
+"   float3 vNormal : NORMAL;"
+"   float2 vTexCoord0 : TEXCOORD0;"
+"};"
+""
+"sampler testSampler : register(s0);"
+"Texture2D testTexture : register(t0);"
+""
+"float4 main( const PS_INPUT i ) : SV_TARGET"
+"{"
+"   const int INT_FLOAT_PRECISION = (128);"
+"   int3 normalInt = (int3)(i.vNormal * INT_FLOAT_PRECISION);"
+"   normalInt = (normalInt << 2) & 35;"
+"   int2 messedUpCoords = (int2)(i.vTexCoord0.xy * INT_FLOAT_PRECISION);"
+"   messedUpCoords = (messedUpCoords ^ 14) & ~normalInt;"
+"	return (float4(0.5, 0.5, 0.5, 1.0) + i.vColor * 0.2) * float4(testTexture.Sample(testSampler, (float2)(messedUpCoords)/INT_FLOAT_PRECISION).xyz, 1.0) * factor + factor2;"
 "}"
 "";
 
 
-void CShaderAPITest::CreateShaders(bool useTexture)
+void CShaderAPITest::CreateShaders(bool useTexture, bool useConstant)
 {
 	m_hVertexShader = m_pShaderDevice->CreateVertexShader(s_pDebugVertexShader, sizeof(s_pDebugVertexShader), "vs_5_0");
 	Assert(m_hVertexShader != VERTEX_SHADER_HANDLE_INVALID);
 
 	const char *pPixelShader;
 	int nPixelShaderSize;
-	if (useTexture)
+	if (useConstant)
+	{
+		pPixelShader = s_pDebugPixelShaderWithTextureAndConstantBuffer;
+		nPixelShaderSize = sizeof(s_pDebugPixelShaderWithTextureAndConstantBuffer);
+	}
+	else if (useTexture)
 	{
 		pPixelShader = s_pDebugPixelShaderWithTexture;
 		nPixelShaderSize = sizeof(s_pDebugPixelShaderWithTexture);
@@ -701,4 +842,73 @@ void CShaderAPITest::CreateShaders(bool useTexture)
 	m_pShaderAPI->BindGeometryShader(GEOMETRY_SHADER_HANDLE_INVALID);
 	m_pShaderAPI->BindPixelShader(m_hPixelShader);
 
+}
+
+void CShaderAPITest::BindShaderFromFile(const char *path, bool bIsVertexShader)
+{
+	FileHandle_t hShader = g_pFullFileSystem->Open(path, "r");
+
+	const char pShaderSource[1024] = { 0 };
+	unsigned int nFileSize = g_pFullFileSystem->Read((void *)pShaderSource, 1024, hShader);
+	g_pFullFileSystem->Close(hShader);
+
+	if (bIsVertexShader)
+	{
+		m_hVertexShader = m_pShaderDevice->CreateVertexShader(pShaderSource, nFileSize, "vs_5_0");
+		Assert(m_hVertexShader != VERTEX_SHADER_HANDLE_INVALID);
+		m_pShaderAPI->BindVertexShader(m_hVertexShader);
+	}
+	else
+	{
+		m_hPixelShader = m_pShaderDevice->CreatePixelShader(pShaderSource, nFileSize, "ps_5_0");
+		Assert(m_hPixelShader != PIXEL_SHADER_HANDLE_INVALID);
+		m_pShaderAPI->BindPixelShader(m_hPixelShader);
+	}
+}
+
+ShaderAPITextureHandle_t CShaderAPITest::LoadTextureFromFile(const char *path)
+{
+	FileHandle_t hVTFFile = g_pFullFileSystem->Open(path, "rb");
+	Assert(hVTFFile);
+
+	int nHeaderSize = VTFFileHeaderSize(VTF_MAJOR_VERSION);
+	CUtlBuffer VTFBuf;
+	VTFBuf.EnsureCapacity(nHeaderSize);
+	int nBytesRead = g_pFullFileSystem->Read(VTFBuf.Base(), nHeaderSize, hVTFFile);
+	VTFBuf.SeekPut(CUtlBuffer::SEEK_HEAD, nBytesRead);
+
+	IVTFTexture *pVTFTexture = CreateVTFTexture();
+
+	if (!pVTFTexture->Unserialize(VTFBuf, true))
+	{
+		Assert(0);
+	}
+
+	int width, height;
+	ImageFormat fmt;
+	float gamma;
+
+	width = pVTFTexture->Width();
+	height = pVTFTexture->Height();
+	fmt = pVTFTexture->Format();
+	gamma = 2.6f;
+
+	int nVTFOffset, nVTFSize;
+	pVTFTexture->ImageFileInfo(0, 0, 0, &nVTFOffset, &nVTFSize);
+	VTFBuf.EnsureCapacity(nVTFSize);
+
+	VTFBuf.SeekPut(CUtlBuffer::SEEK_HEAD, 0);
+	g_pFullFileSystem->Seek(hVTFFile, nVTFOffset, FILESYSTEM_SEEK_HEAD);
+	g_pFullFileSystem->Read(VTFBuf.Base(), nVTFSize, hVTFFile);
+	g_pFullFileSystem->Close(hVTFFile);
+
+	ShaderAPITextureHandle_t hLoadedTexture = m_pShaderAPI->CreateTexture(width, height, 1, fmt, 0, 0, 0, path, "test");
+
+	m_pShaderAPI->ModifyTexture(hLoadedTexture);
+
+	m_pShaderAPI->TexImage2D(0, 0, fmt, 0, width, height, fmt, false, VTFBuf.Base());
+
+	DestroyVTFTexture(pVTFTexture);
+	
+	return hLoadedTexture;
 }

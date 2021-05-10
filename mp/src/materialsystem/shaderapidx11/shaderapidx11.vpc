@@ -62,6 +62,10 @@ $Project "ShaderApiDX11 (EngineBound)"
         $File   "meshdx11.h"
         $File   "meshdx11.cpp"
         
+        $File   "iconstantbufferdx11.h"
+        $File   "constantbufferdx11.h"
+        $File   "constantbufferdx11.cpp"
+        
         $File   "imaterialdx11.h"
         $File   "materialdx11.h"
         $File   "materialdx11.cpp"

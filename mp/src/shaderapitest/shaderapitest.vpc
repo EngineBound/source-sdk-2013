@@ -19,7 +19,7 @@ $Configuration
     
     $Compiler
 	{
-//		$AdditionalIncludeDirectories	"$BASE;"	[$WIN32||$POSIX]
+		$AdditionalIncludeDirectories	"$BASE;..\public\shaderapi;..\materialsystem"	[$WIN32||$POSIX]
 		$PreprocessorDefinitions		"$BASE;SHADERAPITEST;"
 	}
 

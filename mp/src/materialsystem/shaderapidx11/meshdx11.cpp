@@ -223,6 +223,8 @@ CVertexBufferDX11::CVertexBufferDX11(ShaderBufferType_t type, VertexFormat_t fmt
 	m_nBufferSize = (fmt == VERTEX_FORMAT_UNKNOWN) ? nVertexCount : m_nVertexSize * m_nVertexCount;
 	m_nBufferPosition = 0;
 
+	m_pD3DBuffer = NULL;
+
 	if (!m_bIsDynamic)
 		m_pVertBuffer = (unsigned char*)malloc(m_nBufferSize);
 	else
@@ -239,6 +241,8 @@ CVertexBufferDX11::~CVertexBufferDX11()
 
 bool CVertexBufferDX11::CreateBuffer()
 {
+	DestroyBuffer();
+
 	D3D11_BUFFER_DESC bufferDesc;
 	if (m_bIsDynamic)
 	{
@@ -267,7 +271,9 @@ bool CVertexBufferDX11::CreateBuffer()
 
 void CVertexBufferDX11::DestroyBuffer()
 {
-	m_pD3DBuffer->Release();
+	if (m_pD3DBuffer)
+		m_pD3DBuffer->Release();
+	m_pD3DBuffer = NULL;
 }
 
 // NOTE: The following two methods are only valid for static vertex buffers
@@ -429,6 +435,8 @@ CIndexBufferDX11::CIndexBufferDX11(ShaderBufferType_t type, MaterialIndexFormat_
 
 	m_bIsLocked = false;
 
+	m_pD3DBuffer = NULL;
+
 	if (!m_bIsDynamic)
 		m_pIndBuffer = (unsigned short*)malloc(m_nBufferSize);
 	else
@@ -445,6 +453,8 @@ CIndexBufferDX11::~CIndexBufferDX11()
 
 bool CIndexBufferDX11::CreateBuffer()
 {
+	DestroyBuffer();
+
 	D3D11_BUFFER_DESC bufferDesc;
 	if (m_bIsDynamic)
 	{
@@ -471,7 +481,9 @@ bool CIndexBufferDX11::CreateBuffer()
 
 void CIndexBufferDX11::DestroyBuffer()
 {
-	m_pD3DBuffer->Release();
+	if (m_pD3DBuffer)
+		m_pD3DBuffer->Release();
+	m_pD3DBuffer = NULL;
 }
 
 // NOTE: The following two methods are only valid for static index buffers
@@ -576,7 +588,6 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 
 void CIndexBufferDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 {
-	// DYNAMIC ONLY for now
 	if (!m_bIsLocked) return;
 
 	Assert(nWrittenIndexCount <= m_nIndexCount); // probably incorrect :)
@@ -638,8 +649,6 @@ void CIndexBufferDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 
 CMeshDX11::CMeshDX11(bool bIsDynamic, VertexFormat_t fmt)
 {
-	// ONLY WORKS FOR DYNAMIC RIGHT NOW
-
 	m_bIsDynamic = bIsDynamic;
 
 	m_pIndexBufferDX11 = NULL;

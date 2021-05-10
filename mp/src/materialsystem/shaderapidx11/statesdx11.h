@@ -33,6 +33,9 @@ struct DynamicStateDX11 {
 	DXGI_FORMAT m_IBFmt;
 	UINT m_IBOffset;
 
+	ID3D11Buffer* m_pConstantBuffer;
+	UINT m_CBOffset;
+
 	D3D11_PRIMITIVE_TOPOLOGY m_PrimitiveTopology;
 	
 	ID3D11ShaderResourceView *m_ppTextures[MAX_DX11_SAMPLERS];

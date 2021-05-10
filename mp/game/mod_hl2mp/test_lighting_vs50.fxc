@@ -1,0 +1,18 @@
+struct VS_INPUT {
+    float3 vPos : POSITION;
+    float2 vTexCoord0 : TEXCOORD0;
+};
+
+struct VS_OUTPUT {
+    float4 projPos : SV_POSITION;
+    float2 vTexCoord0 : TEXCOORD0;
+    float3 wPos : TEXCOORD1;
+};
+
+VS_OUTPUT main( const VS_INPUT v ) {
+    VS_OUTPUT o = (VS_OUTPUT)0;
+    o.projPos = float4(v.vPos, 1.0);
+    o.vTexCoord0 = v.vTexCoord0;
+    o.wPos = v.vPos;
+	return o;
+}

@@ -6,6 +6,7 @@
 #include "ishaderdevicemgrdx11.h"
 #include "meshdx11.h"
 #include "ishaderutil.h"
+#include "constantbufferdx11.h"
 
 #include "memdbgon.h"
 
@@ -62,6 +63,12 @@ void CShaderAPIDX11::HandleStateChanges()
 	if (m_StateChanges & STATE_CHANGED_INDEX_BUFFER)
 	{
 		pDeviceContext->IASetIndexBuffer(m_DynamicState.m_pIndexBuffer, m_DynamicState.m_IBFmt, m_DynamicState.m_IBOffset);
+	}
+
+	if (m_StateChanges & STATE_CHANGED_CONSTANT_BUFFER)
+	{
+		// TODO: VERTEX CONSTANTS
+		pDeviceContext->PSSetConstantBuffers(0, 1, &m_DynamicState.m_pConstantBuffer);
 	}
 
 	if (m_StateChanges & STATE_CHANGED_PRIMITIVE_TOPOLOGY)
@@ -1838,6 +1845,25 @@ void CShaderAPIDX11::BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBy
 		m_DynamicState.m_IBOffset = nOffset;
 
 		m_StateChanges |= STATE_CHANGED_INDEX_BUFFER;
+	}
+}
+
+void CShaderAPIDX11::BindConstantBuffer(IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes)
+{
+	CConstantBufferDX11 *pConstantBufferDX11 = static_cast<CConstantBufferDX11*>(pConstantBuffer);
+	ID3D11Buffer *pBuffer = NULL;
+	UINT nOffset = nOffsetInBytes;
+	if (pConstantBufferDX11)
+	{
+		pBuffer = pConstantBufferDX11->GetBuffer();
+	}
+
+	if (m_DynamicState.m_pConstantBuffer != pBuffer || m_DynamicState.m_CBOffset != nOffset)
+	{
+		m_DynamicState.m_pConstantBuffer = pBuffer;
+		m_DynamicState.m_CBOffset = nOffset;
+
+		m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 	}
 }
 

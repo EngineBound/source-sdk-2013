@@ -103,6 +103,9 @@ public:
 	virtual IIndexBuffer *CreateIndexBuffer(ShaderBufferType_t bufferType, MaterialIndexFormat_t fmt, int nIndexCount, const char *pBudgetGroup);
 	virtual void DestroyIndexBuffer(IIndexBuffer *pIndexBuffer);
 
+	virtual IConstantBufferDX11 *CreateConstantBuffer(ShaderBufferType_t bufferType, int nBufferSize, const char *pBudgetGroup);
+	virtual void DestroyConstantBuffer(IConstantBufferDX11 *pConstantBuffer);
+
 	// Do we need to specify the stream here in the case of locking multiple dynamic VBs on different streams?
 	virtual IVertexBuffer *GetDynamicVertexBuffer(int nStreamID, VertexFormat_t vertexFormat, bool bBuffered = true);
 	virtual IIndexBuffer *GetDynamicIndexBuffer(MaterialIndexFormat_t fmt, bool bBuffered = true);

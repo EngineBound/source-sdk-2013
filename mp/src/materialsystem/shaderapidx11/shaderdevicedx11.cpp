@@ -5,6 +5,7 @@
 #include "meshdx11.h"
 #include "shaderdevicemgrdx11.h"
 #include "shaderapidx11.h"
+#include "constantbufferdx11.h"
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -631,6 +632,19 @@ IIndexBuffer *CShaderDeviceDX11::CreateIndexBuffer(ShaderBufferType_t bufferType
 void CShaderDeviceDX11::DestroyIndexBuffer(IIndexBuffer *pIndexBuffer)
 {
 	delete pIndexBuffer;
+}
+
+IConstantBufferDX11 *CShaderDeviceDX11::CreateConstantBuffer(ShaderBufferType_t bufferType, int nBufferSize, const char *pBudgetGroup)
+{
+	CConstantBufferDX11 *outBuf = new CConstantBufferDX11(bufferType, nBufferSize, pBudgetGroup);
+	outBuf->CreateBuffer();
+
+	return outBuf;
+}
+
+void CShaderDeviceDX11::DestroyConstantBuffer(IConstantBufferDX11 *pConstantBuffer)
+{
+	delete pConstantBuffer;
 }
 
 // Do we need to specify the stream here in the case of locking multiple dynamic VBs on different streams?

@@ -564,6 +564,7 @@ public:
 	// ------------ New Vertex/Index Buffer interface ----------------------------
 	virtual void BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffer, int nOffsetInBytes, int nFirstVertex, int nVertexCount, VertexFormat_t fmt, int nRepetitions = 1);
 	virtual void BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBytes);
+	virtual void BindConstantBuffer(IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes);
 	virtual void Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount);
 	void DrawMesh(IMesh *pMesh);
 	// ------------ End ----------------------------
@@ -703,7 +704,8 @@ private:
 		STATE_CHANGED_INPUT_LAYOUT = 0x80,
 		STATE_CHANGED_RENDER_TARGETS = 0x100,
 		STATE_CHANGED_TEXTURES = 0x200,
-		STATE_CHANGED_SAMPLERS = 0x400
+		STATE_CHANGED_SAMPLERS = 0x400,
+		STATE_CHANGED_CONSTANT_BUFFER = 0x800,
 	};
 
 	unsigned int m_StateChanges;

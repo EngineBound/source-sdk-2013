@@ -1,0 +1,27 @@
+cbuffer lightData : register(b0)
+{
+    float3 pos : packoffset(c0);
+};
+
+struct PS_INPUT {
+    float4 projPos : SV_POSITION;
+    float2 vTexCoord0 : TEXCOORD0;
+    float3 wPos : TEXCOORD1;
+};
+
+sampler albedoSampler : register(s0);
+Texture2D albedoTexture : register(t0);
+
+sampler nrmSampler : register(s1);
+Texture2D nrmTexture : register(t1);
+
+float4 main( const PS_INPUT i ) : SV_TARGET
+{
+    float dist = pow(max(1 - distance(i.wPos.xyz, pos), 0.0), 2);
+    float3 nrm = normalize((nrmTexture.Sample(nrmSampler, i.vTexCoord0.xy).xyz) * 2.0 - 1.0);
+    float3 albedo = (albedoTexture.Sample(albedoSampler, i.vTexCoord0.xy).xyz);
+    float3 lightDir = normalize(i.wPos.xyz - pos);
+    nrm = float3(nrm.g, nrm.r, -nrm.b);
+    
+    return float4(albedo * dist * -dot(nrm, lightDir), 1.0);
+}
