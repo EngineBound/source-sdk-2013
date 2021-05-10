@@ -686,11 +686,32 @@ void CShaderAPITest::RunLightingTest()
 	m_pShaderAPI->BindVertexBuffer(0, pVertexBuffer, vertexBuilder.Offset(), vertexBuilder.GetFirstVertex(), vertexBuilder.TotalVertexCount(), fmt);
 	m_pShaderAPI->BindIndexBuffer(pIndexBuffer, indexBuilder.Offset());
 
-	for (int i = 0; i < 10; ++i)
+	MSG msg = { 0 };
+	while (msg.message != WM_QUIT)
 	{
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		if (msg.message == WM_KEYDOWN)
+			break;
+
+		POINT p;
+		if (!GetCursorPos(&p))
+		{
+			Assert(0);
+		}
+
+		if (!ScreenToClient(m_hWnd, &p))
+		{
+			Assert(0);
+		}
+
 		lightData_t lightData;
-		lightData.pos[0] = sin((float)i) / 2.0f;
-		lightData.pos[1] = cos((float)i) / 2.0f;
+		lightData.pos[0] = ((float)(p.x) / 1024) * 2.f - 1.f;
+		lightData.pos[1] = (1.f - (float)(p.y) / 768) * 2.f - 1.f;
 		lightData.pos[2] = 0.4f;
 
 		ConstantDesc_t constDesc;
@@ -701,9 +722,8 @@ void CShaderAPITest::RunLightingTest()
 		m_pShaderAPI->BindConstantBuffer(pConstantBuffer, 0);
 		m_pShaderAPI->Draw(MATERIAL_TRIANGLES, indexBuilder.GetFirstIndex(), indexBuilder.TotalIndexCount());
 		m_pShaderDevice->Present();
-
-		WaitForKeypress();
 	}
+
 
 	m_pShaderDevice->DestroyVertexShader(m_hVertexShader);
 	m_pShaderDevice->DestroyPixelShader(m_hPixelShader);

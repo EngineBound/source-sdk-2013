@@ -20,8 +20,8 @@ float4 main( const PS_INPUT i ) : SV_TARGET
     float dist = pow(max(1 - distance(i.wPos.xyz, pos), 0.0), 2);
     float3 nrm = normalize((nrmTexture.Sample(nrmSampler, i.vTexCoord0.xy).xyz) * 2.0 - 1.0);
     float3 albedo = (albedoTexture.Sample(albedoSampler, i.vTexCoord0.xy).xyz);
-    float3 lightDir = normalize(i.wPos.xyz - pos);
-    nrm = float3(nrm.g, nrm.r, -nrm.b);
+    float3 lightDir = normalize(pos - i.wPos.xyz);
+    nrm = float3(nrm.g, nrm.r, nrm.b);
     
     return float4(albedo * dist * -dot(nrm, lightDir), 1.0);
 }
