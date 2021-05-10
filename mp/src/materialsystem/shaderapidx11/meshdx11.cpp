@@ -208,14 +208,13 @@ inline int SizeForIndex(MaterialIndexFormat_t indexFormat) {
 
 CVertexBufferDX11::CVertexBufferDX11(ShaderBufferType_t type, VertexFormat_t fmt, int nVertexCount, const char *pBudgetGroup)
 {
-	Assert(nVertexCount != 0);
-	if (nVertexCount == 0)
-		return;
 
 	m_bIsDynamic = IsDynamicBufferType(type);
 	m_nVertexCount = nVertexCount;
 	m_VertexFormat = fmt;
 
+	Assert(m_nVertexCount != 0);
+	
 	VertexDesc_t tmpDesc;
 	ComputeVertexDesc(0, fmt, tmpDesc);
 
@@ -224,11 +223,12 @@ CVertexBufferDX11::CVertexBufferDX11(ShaderBufferType_t type, VertexFormat_t fmt
 	m_nBufferPosition = 0;
 
 	m_pD3DBuffer = NULL;
+	m_pVertBuffer = NULL;
+
+	if (m_nVertexCount == 0) return;
 
 	if (!m_bIsDynamic)
 		m_pVertBuffer = (unsigned char*)malloc(m_nBufferSize);
-	else
-		m_pVertBuffer = NULL;
 }
 
 CVertexBufferDX11::~CVertexBufferDX11()
@@ -242,6 +242,8 @@ CVertexBufferDX11::~CVertexBufferDX11()
 bool CVertexBufferDX11::CreateBuffer()
 {
 	DestroyBuffer();
+
+	if (m_nBufferSize == 0) return true;
 
 	D3D11_BUFFER_DESC bufferDesc;
 	if (m_bIsDynamic)
@@ -322,6 +324,16 @@ bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 
 	g_ShaderAPIMutex.Lock();
 
+	if (m_nVertexCount == 0) // No lock, but technically a success
+	{
+		ComputeVertexDesc(0, 0, desc);
+		desc.m_nFirstVertex = 0;
+		desc.m_nOffset = 0;
+
+		m_bIsLocked = true;
+		return true;
+	}
+
 	if (m_bIsDynamic)
 	{
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -384,7 +396,15 @@ void CVertexBufferDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 
 	Assert(nVertexCount <= m_nVertexCount);
 
-	int nMemWritten = nVertexCount * m_nVertexSize;
+	if (m_nVertexCount == 0)
+	{
+		g_ShaderAPIMutex.Unlock();
+
+		m_bIsLocked = false;
+		return;
+	}
+
+	int nMemWritten = nVertexCount * m_nVertexSize;	
 
 	if (m_bIsDynamic)
 	{
@@ -446,11 +466,14 @@ CIndexBufferDX11::CIndexBufferDX11(ShaderBufferType_t type, MaterialIndexFormat_
 	m_bIsLocked = false;
 
 	m_pD3DBuffer = NULL;
+	m_pIndBuffer = NULL;
+
+	if (m_nIndexCount == 0)
+		return;
 
 	if (!m_bIsDynamic)
 		m_pIndBuffer = (unsigned short*)malloc(m_nBufferSize);
-	else
-		m_pIndBuffer = NULL;
+		
 }
 
 CIndexBufferDX11::~CIndexBufferDX11()
@@ -464,6 +487,8 @@ CIndexBufferDX11::~CIndexBufferDX11()
 bool CIndexBufferDX11::CreateBuffer()
 {
 	DestroyBuffer();
+
+	if (m_nBufferSize == 0) return true;
 
 	D3D11_BUFFER_DESC bufferDesc;
 	if (m_bIsDynamic)
@@ -541,6 +566,19 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 {
 	Assert(!m_bIsLocked);
 
+	g_ShaderAPIMutex.Lock();
+
+	if (m_nIndexCount == 0)
+	{
+		desc.m_nFirstIndex = 0;
+		desc.m_nOffset = 0;
+		desc.m_nIndexSize = 0;
+		desc.m_pIndices = NULL;
+
+		m_bIsLocked = true;
+		return true;
+	}
+
 	if (m_bIsDynamic)
 	{
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -562,6 +600,7 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 			desc.m_nIndexSize = 0;
 			desc.m_pIndices = NULL;
 
+			g_ShaderAPIMutex.Unlock();
 			return false;
 		}
 
@@ -580,6 +619,7 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 			desc.m_nIndexSize = 0;
 			desc.m_pIndices = NULL;
 
+			g_ShaderAPIMutex.Unlock();
 			return false;
 		}
 
@@ -604,6 +644,14 @@ void CIndexBufferDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 
 	int nMemWritten = nWrittenIndexCount * m_nIndexSize;
 
+	if (m_nIndexCount == 0)
+	{
+		m_bIsLocked = false;
+		g_ShaderAPIMutex.Unlock();
+
+		return;
+	}
+
 	if (m_bIsDynamic)
 	{
 		g_pShaderDeviceDX11->GetDeviceContext()->Unmap(m_pD3DBuffer, 0);
@@ -623,6 +671,8 @@ void CIndexBufferDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 
 	m_nBufferPosition += nMemWritten;
 	m_bIsLocked = false;
+
+	g_ShaderAPIMutex.Unlock();
 }
 
 
