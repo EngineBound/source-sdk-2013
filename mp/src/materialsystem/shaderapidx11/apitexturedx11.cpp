@@ -17,6 +17,10 @@ CAPITextureDX11::CAPITextureDX11()
 	m_pSamplerState = NULL;
 	m_pResourceView = NULL;
 
+	m_APIFormat = IMAGE_FORMAT_UNKNOWN;
+	m_DXGIFormat = DXGI_FORMAT_UNKNOWN;
+	m_nNumMipLevels = 0;
+
 	m_bIsInitialised = false;
 }
 

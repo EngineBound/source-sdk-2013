@@ -37,7 +37,7 @@ struct DynamicStateDX11 {
 	UINT m_CBOffset;
 
 	D3D11_PRIMITIVE_TOPOLOGY m_PrimitiveTopology;
-	
+
 	ID3D11ShaderResourceView *m_ppTextures[MAX_DX11_SAMPLERS];
 	ID3D11SamplerState *m_ppSamplers[MAX_DX11_SAMPLERS];
 	int m_nNumSamplers;
@@ -47,7 +47,35 @@ struct DynamicStateDX11 {
 	DynamicStateDX11()
 	{
 		V_memset(this, 0, sizeof(*this));
+
 		m_nViewportCount = 1;
+
+		m_pVertexBuffer = NULL;
+		m_pPixelShader = NULL;
+
+		m_hVertexShader = 0;
+
+		m_pInputLayout = NULL;
+		m_VertexFormat = VERTEX_FORMAT_UNKNOWN;
+
+		m_pVertexBuffer = NULL;
+		m_VBStride = 0;
+		m_VBOffset = 0;
+
+		m_pIndexBuffer = NULL;
+		m_IBFmt = DXGI_FORMAT_UNKNOWN;
+		m_IBOffset = 0;
+
+		m_pConstantBuffer = NULL;
+		m_CBOffset = 0;
+
+		for (int i = 0; i < MAX_DX11_SAMPLERS; ++i)
+		{
+			m_ppTextures[i] = NULL;
+			m_ppSamplers[i] = NULL;
+		}
+
+		m_nNumSamplers = 0;
 
 		m_pViewports[0].Width = 640;
 		m_pViewports[0].Height = 480;
@@ -74,7 +102,8 @@ struct ShaderStateDX11 {
 		for (int i = 0; i < NUM_MATRIX_MODES; ++i)
 		{
 			m_MatrixStacks[i].Clear();
-			m_MatrixStacks[i].Push(DirectX::XMMatrixIdentity());
+			m_MatrixStacks[i].Push();
+			m_MatrixStacks[i].Top() = DirectX::XMMatrixIdentity();
 		}
 
 	}

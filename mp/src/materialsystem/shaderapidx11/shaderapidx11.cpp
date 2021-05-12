@@ -21,14 +21,12 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IDebugTextureInfoDX11,
 
 IShaderAPIDX11 *g_pShaderAPI = g_pShaderAPIDX11;
 
-CShaderAPIDX11::CShaderAPIDX11()
+CShaderAPIDX11::CShaderAPIDX11() : m_DynamicState(), m_ShaderState()
 {
 	m_MatrixMode = MATERIAL_VIEW;
-	m_DynamicState = DynamicStateDX11();
-	m_ShaderState = ShaderStateDX11();
 
 	m_pCurMatrix = &m_ShaderState.m_MatrixStacks[m_MatrixMode].Top();
-	
+
 	m_pDynamicMesh = NULL;
 
 	m_vTextures.RemoveAll();
