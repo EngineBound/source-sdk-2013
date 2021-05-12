@@ -6,6 +6,7 @@
 #include "shadershadowdx11.h"
 #include "shaderapidx11.h"
 #include "shaderdevicedx11.h"
+#include "apitexturedx11.h"
 
 #include <d3d11.h>
 
@@ -306,30 +307,33 @@ void CShaderDeviceMgrDX11::GetModeInfo(ShaderDisplayMode_t* pInfo, int nAdapter,
 	memset(pInfo, 0, sizeof(*pInfo));
 	pInfo->m_Format = IMAGE_FORMAT_UNKNOWN;
 
-	int nModeCount = GetModeCount(nAdapter);
-	if (!nModeCount)
-		return;
-
 	IDXGIOutput *pOutput = GetAdapterOutput(nAdapter);
 	if (!pOutput)
 		return;
 
 	UINT count = 0;
-	DXGI_MODE_DESC *pModeDescs = (DXGI_MODE_DESC *)_alloca(nModeCount * sizeof(DXGI_MODE_DESC));
-	HRESULT hr = pOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-		DXGI_ENUM_MODES_INTERLACED, &count, pModeDescs);
-	if (FAILED(hr))
+	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	UINT flags = DXGI_ENUM_MODES_INTERLACED;
+
+	HRESULT hr = pOutput->GetDisplayModeList(format,
+		flags, &count, NULL);
+	Assert(SUCCEEDED(hr));
+
+	if ((UINT)nMode >= count)
 		return;
+
+	DXGI_MODE_DESC *pModeDescs = (DXGI_MODE_DESC *)_alloca(count * sizeof(DXGI_MODE_DESC));
+	hr = pOutput->GetDisplayModeList(format,
+		flags, &count, pModeDescs);
+	Assert(SUCCEEDED(hr));
 
 	DXGI_MODE_DESC *modeDesc = &pModeDescs[nMode];
 
-	pInfo->m_Format = modeDesc->Format != DXGI_FORMAT_UNKNOWN ? IMAGE_FORMAT_RGB888 : IMAGE_FORMAT_UNKNOWN; // REPLACE THIS
+	pInfo->m_Format = CAPITextureDX11::GetImageFormat(modeDesc->Format); // REPLACE THIS
 	pInfo->m_nHeight = modeDesc->Height;
 	pInfo->m_nWidth = modeDesc->Width;
 	pInfo->m_nRefreshRateDenominator = modeDesc->RefreshRate.Denominator;
 	pInfo->m_nRefreshRateNumerator = modeDesc->RefreshRate.Numerator;
-
-	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
 }
 
 

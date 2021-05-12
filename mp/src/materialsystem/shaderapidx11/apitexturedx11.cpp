@@ -29,6 +29,10 @@ void CAPITextureDX11::InitTexture(int width, int height, int depth, ImageFormat 
 {
 	Assert(!m_bIsInitialised);
 
+	if (width <= 0) width = 1;
+	if (height <= 0) height = 1;
+	if (depth <= 0) depth = 1;
+
 	m_APIFormat = ResolveToSupportedFormat(dstImageFormat);
 	m_DXGIFormat = GetDXGIFormat(m_APIFormat);
 

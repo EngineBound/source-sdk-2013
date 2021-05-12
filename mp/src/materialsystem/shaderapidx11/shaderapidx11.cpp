@@ -1076,14 +1076,14 @@ void CShaderAPIDX11::SetSkinningMatrices()
 // Returns the nearest supported format
 ImageFormat CShaderAPIDX11::GetNearestSupportedFormat(ImageFormat fmt, bool bFilteringRequired) const
 {
-	return IMAGE_FORMAT_UNKNOWN;
+	//return IMAGE_FORMAT_UNKNOWN;
 
 	return CAPITextureDX11::ResolveToSupportedFormat(fmt);
 }
 
 ImageFormat CShaderAPIDX11::GetNearestRenderTargetFormat(ImageFormat fmt) const
 {
-	return IMAGE_FORMAT_UNKNOWN;
+	//return IMAGE_FORMAT_UNKNOWN;
 
 	return CAPITextureDX11::ResolveToSupportedFormat(fmt);
 }
