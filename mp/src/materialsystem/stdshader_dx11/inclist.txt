@@ -1,0 +1,2 @@
+fxctmp9_tmp\testshader_dx11_ps50.inc
+fxctmp9_tmp\testshader_dx11_vs50.inc

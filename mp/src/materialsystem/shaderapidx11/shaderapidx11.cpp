@@ -117,6 +117,11 @@ void CShaderAPIDX11::HandleStateChanges()
 	}
 
 	m_StateChanges = STATE_CHANGED_NONE;
+
+	// Always update these
+
+
+
 }
 
 // ------------------------------------------------------- //

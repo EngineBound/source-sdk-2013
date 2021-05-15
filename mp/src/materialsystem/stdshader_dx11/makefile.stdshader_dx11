@@ -1,0 +1,10 @@
+default:  fxctmp9_tmp\testshader_dx11_ps50.inc shaders\fxc\testshader_dx11_ps50.vcs fxctmp9_tmp\testshader_dx11_vs50.inc shaders\fxc\testshader_dx11_vs50.vcs
+
+fxctmp9_tmp\testshader_dx11_ps50.inc shaders\fxc\testshader_dx11_ps50.vcs: testshader_dx11_ps50.fxc 
+	perl ..\..\devtools\bin\fxc_prep.pl   -source "..\.." testshader_dx11_ps50.fxc-----testshader_dx11_ps50
+	echo testshader_dx11_ps50.fxc>> filestocopy.txt
+
+fxctmp9_tmp\testshader_dx11_vs50.inc shaders\fxc\testshader_dx11_vs50.vcs: testshader_dx11_vs50.fxc 
+	perl ..\..\devtools\bin\fxc_prep.pl   -source "..\.." testshader_dx11_vs50.fxc-----testshader_dx11_vs50
+	echo testshader_dx11_vs50.fxc>> filestocopy.txt
+

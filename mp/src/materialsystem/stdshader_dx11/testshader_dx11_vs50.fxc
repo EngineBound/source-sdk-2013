@@ -1,0 +1,22 @@
+
+struct VS_INPUT
+{
+    float4 vPos : POSITION;
+    float4 vTexCoord0 : TEXCOORD0;
+};
+
+struct VS_OUTPUT
+{
+    float4 projPos : SV_POSITION;
+    float2 texCoord0 : TEXCOORD0;
+};
+
+VS_OUTPUT main( const VS_INPUT v )
+{
+    VS_OUTPUT o = ( VS_OUTPUT )0;
+    
+    o.projPos = v.vPos; // FIXME
+    
+    o.texCoord0 = v.vTexCoord0.xy;
+    return o;
+}

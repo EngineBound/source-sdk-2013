@@ -1,0 +1,5 @@
+..\..\dx9sdk\utilities\dx_proxy.dll 
+E:\GitHub\source-sdk-2013\mp\src\materialsystem\stdshader_dx11\..\..\..\game\bin\shadercompile.exe 
+E:\GitHub\source-sdk-2013\mp\src\materialsystem\stdshader_dx11\..\..\..\game\bin\shadercompile_dll.dll 
+E:\GitHub\source-sdk-2013\mp\src\materialsystem\stdshader_dx11\..\..\..\game\bin\vstdlib.dll 
+E:\GitHub\source-sdk-2013\mp\src\materialsystem\stdshader_dx11\..\..\..\game\bin\tier0.dll 

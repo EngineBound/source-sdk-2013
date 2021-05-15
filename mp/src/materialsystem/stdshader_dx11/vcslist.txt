@@ -1,0 +1,2 @@
+..\..\..\game\hl2\shaders\fxc\testshader_dx11_ps50.vcs
+..\..\..\game\hl2\shaders\fxc\testshader_dx11_vs50.vcs

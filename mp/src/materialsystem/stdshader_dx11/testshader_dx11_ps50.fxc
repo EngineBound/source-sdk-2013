@@ -1,0 +1,36 @@
+
+struct PS_INPUT
+{
+    float2 texCoord0 : TEXCOORD0;
+};
+
+sampler ySampler : register(s0);
+Texture2D yTexture : register(t0);
+
+sampler cRSampler : register(s1);
+Texture2D cRTexture : register(t1);
+
+sampler cBSampler : register(s2);
+Texture2D cBTexture : register(t2);
+
+float4 main ( PS_INPUT i ) : SV_TARGET
+{
+    float y = yTexture.Sample( ySampler, i.texCoord0.xy ).r;
+    float cR = cRTexture.Sample( cRSampler, i.texCoord0.xy ).r;
+    float cB = yTexture.Sample( cBSampler, i.texCoord0.xy ).r;
+    
+    float4 fullImage = float4( y, cR, cB, 1.0f );
+    
+    float4 toR = float4( 1.164123535f,  1.595794678f,  0.0f,         -0.87065506f );
+    float4 toG = float4( 1.164123535f, -0.813476563f, -0.391448975f,  0.529705048f );
+    float4 toB = float4( 1.164123535f,  0.0f,          2.017822266f, -1.081668854f );
+    
+    float4 result;
+    
+    result.r = dot( fullImage, toR );
+    result.g = dot( fullImage, toG );
+    result.b = dot( fullImage, toB );
+    result.a = 1.0f;
+    
+    return result;
+}
