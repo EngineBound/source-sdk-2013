@@ -244,9 +244,9 @@ public:
 
 	HWInfo_t& GetInfo() { return m_HWInfo; }
 
-private:
+	void SetInfo(HWInfo_t srcInfo);
 
-	void SetupHWInfo(int nDXLevel);
+private:
 
 	HWInfo_t m_HWInfo;
 

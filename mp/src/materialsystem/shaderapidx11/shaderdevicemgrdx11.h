@@ -68,6 +68,8 @@ public:
 	IDXGIAdapter *GetAdapter(int nAdapter) const;
 	IDXGIOutput *GetAdapterOutput(int nAdapter) const;
 
+	inline HWInfo_t& GetHWInfo(int nAdapter) { return m_vAdapterInfo[nAdapter]; }
+
 private:
 	bool PopulateHWInfo(HWInfo_t *pHWInfo, IDXGIAdapter *pAdapter, IDXGIOutput *pOutput);
 

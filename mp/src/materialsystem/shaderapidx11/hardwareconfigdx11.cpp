@@ -25,9 +25,9 @@ CHardwareConfigDX11::CHardwareConfigDX11()
 }
 
 // Sets up HWInfo_t struct (m_HWInfo) with system capabilities
-void CHardwareConfigDX11::SetupHWInfo(int nDXLevel)
+void CHardwareConfigDX11::SetInfo(HWInfo_t srcInfo)
 {
-	m_HWInfo.m_nDXSupportLevel = nDXLevel;
+	m_HWInfo = srcInfo;
 }
 
 // Does the destination buffer (back buffer) have an alpha channel?

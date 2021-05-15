@@ -3,6 +3,7 @@
 #include "dx11global.h"
 
 #include "meshdx11.h"
+#include "hardwareconfigdx11.h"
 #include "shaderdevicemgrdx11.h"
 #include "shaderapidx11.h"
 #include "constantbufferdx11.h"
@@ -48,6 +49,9 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceDX11, IShaderDeviceDX11,
 	SHADER_DEVICE_INTERFACE_VERSION, s_ShaderDeviceDX11)
 
 IShaderDeviceDX11 *g_pShaderDevice = g_pShaderDeviceDX11;
+
+extern CHardwareConfigDX11* g_pHardwareConfigDX11;
+extern CShaderDeviceMgrDX11* g_pShaderDeviceMgrDX11;
 
 CShaderDeviceDX11::CShaderDeviceDX11()
 {
@@ -116,6 +120,8 @@ bool CShaderDeviceDX11::Init(void *hWnd, int nAdapter, const ShaderDeviceInfo_t 
 		return false;
 
 	m_nAdapter = nAdapter;
+
+	g_pHardwareConfigDX11->SetInfo(g_pShaderDeviceMgrDX11->GetHWInfo(m_nAdapter));
 
 	m_bDeviceInitialized = true;
 
