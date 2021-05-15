@@ -225,6 +225,9 @@ CVertexBufferDX11::CVertexBufferDX11(ShaderBufferType_t type, VertexFormat_t fmt
 	m_pD3DBuffer = NULL;
 	m_pVertBuffer = NULL;
 
+	m_nBufferPosition = 0;
+	m_bIsLocked = false;
+
 	if (m_nVertexCount == 0) return;
 
 	if (!m_bIsDynamic)
@@ -314,7 +317,7 @@ void CVertexBufferDX11::EndCastBuffer()
 // Returns the number of vertices that can still be written into the buffer
 int CVertexBufferDX11::GetRoomRemaining() const
 {
-	if (m_nVertexSize == 0)
+	if (m_nVertexSize == 0) // Just stick a massive number in because you can write however many you want
 		return 0xFFFF;
 
 	return m_nVertexCount - m_nBufferPosition / m_nVertexSize;
@@ -368,7 +371,7 @@ bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 	}
 	else
 	{
-		if (GetRoomRemaining() < nVertexCount)
+		if (nVertexCount > m_nVertexCount)
 		{
 			AssertMsg(0, "%d < %d !", GetRoomRemaining(), nVertexCount);
 			ComputeVertexDesc(0, 0, desc);
@@ -470,6 +473,9 @@ CIndexBufferDX11::CIndexBufferDX11(ShaderBufferType_t type, MaterialIndexFormat_
 
 	m_pD3DBuffer = NULL;
 	m_pIndBuffer = NULL;
+
+	m_nBufferPosition = 0;
+	m_bIsLocked = false;
 
 	if (m_nIndexCount == 0)
 		return;
@@ -614,7 +620,7 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 	}
 	else
 	{
-		if (GetRoomRemaining() < nMaxIndexCount)
+		if (nMaxIndexCount > m_nIndexCount)
 		{
 			Assert(0);
 			desc.m_nFirstIndex = 0;
