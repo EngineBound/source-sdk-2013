@@ -41,7 +41,7 @@ bool CHardwareConfigDX11::HasDestAlphaBuffer() const
 	return (g_pShaderDeviceDX11->GetBackBufferFormat() == IMAGE_FORMAT_BGRA8888);
 	*/
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -61,7 +61,7 @@ int	 CHardwareConfigDX11::GetFrameBufferColorDepth() const
 	return ShaderUtil()->ImageFormatInfo(g_pShaderDeviceDX11->GetBackBufferFormat()).m_NumBytes;
 	*/
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -426,7 +426,7 @@ bool CHardwareConfigDX11::IsAAEnabled() const	// Is antialiasing being used?
 	return g_pShaderDeviceDX11->IsAAEnabled();
 	*/
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 	return false;
 }
 
@@ -486,7 +486,7 @@ int CHardwareConfigDX11::StencilBufferBits() const
 	return g_pShaderDeviceDX11->StencilBufferBits();
 	*/
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 	return -1;
 }
 
@@ -543,7 +543,7 @@ bool CHardwareConfigDX11::HasFastVertexTextures() const
 int CHardwareConfigDX11::MaxHWMorphBatchCount() const
 {
 	// return ShaderUtil()->MaxHWMorphBatchCount();
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 	return -1;
 }
 

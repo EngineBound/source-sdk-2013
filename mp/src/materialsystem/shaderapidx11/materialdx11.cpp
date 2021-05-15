@@ -1,3 +1,5 @@
+#include "dx11global.h"
+
 #include "materialdx11.h"
 
 #include "memdbgon.h"
@@ -44,7 +46,7 @@ const char *CMaterialDX11::GetTextureGroupName() const
 PreviewImageRetVal_t CMaterialDX11::GetPreviewImageProperties(int *width, int *height,
 	ImageFormat *imageFormat, bool* isTranslucent) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return PreviewImageRetVal_t::MATERIAL_NO_PREVIEW_IMAGE;
 }
 
@@ -55,47 +57,47 @@ PreviewImageRetVal_t CMaterialDX11::GetPreviewImage(unsigned char *data,
 	int width, int height,
 	ImageFormat imageFormat) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return PreviewImageRetVal_t::MATERIAL_NO_PREVIEW_IMAGE;
 }
 // 
 int	CMaterialDX11::GetMappingWidth()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 int	CMaterialDX11::GetMappingHeight()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 int	CMaterialDX11::GetNumAnimationFrames()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 // For material subrects (material pages).  Offset(u,v) and scale(u,v) are normalized to texture.
 bool CMaterialDX11::InMaterialPage(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 void CMaterialDX11::GetMaterialOffset(float *pOffset)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CMaterialDX11::GetMaterialScale(float *pScale)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 IMaterial *CMaterialDX11::GetMaterialPage(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return (IMaterial *)NULL;
 }
 
@@ -105,7 +107,7 @@ IMaterial *CMaterialDX11::GetMaterialPage(void)
 // the shader for the material that it is trying to affect.
 IMaterialVar *CMaterialDX11::FindVar(const char *varName, bool *found, bool complain /*= true*/)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return (IMaterialVar *)NULL;
 }
 
@@ -114,89 +116,89 @@ IMaterialVar *CMaterialDX11::FindVar(const char *varName, bool *found, bool comp
 // IMaterialSystem::UncacheUnusedMaterials.
 void CMaterialDX11::IncrementReferenceCount(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CMaterialDX11::DecrementReferenceCount(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Each material is assigned a number that groups it with like materials
 // for sorting in the application.
 int CMaterialDX11::GetEnumerationID(void) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 void CMaterialDX11::GetLowResColorSample(float s, float t, float *color) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // This computes the state snapshots for this material
 void CMaterialDX11::RecomputeStateSnapshots()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Are we translucent?
 bool CMaterialDX11::IsTranslucent()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 // Are we alphatested?
 bool CMaterialDX11::IsAlphaTested()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 // Are we vertex lit?
 bool CMaterialDX11::IsVertexLit()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 // Gets the vertex format
 VertexFormat_t CMaterialDX11::GetVertexFormat() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return VERTEX_FORMAT_UNKNOWN;
 }
 
 // returns true if this material uses a material proxy
 bool CMaterialDX11::HasProxy(void) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 bool CMaterialDX11::UsesEnvCubemap(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 bool CMaterialDX11::NeedsTangentSpace(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 bool CMaterialDX11::NeedsPowerOfTwoFrameBufferTexture(bool bCheckSpecificToThisFrame /*= true*/)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 bool CMaterialDX11::NeedsFullFrameBufferTexture(bool bCheckSpecificToThisFrame /*= true*/)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -204,70 +206,70 @@ bool CMaterialDX11::NeedsFullFrameBufferTexture(bool bCheckSpecificToThisFrame /
 // the data that is sent to it to be preskinned.
 bool CMaterialDX11::NeedsSoftwareSkinning(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 // Apply constant color or alpha modulation
 void CMaterialDX11::AlphaModulate(float alpha)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CMaterialDX11::ColorModulate(float r, float g, float b)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Material Var flags...
 void CMaterialDX11::SetMaterialVarFlag(MaterialVarFlags_t flag, bool on)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 bool CMaterialDX11::GetMaterialVarFlag(MaterialVarFlags_t flag) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 // Gets material reflectivity
 void CMaterialDX11::GetReflectivity(Vector& reflect)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Gets material property flags
 bool CMaterialDX11::GetPropertyFlag(MaterialPropertyTypes_t type)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 // Is the material visible from both sides?
 bool CMaterialDX11::IsTwoSided()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 // Sets the shader associated with the material
 void CMaterialDX11::SetShader(const char *pShaderName)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Can't be const because the material might have to precache itself.
 int CMaterialDX11::GetNumPasses(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 // Can't be const because the material might have to precache itself.
 int	CMaterialDX11::GetTextureMemoryBytes(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -275,13 +277,13 @@ int	CMaterialDX11::GetTextureMemoryBytes(void)
 // It updates the materials to reflect the current values stored in the material vars
 void CMaterialDX11::Refresh()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // GR - returns true is material uses lightmap alpha for blending
 bool CMaterialDX11::NeedsLightmapBlendAlpha(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -289,20 +291,20 @@ bool CMaterialDX11::NeedsLightmapBlendAlpha(void)
 // the data that is sent to it to be prelighted
 bool CMaterialDX11::NeedsSoftwareLighting(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 // Gets at the shader parameters
 int CMaterialDX11::ShaderParamCount() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 IMaterialVar **CMaterialDX11::GetShaderParams(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return (IMaterialVar**)NULL;
 }
 
@@ -310,88 +312,88 @@ IMaterialVar **CMaterialDX11::GetShaderParams(void)
 // the material can't be found.
 bool CMaterialDX11::IsErrorMaterial() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 void CMaterialDX11::SetUseFixedFunctionBakedLighting(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Gets the current alpha modulation
 float CMaterialDX11::GetAlphaModulation()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1.f;
 }
 
 void CMaterialDX11::GetColorModulation(float *r, float *g, float *b)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Gets the morph format
 MorphFormat_t CMaterialDX11::GetMorphFormat() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return MORPH_POSITION;
 }
 
 // fast find that stores the index of the found var in the string table in local cache
 IMaterialVar *CMaterialDX11::FindVarFast(char const *pVarName, unsigned int *pToken)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return (IMaterialVar *)NULL;
 }
 
 // Sets new VMT shader parameters for the material
 void CMaterialDX11::SetShaderAndParams(KeyValues *pKeyValues)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 const char *CMaterialDX11::GetShaderName() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return "Epic Shader";
 }
 
 void CMaterialDX11::DeleteIfUnreferenced()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 bool CMaterialDX11::IsSpriteCard()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 void CMaterialDX11::CallBindProxy(void *proxyData)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 IMaterial *CMaterialDX11::CheckProxyReplacement(void *proxyData)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return (IMaterial *)NULL;
 }
 
 void CMaterialDX11::RefreshPreservingMaterialVars()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 bool CMaterialDX11::WasReloadedFromWhitelist()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 bool CMaterialDX11::IsPrecached() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }

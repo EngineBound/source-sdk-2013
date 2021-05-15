@@ -1,4 +1,6 @@
 
+#include "dx11global.h"
+
 #include "shadershadowdx11.h"
 
 #include "memdbgon.h"
@@ -14,29 +16,29 @@ IShaderShadowDX11* g_pShaderShadow = g_pShaderShadowDX11;
 // Sets the default *shadow* state
 void CShaderShadowDX11::SetDefaultState()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Methods related to depth buffering
 void CShaderShadowDX11::DepthFunc(ShaderDepthFunc_t depthFunc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::EnableDepthWrites(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::EnableDepthTest(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::EnablePolyOffset(PolygonOffsetMode_t nOffsetMode)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -45,66 +47,66 @@ void CShaderShadowDX11::EnablePolyOffset(PolygonOffsetMode_t nOffsetMode)
 // Methods related to stencil
 void CShaderShadowDX11::EnableStencil(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::StencilFunc(ShaderStencilFunc_t stencilFunc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::StencilPassOp(ShaderStencilOp_t stencilOp)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::StencilFailOp(ShaderStencilOp_t stencilOp)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::StencilDepthFailOp(ShaderStencilOp_t stencilOp)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::StencilReference(int nReference)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::StencilMask(int nMask)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::StencilWriteMask(int nMask)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Suppresses/activates color writing 
 void CShaderShadowDX11::EnableColorWrites(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::EnableAlphaWrites(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Methods related to alpha blending
 void CShaderShadowDX11::EnableBlending(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::BlendFunc(ShaderBlendFactor_t srcFactor, ShaderBlendFactor_t dstFactor)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // More below...
@@ -112,33 +114,33 @@ void CShaderShadowDX11::BlendFunc(ShaderBlendFactor_t srcFactor, ShaderBlendFact
 // Alpha testing
 void CShaderShadowDX11::EnableAlphaTest(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::AlphaFunc(ShaderAlphaFunc_t alphaFunc, float alphaRef /* [0-1] */)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Wireframe/filled polygons
 void CShaderShadowDX11::PolyMode(ShaderPolyModeFace_t face, ShaderPolyMode_t polyMode)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Back face culling
 void CShaderShadowDX11::EnableCulling(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // constant color + transparency
 void CShaderShadowDX11::EnableConstantColor(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -149,46 +151,46 @@ void CShaderShadowDX11::EnableConstantColor(bool bEnable)
 void CShaderShadowDX11::VertexShaderVertexFormat(unsigned int nFlags,
 	int nTexCoordCount, int* pTexCoordDimensions, int nUserDataSize) 
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Pixel and vertex shader methods
 void CShaderShadowDX11::SetVertexShader(const char* pFileName, int nStaticVshIndex)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::SetPixelShader(const char* pFileName, int nStaticPshIndex)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Indicates we're going to light the model
 void CShaderShadowDX11::EnableLighting(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Enables specular lighting (lighting has also got to be enabled)
 void CShaderShadowDX11::EnableSpecular(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Convert from linear to gamma color space on writes to frame buffer.
 void CShaderShadowDX11::EnableSRGBWrite(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Convert from gamma to linear on texture fetch.
 void CShaderShadowDX11::EnableSRGBRead(Sampler_t sampler, bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -197,29 +199,29 @@ void CShaderShadowDX11::EnableSRGBRead(Sampler_t sampler, bool bEnable)
 // we allocate enough room for 3 weights (max allowed)
 void CShaderShadowDX11::EnableVertexBlend(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // per texture unit stuff
 void CShaderShadowDX11::OverbrightValue(TextureStage_t stage, float value)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::EnableTexture(Sampler_t sampler, bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::EnableTexGen(TextureStage_t stage, bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::TexGen(TextureStage_t stage, ShaderTexGenParam_t param)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -227,69 +229,69 @@ void CShaderShadowDX11::TexGen(TextureStage_t stage, ShaderTexGenParam_t param)
 // Can be used to specify different operation per channel (alpha/color)...
 void CShaderShadowDX11::EnableCustomPixelPipe(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::CustomTextureStages(int stageCount)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::CustomTextureOperation(TextureStage_t stage, ShaderTexChannel_t channel,
 	ShaderTexOp_t op, ShaderTexArg_t arg1, ShaderTexArg_t arg2) 
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // indicates what per-vertex data we're providing
 void CShaderShadowDX11::DrawFlags(unsigned int drawFlags)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // A simpler method of dealing with alpha modulation
 void CShaderShadowDX11::EnableAlphaPipe(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::EnableConstantAlpha(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::EnableVertexAlpha(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::EnableTextureAlpha(TextureStage_t stage, bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // GR - Separate alpha blending
 void CShaderShadowDX11::EnableBlendingSeparateAlpha(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::BlendFuncSeparateAlpha(ShaderBlendFactor_t srcFactor, ShaderBlendFactor_t dstFactor)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::FogMode(ShaderFogMode_t fogMode)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderShadowDX11::SetDiffuseMaterialSource(ShaderMaterialSource_t materialSource)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -297,37 +299,37 @@ void CShaderShadowDX11::SetDiffuseMaterialSource(ShaderMaterialSource_t material
 // The flags to pass in here come from the MorphFormatFlags_t enum
 void CShaderShadowDX11::SetMorphFormat(MorphFormat_t flags)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderShadowDX11::DisableFogGammaCorrection(bool bDisable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
  //some blending modes won't work properly with corrected fog
 
 // Alpha to coverage
 void CShaderShadowDX11::EnableAlphaToCoverage(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Shadow map filtering
 void CShaderShadowDX11::SetShadowDepthFiltering(Sampler_t stage)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // More alpha blending state
 void CShaderShadowDX11::BlendOp(ShaderBlendOp_t blendOp)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderShadowDX11::BlendOpSeparateAlpha(ShaderBlendOp_t blendOp)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }

@@ -236,7 +236,7 @@ void CAPITextureDX11::CreateSamplerState()
 
 void CAPITextureDX11::LoadFromVTF(IVTFTexture* pVTF, int iVTFFrame)
 {
-	_AssertMsg(0, "Not Implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return;
 
 	unsigned char *imageData = pVTF->ImageData();

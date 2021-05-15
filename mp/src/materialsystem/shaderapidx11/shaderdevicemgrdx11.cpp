@@ -218,7 +218,7 @@ bool CShaderDeviceMgrDX11::PopulateHWInfo(HWInfo_t *pHWInfo, IDXGIAdapter *pAdap
 // Gets the number of adapters...
 int	 CShaderDeviceMgrDX11::GetAdapterCount() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -267,15 +267,15 @@ void CShaderDeviceMgrDX11::GetAdapterInfo(int nAdapter, MaterialAdapterInfo_t& i
 	memset(&info, 0, sizeof(info));
 	info.m_nDXSupportLevel = 110;
 
-	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 }
 
 
 // Gets recommended configuration for a particular adapter at a particular dx level
 bool CShaderDeviceMgrDX11::GetRecommendedConfigurationInfo(int nAdapter, int nDXLevel, KeyValues *pConfiguration)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
-	return false;
+	ALERT_BADLY_IMPLEMENTED();
+	return true;
 }
 
 
@@ -401,10 +401,10 @@ CreateInterfaceFn CShaderDeviceMgrDX11::SetMode(void *hWnd, int nAdapter, const 
 // Installs a callback to get called 
 void CShaderDeviceMgrDX11::AddModeChangeCallback(ShaderModeChangeCallbackFunc_t func)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderDeviceMgrDX11::RemoveModeChangeCallback(ShaderModeChangeCallbackFunc_t func)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }

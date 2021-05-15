@@ -302,18 +302,21 @@ bool CVertexBufferDX11::IsDynamic() const
 // Casts the memory of the dynamic vertex buffer to the appropriate type
 void CVertexBufferDX11::BeginCastBuffer(VertexFormat_t format)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CVertexBufferDX11::EndCastBuffer()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Returns the number of vertices that can still be written into the buffer
 int CVertexBufferDX11::GetRoomRemaining() const
 {
+	if (m_nVertexSize == 0)
+		return 0xFFFF;
+
 	return m_nVertexCount - m_nBufferPosition / m_nVertexSize;
 }
 
@@ -409,9 +412,9 @@ void CVertexBufferDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 	if (m_bIsDynamic)
 	{
 		g_pShaderDeviceDX11->GetDeviceContext()->Unmap(m_pD3DBuffer, 0);
-		
+
 	}
-	else
+	else if (nMemWritten > 0)
 	{
 		D3D11_BOX box;
 		box.left = m_nBufferPosition;
@@ -420,7 +423,7 @@ void CVertexBufferDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 		box.bottom = 1;
 		box.back = 1;
 		box.front = 0;
-		
+
 		g_pShaderDeviceDX11->GetDeviceContext()->UpdateSubresource(m_pD3DBuffer, 0, &box, m_pVertBuffer + m_nBufferPosition, 0, 0);
 	}
 
@@ -436,14 +439,14 @@ void CVertexBufferDX11::Spew(int nVertexCount, const VertexDesc_t &desc)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Call this in debug mode to make sure our data is good.
 void CVertexBufferDX11::ValidateData(int nVertexCount, const VertexDesc_t & desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -545,12 +548,12 @@ bool CIndexBufferDX11::IsDynamic() const
 // Casts the memory of the dynamic index buffer to the appropriate type
 void CIndexBufferDX11::BeginCastBuffer(MaterialIndexFormat_t format)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CIndexBufferDX11::EndCastBuffer()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -680,12 +683,12 @@ void CIndexBufferDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 // Locks, unlocks the index buffer for modify
 void CIndexBufferDX11::ModifyBegin(bool bReadOnly, int nFirstIndex, int nIndexCount, IndexDesc_t& desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CIndexBufferDX11::ModifyEnd(IndexDesc_t& desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -694,14 +697,14 @@ void CIndexBufferDX11::Spew(int nIndexCount, const IndexDesc_t &desc)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Ensures the data in the index buffer is valid
 void CIndexBufferDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -750,14 +753,14 @@ bool CMeshDX11::IsDynamic() const
 // NOTE: For dynamic meshes only!
 void CMeshDX11::EndCastBuffer()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Returns room remaining :)
 int CMeshDX11::GetRoomRemaining() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -901,20 +904,20 @@ void CMeshDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 // Sets/gets the primitive type
 void CMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Draws the mesh
 void CMeshDX11::Draw(int nFirstIndex, int nIndexCount)
 {
-	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 }
 
 
 void CMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -924,7 +927,7 @@ void CMeshDX11::SetColorMesh(IMesh *pColorMesh, int nVertexOffset)
 // NOTE: this only works with STATIC meshes.
 void CMeshDX11::Draw(CPrimList *pLists, int nLists)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -937,7 +940,7 @@ void CMeshDX11::CopyToMeshBuilder(
 	int indexOffset,	// This is added to each index.
 	CMeshBuilder &builder)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Spews the mesh data
@@ -945,7 +948,7 @@ void CMeshDX11::Spew(int nVertexCount, int nIndexCount, const MeshDesc_t &desc)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -971,12 +974,12 @@ void CMeshDX11::LockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 
 void CMeshDX11::ModifyBegin(int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t& desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CMeshDX11::ModifyEnd(MeshDesc_t& desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
@@ -990,30 +993,30 @@ void CMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 
 void CMeshDX11::ModifyBeginEx(bool bReadOnly, int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t &desc)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CMeshDX11::SetFlexMesh(IMesh *pMesh, int nVertexOffset)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CMeshDX11::DisableFlexMesh()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CMeshDX11::MarkAsDrawn()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 unsigned CMeshDX11::ComputeMemoryUsed()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return 0;
 }

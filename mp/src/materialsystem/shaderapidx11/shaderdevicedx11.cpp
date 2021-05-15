@@ -183,19 +183,19 @@ void CShaderDeviceDX11::Shutdown()
 // Releases/reloads resources when other apps want some memory
 void CShaderDeviceDX11::ReleaseResources()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderDeviceDX11::ReacquireResources()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // returns the backbuffer format and dimensions
 ImageFormat CShaderDeviceDX11::GetBackBufferFormat() const
 {
-	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 	return IMAGE_FORMAT_RGBA8888;
 }
 
@@ -225,14 +225,14 @@ bool CShaderDeviceDX11::IsUsingGraphics() const
 // Use this to spew information about the 3D layer 
 void CShaderDeviceDX11::SpewDriverInfo() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // What's the bit depth of the stencil buffer?
 int CShaderDeviceDX11::StencilBufferBits() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -240,7 +240,7 @@ int CShaderDeviceDX11::StencilBufferBits() const
 // Are we using a mode that uses MSAA
 bool CShaderDeviceDX11::IsAAEnabled() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -248,7 +248,7 @@ bool CShaderDeviceDX11::IsAAEnabled() const
 // Does a page flip
 void CShaderDeviceDX11::Present()
 {
-	_AssertMsg(0, "Incomplete Implementation! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 
 #ifdef DEBUG
 	HRESULT hr =
@@ -276,27 +276,27 @@ void CShaderDeviceDX11::GetWindowSize(int &nWidth, int &nHeight) const
 // Gamma ramp control
 void CShaderDeviceDX11::SetHardwareGammaRamp(float fGamma, float fGammaTVRangeMin, float fGammaTVRangeMax, float fGammaTVExponent, bool bTVEnabled)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Creates/ destroys a child window
 bool CShaderDeviceDX11::AddView(void* hWnd)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 void CShaderDeviceDX11::RemoveView(void* hWnd)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Activates a view
 void CShaderDeviceDX11::SetView(void* hWnd)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -360,13 +360,13 @@ void CShaderDeviceDX11::DestroyVertexShader(VertexShaderHandle_t hShader)
 
 GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(IShaderBuffer* pShaderBuffer)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
 void CShaderDeviceDX11::DestroyGeometryShader(GeometryShaderHandle_t hShader)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(IShaderBuffer* pShaderBuffer)
@@ -568,19 +568,19 @@ VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(const char *pProgram,
 
 VertexShaderHandle_t CShaderDeviceDX11::CreateVertexShader(CUtlBuffer &buf, const char *pShaderVersion)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
 GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(const char *pProgram, size_t nBufLen, const char *pShaderVersion)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
 GeometryShaderHandle_t CShaderDeviceDX11::CreateGeometryShader(CUtlBuffer &buf, const char *pShaderVersion)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
@@ -614,7 +614,7 @@ PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(const char *pProgram, s
 
 PixelShaderHandle_t CShaderDeviceDX11::CreatePixelShader(CUtlBuffer &buf, const char *pShaderVersion)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
@@ -624,7 +624,7 @@ IMesh* CShaderDeviceDX11::CreateStaticMesh(VertexFormat_t vertexFormat, const ch
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 	return new CMeshDX11(false, vertexFormat);
 }
 
@@ -632,7 +632,7 @@ void CShaderDeviceDX11::DestroyStaticMesh(IMesh* mesh)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 	delete mesh;
 }
 
@@ -692,7 +692,7 @@ IVertexBuffer *CShaderDeviceDX11::GetDynamicVertexBuffer(int nStreamID, VertexFo
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
@@ -700,7 +700,7 @@ IIndexBuffer *CShaderDeviceDX11::GetDynamicIndexBuffer(MaterialIndexFormat_t fmt
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
@@ -708,17 +708,17 @@ IIndexBuffer *CShaderDeviceDX11::GetDynamicIndexBuffer(MaterialIndexFormat_t fmt
 // A special path used to tick the front buffer while loading on the 360
 void CShaderDeviceDX11::EnableNonInteractiveMode(MaterialNonInteractiveMode_t mode, ShaderNonInteractiveInfo_t *pInfo)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderDeviceDX11::RefreshFrontBufferNonInteractive()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderDeviceDX11::HandleThreadEvent(uint32 threadEvent)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -726,14 +726,14 @@ void CShaderDeviceDX11::HandleThreadEvent(uint32 threadEvent)
 #ifdef DX_TO_GL_ABSTRACTION
 void CShaderDeviceDX11::DoStartupShaderPreloading(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 #endif
 
 char *CShaderDeviceDX11::GetDisplayDeviceName()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 

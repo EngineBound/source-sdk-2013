@@ -8,6 +8,22 @@
 #define VENDORID_NVIDIA	0x10DE
 #define VENDORID_ATI	0x1002
 
+#define _ALERT_IMPLEMENTATION 0
+
+#if (_ALERT_IMPLEMENTATION == 1)
+
+#define ALERT_NOT_IMPLEMENTED() _AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0)
+#define ALERT_INCOMPLETE() _AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0)
+#define ALERT_BADLY_IMPLEMENTED() _AssertMsg(0, "Bad implementation! " __FUNCTION__, 0, 0)
+
+#else
+
+#define ALERT_NOT_IMPLEMENTED()
+#define ALERT_INCOMPLETE()
+#define ALERT_BADLY_IMPLEMENTED()
+
+#endif
+
 #include "tier0/threadtools.h"
 
 class IShaderUtil;

@@ -190,13 +190,13 @@ void CShaderAPIDX11::GetLightmapDimensions(int *w, int *h)
 // This is used by the shaders for picking the proper vertex shader for fogging based on dynamic state.
 MaterialFogMode_t CShaderAPIDX11::GetSceneFogMode()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return MATERIAL_FOG_NONE;
 }
 
 void CShaderAPIDX11::GetSceneFogColor(unsigned char *rgb)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -287,7 +287,7 @@ void CShaderAPIDX11::PerspectiveX(double fovx, double aspect, double zNear, doub
 
 void CShaderAPIDX11::PickMatrix(int x, int y, int width, int height)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::Rotate(float angle, float x, float y, float z)
@@ -317,88 +317,88 @@ void CShaderAPIDX11::ScaleXY(float x, float y)
 // Sets the color to modulate by
 void CShaderAPIDX11::Color3f(float r, float g, float b)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::Color3fv(float const* pColor)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::Color4f(float r, float g, float b, float a)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::Color4fv(float const* pColor)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::Color3ub(unsigned char r, unsigned char g, unsigned char b)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::Color3ubv(unsigned char const* pColor)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::Color4ub(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::Color4ubv(unsigned char const* pColor)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Sets the constant register for vertex and pixel shaders
 void CShaderAPIDX11::SetVertexShaderConstant(int var, float const* pVec, int numConst, bool bForce)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetPixelShaderConstant(int var, float const* pVec, int numConst, bool bForce)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Sets the default *dynamic* state
 void CShaderAPIDX11::SetDefaultState()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Get the current camera position in world space.
 void CShaderAPIDX11::GetWorldSpaceCameraPosition(float* pPos) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 int CShaderAPIDX11::GetCurrentNumBones(void) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 int CShaderAPIDX11::GetCurrentLightCombo(void) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 
 MaterialFogMode_t CShaderAPIDX11::GetCurrentFogType(void) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return MATERIAL_FOG_NONE;
 }
 
@@ -406,29 +406,29 @@ MaterialFogMode_t CShaderAPIDX11::GetCurrentFogType(void) const
 // fixme: move this to shadow state
 void CShaderAPIDX11::SetTextureTransformDimension(TextureStage_t textureStage, int dimension, bool projected)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::DisableTextureTransform(TextureStage_t textureStage)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetBumpEnvMatrix(TextureStage_t textureStage, float m00, float m01, float m10, float m11)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Sets the vertex and pixel shaders
 void CShaderAPIDX11::SetVertexShaderIndex(int vshIndex)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetPixelShaderIndex(int pshIndex)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -445,7 +445,7 @@ void CShaderAPIDX11::GetBackBufferDimensions(int& width, int& height) const
 // Get the lights
 int CShaderAPIDX11::GetMaxLights(void) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -453,44 +453,44 @@ static LightDesc_t s_tmpLightDesc;
 
 const LightDesc_t& CShaderAPIDX11::GetLight(int lightNum) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return s_tmpLightDesc;
 }
 
 
 void CShaderAPIDX11::SetPixelShaderFogParams(int reg)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Render state for the ambient light cube
 void CShaderAPIDX11::SetVertexShaderStateAmbientLightCube()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetPixelShaderStateAmbientLightCube(int pshReg, bool bForceToBlack)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::CommitPixelShaderLighting(int pshReg)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Use this to get the mesh builder that allows us to modify vertex data
 CMeshBuilder* CShaderAPIDX11::GetVertexModifyBuilder()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
 bool CShaderAPIDX11::InFlashlightMode() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -498,13 +498,13 @@ static FlashlightState_t s_tmpFlashlightState;
 
 const FlashlightState_t &CShaderAPIDX11::GetFlashlightState(VMatrix &worldToTexture) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return s_tmpFlashlightState;
 }
 
 bool CShaderAPIDX11::InEditorMode() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -512,7 +512,7 @@ bool CShaderAPIDX11::InEditorMode() const
 // Gets the bound morph's vertex format; returns 0 if no morph is bound
 MorphFormat_t CShaderAPIDX11::GetBoundMorphFormat()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return MORPH_NORMAL;
 }
 
@@ -532,63 +532,63 @@ ITexture *CShaderAPIDX11::GetRenderTargetEx(int nRenderTargetID)
 
 void CShaderAPIDX11::SetToneMappingScaleLinear(const Vector &scale)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 static Vector s_tmpVec;
 const Vector &CShaderAPIDX11::GetToneMappingScaleLinear(void) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return s_tmpVec;
 }
 
 float CShaderAPIDX11::GetLightMapScaleFactor(void) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1.0f;
 }
 
 
 void CShaderAPIDX11::LoadBoneMatrix(int boneIndex, const float *m)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::PerspectiveOffCenterX(double fovx, double aspect, double zNear, double zFar, double bottom, double top, double left, double right)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::GetDXLevelDefaults(uint &max_dxlevel, uint &recommended_dxlevel)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 const FlashlightState_t &CShaderAPIDX11::GetFlashlightStateEx(VMatrix &worldToTexture, ITexture **pFlashlightDepthTexture) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return s_tmpFlashlightState;
 }
 
 
 float CShaderAPIDX11::GetAmbientLightCubeLuminance()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1.0f;
 }
 
 
 void CShaderAPIDX11::GetDX9LightState(LightState_t *state) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 int CShaderAPIDX11::GetPixelFogCombo()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
  //0 is either range fog, or no fog simulated with rigged range fog values. 1 is height fog
@@ -602,42 +602,42 @@ void CShaderAPIDX11::BindStandardVertexTexture(VertexTextureSampler_t sampler, S
 // Is hardware morphing enabled?
 bool CShaderAPIDX11::IsHWMorphingEnabled() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 
 void CShaderAPIDX11::GetStandardTextureDimensions(int *pWidth, int *pHeight, StandardTextureId_t id)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::SetBooleanVertexShaderConstant(int var, BOOL const* pVec, int numBools, bool bForce)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetIntegerVertexShaderConstant(int var, int const* pVec, int numIntVecs, bool bForce)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetBooleanPixelShaderConstant(int var, BOOL const* pVec, int numBools, bool bForce)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetIntegerPixelShaderConstant(int var, int const* pVec, int numIntVecs, bool bForce)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 //Are we in a configuration that needs access to depth data through the alpha channel later?
 bool CShaderAPIDX11::ShouldWriteDepthToDestAlpha(void) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -646,17 +646,17 @@ bool CShaderAPIDX11::ShouldWriteDepthToDestAlpha(void) const
 // deformations
 void CShaderAPIDX11::PushDeformation(DeformationBase_t const *Deformation)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::PopDeformation()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 int CShaderAPIDX11::GetNumActiveDeformations() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -670,7 +670,7 @@ int nBufferSize,
 int nMaximumDeformations,
 int *pNumDefsOut) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -680,40 +680,40 @@ int *pNumDefsOut) const
 // known only at dynamic state time. It's here only to silence warnings.
 void CShaderAPIDX11::MarkUnusedVertexFields(unsigned int nFlags, int nTexCoordCount, bool *pUnusedTexCoords)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 
 void CShaderAPIDX11::ExecuteCommandBuffer(uint8 *pCmdBuffer)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // interface for mat system to tell shaderapi about standard texture handles
 void CShaderAPIDX11::SetStandardTextureHandle(StandardTextureId_t nId, ShaderAPITextureHandle_t nHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Interface for mat system to tell shaderapi about color correction
 void CShaderAPIDX11::GetCurrentColorCorrection(ShaderColorCorrectionInfo_t* pInfo)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::SetPSNearAndFarZ(int pshReg)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::SetDepthFeatheringPixelShaderConstant(int iConstant, float fDepthBlendScale)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -781,7 +781,7 @@ void CShaderAPIDX11::BindGeometryShader(GeometryShaderHandle_t hGeometryShader)
 	if (hGeometryShader == GEOMETRY_SHADER_HANDLE_INVALID)
 		return;
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::BindPixelShader(PixelShaderHandle_t hPixelShader)
@@ -813,7 +813,7 @@ void CShaderAPIDX11::UnbindPixelShader(PixelShaderHandle_t hPixelShader)
 // Methods related to state objects
 void CShaderAPIDX11::SetRasterState(const ShaderRasterState_t& state)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -830,14 +830,14 @@ bool CShaderAPIDX11::SetMode(void* hwnd, int nAdapter, const ShaderDeviceInfo_t 
 
 void CShaderAPIDX11::ChangeVideoMode(const ShaderDeviceInfo_t &info)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Returns the snapshot id for the shader state
 StateSnapshot_t	 CShaderAPIDX11::TakeSnapshot()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -846,27 +846,27 @@ void CShaderAPIDX11::TexMinFilter(ShaderTexFilterMode_t texFilterMode)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::TexMagFilter(ShaderTexFilterMode_t texFilterMode)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::TexWrap(ShaderTexCoordComponent_t coord, ShaderTexWrapMode_t wrapMode)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::CopyRenderTargetToTexture(ShaderAPITextureHandle_t textureHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -875,7 +875,7 @@ void CShaderAPIDX11::Bind(IMaterial* pMaterial)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -884,7 +884,7 @@ void CShaderAPIDX11::FlushBufferedPrimitives()
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -900,7 +900,7 @@ IMesh* CShaderAPIDX11::GetDynamicMesh(IMaterial* pMaterial, int nHWSkinBoneCount
 IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t vertexFormat, int nHWSkinBoneCount,
 	bool bBuffered, IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
-	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 
 	if (!m_pDynamicMesh)
 		m_pDynamicMesh = new CMeshDX11(true, vertexFormat);
@@ -914,7 +914,7 @@ bool CShaderAPIDX11::IsTranslucent(StateSnapshot_t id) const
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -922,13 +922,13 @@ bool CShaderAPIDX11::IsAlphaTested(StateSnapshot_t id) const
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 bool CShaderAPIDX11::UsesVertexAndPixelShaders(StateSnapshot_t id) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return true;
 }
 
@@ -936,7 +936,7 @@ bool CShaderAPIDX11::IsDepthWriteEnabled(StateSnapshot_t id) const
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -946,7 +946,7 @@ VertexFormat_t CShaderAPIDX11::ComputeVertexFormat(int numSnapshots, StateSnapsh
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return VERTEX_FORMAT_UNKNOWN;
 }
 
@@ -956,7 +956,7 @@ VertexFormat_t CShaderAPIDX11::ComputeVertexUsage(int numSnapshots, StateSnapsho
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return VERTEX_FORMAT_UNKNOWN;
 }
 
@@ -964,14 +964,14 @@ VertexFormat_t CShaderAPIDX11::ComputeVertexUsage(int numSnapshots, StateSnapsho
 // Begins a rendering pass
 void CShaderAPIDX11::BeginPass(StateSnapshot_t snapshot)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Renders a single pass of a material
 void CShaderAPIDX11::RenderPass(int nPass, int nPassCount)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -980,7 +980,7 @@ void CShaderAPIDX11::SetNumBoneWeights(int numBones)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -989,41 +989,41 @@ void CShaderAPIDX11::SetLight(int lightNum, const LightDesc_t& desc)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Lighting origin for the current model
 void CShaderAPIDX11::SetLightingOrigin(Vector vLightingOrigin)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::SetAmbientLight(float r, float g, float b)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetAmbientLightCube(Vector4D cube[6])
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // The shade mode
 void CShaderAPIDX11::ShadeMode(ShaderShadeMode_t mode)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // The cull mode
 void CShaderAPIDX11::CullMode(MaterialCullMode_t cullMode)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1031,43 +1031,43 @@ void CShaderAPIDX11::CullMode(MaterialCullMode_t cullMode)
 // by rendering the desired Z values ahead of time.
 void CShaderAPIDX11::ForceDepthFuncEquals(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Forces Z buffering to be on or off
 void CShaderAPIDX11::OverrideDepthEnable(bool bEnable, bool bDepthEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::SetHeightClipZ(float z)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetHeightClipMode(enum MaterialHeightClipMode_t heightClipMode)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::SetClipPlane(int index, const float *pPlane)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::EnableClipPlane(int index, bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Put all the model matrices into vertex shader constants.
 void CShaderAPIDX11::SetSkinningMatrices()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1091,7 +1091,7 @@ ImageFormat CShaderAPIDX11::GetNearestRenderTargetFormat(ImageFormat fmt) const
 // depth buffer.
 bool CShaderAPIDX11::DoRenderTargetsNeedSeparateDepthBuffer() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -1131,19 +1131,19 @@ bool bTexture)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
 bool CShaderAPIDX11::IsTexture(ShaderAPITextureHandle_t textureHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 bool CShaderAPIDX11::IsTextureResident(ShaderAPITextureHandle_t textureHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -1199,7 +1199,7 @@ void CShaderAPIDX11::TexImageFromVTF(IVTFTexture* pVTF, int iVTFFrame)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Incomplete implementation! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 	// Needs miplevel and cubemap/volume support
 
 	unsigned char *imageData = pVTF->ImageData( iVTFFrame, 0, 0);
@@ -1221,7 +1221,7 @@ bool CShaderAPIDX11::TexLock(int level, int cubeFaceID, int xOffset, int yOffset
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -1229,14 +1229,14 @@ void CShaderAPIDX11::TexUnlock()
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // These are bound to the texture
 void CShaderAPIDX11::TexSetPriority(int priority)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1280,7 +1280,7 @@ void CShaderAPIDX11::BindTexture(Sampler_t sampler, ShaderAPITextureHandle_t tex
 void CShaderAPIDX11::SetRenderTarget(ShaderAPITextureHandle_t colorTextureHandle,
 	ShaderAPITextureHandle_t depthTextureHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // stuff that isn't to be used from within a shader
@@ -1288,35 +1288,35 @@ void CShaderAPIDX11::ClearBuffersObeyStencil(bool bClearColor, bool bClearDepth)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::ReadPixels(int x, int y, int width, int height, unsigned char *data, ImageFormat dstFormat)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::ReadPixels(Rect_t *pSrcRect, Rect_t *pDstRect, unsigned char *data, ImageFormat dstFormat, int nDstStride)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::FlushHardware()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Use this to begin and end the frame
 void CShaderAPIDX11::BeginFrame()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::EndFrame()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1325,7 +1325,7 @@ int  CShaderAPIDX11::SelectionMode(bool selectionMode)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -1333,42 +1333,42 @@ void CShaderAPIDX11::SelectionBuffer(unsigned int* pBuffer, int size)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::ClearSelectionNames()
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::LoadSelectionName(int name)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::PushSelectionName(int name)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::PopSelectionName()
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Force the hardware to finish whatever it's doing
 void CShaderAPIDX11::ForceHardwareSync()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1377,34 +1377,34 @@ void CShaderAPIDX11::ClearSnapshots()
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::FogStart(float fStart)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::FogEnd(float fEnd)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetFogZ(float fogZ)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // Scene fog state.
 void CShaderAPIDX11::SceneFogColor3ub(unsigned char r, unsigned char g, unsigned char b)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SceneFogMode(MaterialFogMode_t fogMode)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1417,14 +1417,14 @@ bool CShaderAPIDX11::CanDownloadTextures() const
 
 void CShaderAPIDX11::ResetRenderState(bool bFullReset)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // We use smaller dynamic VBs during level transitions, to free up memory
 int  CShaderAPIDX11::GetCurrentDynamicVBSize(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -1432,13 +1432,13 @@ void CShaderAPIDX11::DestroyVertexBuffers(bool bExitingLevel)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::EvictManagedResources()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1447,7 +1447,7 @@ void CShaderAPIDX11::SetAnisotropicLevel(int nAnisotropyLevel)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1455,7 +1455,7 @@ void CShaderAPIDX11::SetAnisotropicLevel(int nAnisotropyLevel)
 // then someone doing a playback can watch for the token.
 void CShaderAPIDX11::SyncToken(const char *pToken)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1463,7 +1463,7 @@ void CShaderAPIDX11::SyncToken(const char *pToken)
 // This needs to be called anytime that overbright changes.
 void CShaderAPIDX11::SetStandardVertexShaderConstants(float fOverbright)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1474,25 +1474,25 @@ void CShaderAPIDX11::SetStandardVertexShaderConstants(float fOverbright)
 // Allocate and delete query objects.
 ShaderAPIOcclusionQuery_t CShaderAPIDX11::CreateOcclusionQueryObject(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
 void CShaderAPIDX11::DestroyOcclusionQueryObject(ShaderAPIOcclusionQuery_t)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Bracket drawing with begin and end so that we can get counts next frame.
 void CShaderAPIDX11::BeginOcclusionQueryDrawing(ShaderAPIOcclusionQuery_t)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::EndOcclusionQueryDrawing(ShaderAPIOcclusionQuery_t)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1506,7 +1506,7 @@ void CShaderAPIDX11::EndOcclusionQueryDrawing(ShaderAPIOcclusionQuery_t)
 // Use OCCLUSION_QUERY_FINISHED( iQueryResult ) to test if query finished.
 int CShaderAPIDX11::OcclusionQuery_GetNumPixelsRendered(ShaderAPIOcclusionQuery_t hQuery, bool bFlush)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -1515,7 +1515,7 @@ void CShaderAPIDX11::SetFlashlightState(const FlashlightState_t &state, const VM
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1523,21 +1523,21 @@ void CShaderAPIDX11::ClearVertexAndPixelShaderRefCounts()
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::PurgeUnusedVertexAndPixelShaders()
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Called when the dx support level has changed
 void CShaderAPIDX11::DXSupportLevelChanged()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1548,12 +1548,12 @@ void CShaderAPIDX11::DXSupportLevelChanged()
 // will be mutliplied against this instead of the normal VIEW matrix.
 void CShaderAPIDX11::EnableUserClipTransformOverride(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::UserClipTransform(const VMatrix &worldToView)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1566,7 +1566,7 @@ MorphFormat_t CShaderAPIDX11::ComputeMorphFormat(int numSnapshots, StateSnapshot
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return MORPH_NORMAL;
 }
 
@@ -1578,41 +1578,41 @@ void CShaderAPIDX11::SetRenderTargetEx(int nRenderTargetID,
 ShaderAPITextureHandle_t colorTextureHandle,
 ShaderAPITextureHandle_t depthTextureHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::CopyRenderTargetToTextureEx(ShaderAPITextureHandle_t textureHandle, int nRenderTargetID, Rect_t *pSrcRect, Rect_t *pDstRect)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::CopyTextureToRenderTargetEx(int nRenderTargetID, ShaderAPITextureHandle_t textureHandle, Rect_t *pSrcRect, Rect_t *pDstRect)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // For dealing with device lost in cases where SwapBuffers isn't called all the time (Hammer)
 void CShaderAPIDX11::HandleDeviceLost()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::EnableLinearColorSpaceFrameBuffer(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Lets the shader know about the full-screen texture so it can 
 void CShaderAPIDX11::SetFullScreenTextureHandle(ShaderAPITextureHandle_t h)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1622,21 +1622,21 @@ void CShaderAPIDX11::SetFloatRenderingParameter(int parm_number, float value)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetIntRenderingParameter(int parm_number, int value)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetVectorRenderingParameter(int parm_number, Vector const &value)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1644,7 +1644,7 @@ float CShaderAPIDX11::GetFloatRenderingParameter(int parm_number) const
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1.f;
 }
 
@@ -1652,7 +1652,7 @@ int CShaderAPIDX11::GetIntRenderingParameter(int parm_number) const
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -1660,19 +1660,19 @@ Vector CShaderAPIDX11::GetVectorRenderingParameter(int parm_number) const
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return s_tmpVec;
 }
 
 
 void CShaderAPIDX11::SetFastClipPlane(const float *pPlane)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::EnableFastClip(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1684,20 +1684,20 @@ void CShaderAPIDX11::EnableFastClip(bool bEnable)
 // the maximum possible vertices + indices that can be rendered in a single batch
 void CShaderAPIDX11::GetMaxToRender(IMesh *pMesh, bool bMaxUntilFlush, int *pMaxVerts, int *pMaxIndices)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Returns the max number of vertices we can render for a given material
 int CShaderAPIDX11::GetMaxVerticesToRender(IMaterial *pMaterial)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 int CShaderAPIDX11::GetMaxIndicesToRender()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -1705,47 +1705,47 @@ int CShaderAPIDX11::GetMaxIndicesToRender()
 // stencil methods
 void CShaderAPIDX11::SetStencilEnable(bool onoff)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetStencilFailOperation(StencilOperation_t op)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetStencilZFailOperation(StencilOperation_t op)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetStencilPassOperation(StencilOperation_t op)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetStencilCompareFunction(StencilComparisonFunction_t cmpfn)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetStencilReferenceValue(int ref)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetStencilTestMask(uint32 msk)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetStencilWriteMask(uint32 msk)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::ClearStencilBufferRectangle(int xmin, int ymin, int xmax, int ymax, int value)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1754,21 +1754,21 @@ void CShaderAPIDX11::DisableAllLocalLights()
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 int CShaderAPIDX11::CompareSnapshots(StateSnapshot_t snapshot0, StateSnapshot_t snapshot1)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
 
 IMesh *CShaderAPIDX11::GetFlexMesh()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
@@ -1777,20 +1777,20 @@ void CShaderAPIDX11::SetFlashlightStateEx(const FlashlightState_t &state, const 
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 bool CShaderAPIDX11::SupportsMSAAMode(int nMSAAMode)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 
 bool CShaderAPIDX11::OwnGPUResources(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -1798,61 +1798,61 @@ bool CShaderAPIDX11::OwnGPUResources(bool bEnable)
 //get fog distances entered with FogStart(), FogEnd(), and SetFogZ()
 void CShaderAPIDX11::GetFogDistances(float *fStart, float *fEnd, float *fFogZ)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Hooks for firing PIX events from outside the Material System...
 void CShaderAPIDX11::BeginPIXEvent(unsigned long color, const char *szName)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::EndPIXEvent()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::SetPIXMarker(unsigned long color, const char *szName)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Enables and disables for Alpha To Coverage
 void CShaderAPIDX11::EnableAlphaToCoverage()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::DisableAlphaToCoverage()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Computes the vertex buffer pointers 
 void CShaderAPIDX11::ComputeVertexDescription(unsigned char* pBuffer, VertexFormat_t vertexFormat, MeshDesc_t& desc) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 bool CShaderAPIDX11::SupportsShadowDepthTextures(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 
 void CShaderAPIDX11::SetDisallowAccess(bool)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::EnableShaderShaderMutex(bool)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::ShaderLock()
@@ -1868,20 +1868,20 @@ void CShaderAPIDX11::ShaderUnlock()
 
 ImageFormat CShaderAPIDX11::GetShadowDepthTextureFormat(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return IMAGE_FORMAT_UNKNOWN;
 }
 
 
 bool CShaderAPIDX11::SupportsFetch4(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
 void CShaderAPIDX11::SetShadowDepthBiasFactors(float fShadowSlopeScaleDepthBias, float fShadowDepthBias)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -1965,7 +1965,7 @@ void CShaderAPIDX11::BindConstantBuffer(IConstantBufferDX11 *pConstantBuffer, in
 
 void CShaderAPIDX11::Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount)
 {
-	_AssertMsg(0, "Incomplete Implementation! " __FUNCTION__, 0, 0);
+	ALERT_INCOMPLETE();
 	SetPrimitiveTopology(primitiveType);
 
 	HandleStateChanges();
@@ -2014,7 +2014,7 @@ void CShaderAPIDX11::SetPrimitiveTopology(MaterialPrimitiveType_t primitiveType)
 
 void CShaderAPIDX11::DrawMesh(IMesh *pMesh)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 // ------------ End ----------------------------
@@ -2023,20 +2023,20 @@ void CShaderAPIDX11::DrawMesh(IMesh *pMesh)
 // Apply stencil operations to every pixel on the screen without disturbing depth or color buffers
 void CShaderAPIDX11::PerformFullScreenStencilOperation(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::SetScissorRect(const int nLeft, const int nTop, const int nRight, const int nBottom, const bool bEnableScissor)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // nVidia CSAA modes, different from SupportsMSAAMode()
 bool CShaderAPIDX11::SupportsCSAAMode(int nNumSamples, int nQualityLevel)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -2044,20 +2044,20 @@ bool CShaderAPIDX11::SupportsCSAAMode(int nNumSamples, int nQualityLevel)
 //Notifies the shaderapi to invalidate the current set of delayed constants because we just finished a draw pass. Either actual or not.
 void CShaderAPIDX11::InvalidateDelayedShaderConstants(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Gamma<->Linear conversions according to the video hardware we're running on
 float CShaderAPIDX11::GammaToLinear_HardwareSpecific(float fGamma) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1.f;
 }
 
 float CShaderAPIDX11::LinearToGamma_HardwareSpecific(float fLinear) const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1.f;
 }
 
@@ -2065,27 +2065,27 @@ float CShaderAPIDX11::LinearToGamma_HardwareSpecific(float fLinear) const
 //Set's the linear->gamma conversion textures to use for this hardware for both srgb writes enabled and disabled(identity)
 void CShaderAPIDX11::SetLinearToGammaConversionTextures(ShaderAPITextureHandle_t hSRGBWriteEnabledTexture, ShaderAPITextureHandle_t hIdentityTexture)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 ImageFormat CShaderAPIDX11::GetNullTextureFormat(void)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return IMAGE_FORMAT_UNKNOWN;
 }
 
 
 void CShaderAPIDX11::BindVertexTexture(VertexTextureSampler_t nSampler, ShaderAPITextureHandle_t textureHandle)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Enables hardware morphing
 void CShaderAPIDX11::EnableHWMorphing(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -2094,13 +2094,13 @@ void CShaderAPIDX11::SetFlexWeights(int nFirstWeight, int nCount, const MorphWei
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 void CShaderAPIDX11::FogMaxDensity(float flMaxDensity)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::CreateTextureHandles(ShaderAPITextureHandle_t* pHandles, int count)
@@ -2147,18 +2147,18 @@ void CShaderAPIDX11::CreateTextures(
 
 void CShaderAPIDX11::AcquireThreadOwnership()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::ReleaseThreadOwnership()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 bool CShaderAPIDX11::SupportsNormalMapCompression() const
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -2166,7 +2166,7 @@ bool CShaderAPIDX11::SupportsNormalMapCompression() const
 // Only does anything on XBox360. This is useful to eliminate stalls
 void CShaderAPIDX11::EnableBuffer2FramesAhead(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -2174,29 +2174,29 @@ void CShaderAPIDX11::EnableBuffer2FramesAhead(bool bEnable)
 // only implemented in some subclasses
 void CShaderAPIDX11::PrintfVA(char *fmt, va_list vargs)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::Printf(PRINTF_FORMAT_STRING const char *fmt, ...)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 float CShaderAPIDX11::Knob(char *knobname, float *setvalue)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1.f;
 }
 
 // Allows us to override the alpha write setting of a material
 void CShaderAPIDX11::OverrideAlphaWriteEnable(bool bEnable, bool bAlphaWriteEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::OverrideColorWriteEnable(bool bOverrideEnable, bool bColorWriteEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -2205,26 +2205,26 @@ void CShaderAPIDX11::ClearBuffersObeyStencilEx(bool bClearColor, bool bClearAlph
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Allows copying a render target to another texture by specifying them both.
 void CShaderAPIDX11::CopyRenderTargetToScratchTexture(ShaderAPITextureHandle_t srcRt, ShaderAPITextureHandle_t dstTex, Rect_t *pSrcRect, Rect_t *pDstRect)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
 // Allows locking and unlocking of very specific surface types.
 void CShaderAPIDX11::LockRect(void** pOutBits, int* pOutPitch, ShaderAPITextureHandle_t texHandle, int mipmap, int x, int y, int w, int h, bool bWrite, bool bRead)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 void CShaderAPIDX11::UnlockRect(ShaderAPITextureHandle_t texHandle, int mipmap)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -2236,7 +2236,7 @@ void CShaderAPIDX11::UnlockRect(ShaderAPITextureHandle_t texHandle, int mipmap)
 // At the end of the next frame, GetDebugTextureList() will return a valid list of the textures.
 void CShaderAPIDX11::EnableDebugTextureList(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -2244,7 +2244,7 @@ void CShaderAPIDX11::EnableDebugTextureList(bool bEnable)
 // It is required to enable debug texture list to get this.
 void CShaderAPIDX11::EnableGetAllTextures(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 }
 
 
@@ -2259,7 +2259,7 @@ void CShaderAPIDX11::EnableGetAllTextures(bool bEnable)
 // It is required to enable debug texture list to get this.
 KeyValues* CShaderAPIDX11::GetDebugTextureList()
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return NULL;
 }
 
@@ -2267,7 +2267,7 @@ KeyValues* CShaderAPIDX11::GetDebugTextureList()
 // This returns how much memory was used.
 int CShaderAPIDX11::GetTextureMemoryUsed(TextureMemoryType eTextureMemory)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return -1;
 }
 
@@ -2275,7 +2275,7 @@ int CShaderAPIDX11::GetTextureMemoryUsed(TextureMemoryType eTextureMemory)
 // Use this to determine if texture debug info was computed within last numFramesAllowed frames.
 bool CShaderAPIDX11::IsDebugTextureListFresh(int numFramesAllowed)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
@@ -2285,7 +2285,7 @@ bool CShaderAPIDX11::IsDebugTextureListFresh(int numFramesAllowed)
 // it for restoring the mode.
 bool CShaderAPIDX11::SetDebugTextureRendering(bool bEnable)
 {
-	_AssertMsg(0, "Not implemented! " __FUNCTION__, 0, 0);
+	ALERT_NOT_IMPLEMENTED();
 	return false;
 }
 
