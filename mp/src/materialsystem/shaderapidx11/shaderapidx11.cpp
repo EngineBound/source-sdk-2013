@@ -4,9 +4,12 @@
 
 #include "shaderdevicedx11.h"
 #include "ishaderdevicemgrdx11.h"
+#include "materialdx11.h"
 #include "meshdx11.h"
 #include "ishaderutil.h"
 #include "constantbufferdx11.h"
+
+#include "shaderapi/commandbuffer.h"
 
 #include "memdbgon.h"
 
@@ -15,6 +18,9 @@ CShaderAPIDX11 *g_pShaderAPIDX11 = &s_ShaderAPIDX11;
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IShaderAPIDX11,
 	SHADERAPI_INTERFACE_VERSION, s_ShaderAPIDX11)
+
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IShaderDynamicAPI,
+	SHADERDYNAMIC_INTERFACE_VERSION, s_ShaderAPIDX11)
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderAPIDX11, IDebugTextureInfoDX11,
 	DEBUG_TEXTURE_INFO_VERSION, s_ShaderAPIDX11)
@@ -34,6 +40,8 @@ CShaderAPIDX11::CShaderAPIDX11() : m_DynamicState(), m_ShaderState()
 	m_BackBufferHandle = 0;
 
 	m_StateChanges = STATE_CHANGED_PRIMITIVE_TOPOLOGY;
+
+	m_pMaterial = 0;
 }
 
 CShaderAPIDX11::~CShaderAPIDX11()
@@ -692,7 +700,13 @@ void CShaderAPIDX11::MarkUnusedVertexFields(unsigned int nFlags, int nTexCoordCo
 
 void CShaderAPIDX11::ExecuteCommandBuffer(uint8 *pCmdBuffer)
 {
-	ALERT_NOT_IMPLEMENTED();
+	for (;;)
+	{
+		int curCmd = *(pCmdBuffer++);
+
+		if (curCmd == CBCMD_END)
+			break;
+	}
 }
 
 
@@ -880,7 +894,8 @@ void CShaderAPIDX11::Bind(IMaterial* pMaterial)
 {
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
-	ALERT_NOT_IMPLEMENTED();
+	 // TODO: Check if materials are the same
+	m_pMaterial = static_cast<CMaterialDX11 *>(pMaterial);
 }
 
 
@@ -899,7 +914,7 @@ void CShaderAPIDX11::FlushBufferedPrimitives()
 IMesh* CShaderAPIDX11::GetDynamicMesh(IMaterial* pMaterial, int nHWSkinBoneCount, bool bBuffered,
 	IMesh* pVertexOverride, IMesh* pIndexOverride)
 {
-	return GetDynamicMeshEx(pMaterial, VERTEX_FORMAT_UNKNOWN, nHWSkinBoneCount, bBuffered, pVertexOverride, pIndexOverride);
+	return GetDynamicMeshEx(pMaterial, pMaterial->GetVertexFormat(), nHWSkinBoneCount, bBuffered, pVertexOverride, pIndexOverride);
 }
 
 IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t vertexFormat, int nHWSkinBoneCount,
@@ -909,6 +924,13 @@ IMesh* CShaderAPIDX11::GetDynamicMeshEx(IMaterial* pMaterial, VertexFormat_t ver
 
 	if (!m_pDynamicMesh)
 		m_pDynamicMesh = new CMeshDX11(true, vertexFormat);
+
+	if (vertexFormat != VERTEX_FORMAT_UNKNOWN)
+	{
+		CMeshDX11 *pDynamicMeshDX11 = (CMeshDX11 *)m_pDynamicMesh;
+
+		pDynamicMeshDX11->SetVertexFormat(vertexFormat);
+	}
 
 	return m_pDynamicMesh;
 }
@@ -2019,7 +2041,14 @@ void CShaderAPIDX11::SetPrimitiveTopology(MaterialPrimitiveType_t primitiveType)
 
 void CShaderAPIDX11::DrawMesh(IMesh *pMesh)
 {
-	ALERT_NOT_IMPLEMENTED();
+	CMeshDX11 *pMeshDX11 = static_cast<CMeshDX11 *>(pMesh);
+
+	SetPrimitiveTopology(pMeshDX11->GetTopology());
+
+	BindVertexBuffer(0, pMeshDX11->GetVertexBuffer(), 0, 0, pMesh->VertexCount(), pMesh->GetVertexFormat());
+	BindIndexBuffer(pMeshDX11->GetIndexBuffer(), 0);
+
+	m_pMaterial->DrawElements(CompressionType(pMesh->GetVertexFormat()));
 }
 
 // ------------ End ----------------------------
@@ -2316,7 +2345,6 @@ void CShaderAPIDX11::OnDeviceInitialised()
 	pBackBufferTex->InitRenderTarget(w, h, pBackBuffer, g_pShaderDevice->GetBackBufferFormat());
 
 	m_StateChanges |= STATE_CHANGED_RENDER_TARGETS;
-
 }
 
 void CShaderAPIDX11::OnDeviceShutdown()

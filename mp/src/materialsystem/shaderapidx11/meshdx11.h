@@ -60,6 +60,12 @@ public:
 		return m_nVertexSize;
 	}
 
+	inline void SetVertexFormat(VertexFormat_t fmt)
+	{
+		if (m_bIsDynamic)
+			m_VertexFormat = fmt;
+	}
+
 private:
 
 	bool m_bIsDynamic;
@@ -263,6 +269,16 @@ public:
 	virtual void MarkAsDrawn();
 
 	virtual unsigned ComputeMemoryUsed();
+
+	inline CVertexBufferDX11 *GetVertexBuffer() { return m_pVertexBufferDX11; }
+	inline CIndexBufferDX11 *GetIndexBuffer() { return m_pIndexBufferDX11; }
+
+	inline void SetVertexFormat(VertexFormat_t fmt) { 
+		m_pVertexBufferDX11->SetVertexFormat(fmt);
+		m_VertFormat = fmt;
+	}
+
+	inline MaterialPrimitiveType_t GetTopology() { return m_PrimitiveType; }
 private:
 	bool m_bIsDynamic;
 
@@ -270,6 +286,8 @@ private:
 	CIndexBufferDX11 *m_pIndexBufferDX11;
 
 	VertexFormat_t m_VertFormat;
+
+	MaterialPrimitiveType_t m_PrimitiveType;
 
 };
 

@@ -1,12 +1,15 @@
 
 #include "dx11global.h"
 #include "shaderdevicedx11.h"
+#include "shaderapidx11.h"
 
 #include "meshdx11.h"
 
 #include <d3d11.h>
 
 #include "memdbgon.h"
+
+extern CShaderAPIDX11 *g_pShaderAPIDX11;
 
 inline void ComputeVertexDesc(unsigned char *pBuffer, VertexFormat_t vertexFormat, VertexDesc_t &desc)
 {
@@ -727,6 +730,8 @@ CMeshDX11::CMeshDX11(bool bIsDynamic, VertexFormat_t fmt)
 
 	m_VertFormat = fmt;
 
+	m_PrimitiveType = MATERIAL_TRIANGLES; // Easiest to handle by default
+
 	if (m_bIsDynamic)
 	{
 		// REMOVE THIS MORON
@@ -910,7 +915,7 @@ void CMeshDX11::ValidateData(int nIndexCount, const IndexDesc_t &desc)
 // Sets/gets the primitive type
 void CMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
 {
-	ALERT_NOT_IMPLEMENTED();
+	m_PrimitiveType = type;
 }
 
 
@@ -918,6 +923,7 @@ void CMeshDX11::SetPrimitiveType(MaterialPrimitiveType_t type)
 void CMeshDX11::Draw(int nFirstIndex, int nIndexCount)
 {
 	ALERT_INCOMPLETE();
+	g_pShaderAPIDX11->DrawMesh(this);
 }
 
 

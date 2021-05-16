@@ -360,7 +360,7 @@ static void* ShaderInterfaceFactory(const char *pInterfaceName, int *pReturnCode
 
 	if (!V_stricmp(pInterfaceName, SHADER_DEVICE_INTERFACE_VERSION))
 		return static_cast<IShaderDevice*>(g_pShaderDevice);
-	if (!V_stricmp(pInterfaceName, SHADERAPI_INTERFACE_VERSION))
+	if (!V_stricmp(pInterfaceName, SHADERAPI_INTERFACE_VERSION) || !V_stricmp(pInterfaceName, SHADERDYNAMIC_INTERFACE_VERSION) || !V_stricmp(pInterfaceName, DEBUG_TEXTURE_INFO_VERSION))
 		return static_cast<IShaderAPI*>(g_pShaderAPI);
 	if (!V_stricmp(pInterfaceName, SHADERSHADOW_INTERFACE_VERSION))
 		return static_cast<IShaderShadow*>(g_pShaderShadow);\
