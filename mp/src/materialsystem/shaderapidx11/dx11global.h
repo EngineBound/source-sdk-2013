@@ -24,6 +24,9 @@
 
 #endif
 
+typedef void * ShaderHandle_t;
+typedef ShaderHandle_t * StaticShaderHandle_t;
+
 #include "tier0/threadtools.h"
 
 class IShaderUtil;

@@ -8,6 +8,7 @@
 #include "utlstack.h"
 
 #include "IShaderDevice.h" // Lol,,,
+#include "dx11global.h"
 
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -112,8 +113,11 @@ struct ShaderStateDX11 {
 };
 
 struct ShadowStateDX11 {
-	VertexShaderHandle_t m_hVertexShader;
-	PixelShaderHandle_t m_hPixelShader;
+	StaticShaderHandle_t m_hStaticVertexShader;
+	StaticShaderHandle_t m_hStaticPixelShader;
+
+	ShaderHandle_t m_hVertexShader;
+	ShaderHandle_t m_hPixelShader;
 
 	ShadowStateDX11()
 	{

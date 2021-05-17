@@ -1,6 +1,7 @@
 
 struct PS_INPUT
 {
+    float4 pos : SV_POSITION;
     float2 texCoord0 : TEXCOORD0;
 };
 
@@ -17,7 +18,7 @@ float4 main ( PS_INPUT i ) : SV_TARGET
 {
     float y = yTexture.Sample( ySampler, i.texCoord0.xy ).r;
     float cR = cRTexture.Sample( cRSampler, i.texCoord0.xy ).r;
-    float cB = yTexture.Sample( cBSampler, i.texCoord0.xy ).r;
+    float cB = cBTexture.Sample( cBSampler, i.texCoord0.xy ).r;
     
     float4 fullImage = float4( y, cR, cB, 1.0f );
     

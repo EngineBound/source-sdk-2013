@@ -138,6 +138,13 @@ public:
 	virtual void BlendOp(ShaderBlendOp_t blendOp);
 	virtual void BlendOpSeparateAlpha(ShaderBlendOp_t blendOp);
 
+public:
+
+	inline ShadowStateDX11& GetShadowState()
+	{
+		return m_ShadowState;
+	}
+
 private:
 
 	ShadowStateDX11 m_ShadowState;
@@ -145,7 +152,7 @@ private:
 	struct VCSRep_t
 	{
 		CUtlSymbol m_Name;
-		CVCSReader m_VCSReader;
+		CVCSReader *m_pVCSReader;
 
 		bool operator==(const VCSRep_t& a) const
 		{

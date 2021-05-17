@@ -44,8 +44,6 @@
 
 #define SHADER_FILE_EXTENSION ".vcs"
 
-extern CShaderDeviceDX11 *g_pShaderDeviceDX11;
-
 bool StaticComboRecordLessFunc(const StaticComboRecord_t &a, const StaticComboRecord_t &b)
 {
 	return a.m_nStaticComboID < b.m_nStaticComboID;
@@ -64,19 +62,20 @@ CVCSReader::CVCSReader()
 	m_pStaticComboRecords = new CUtlRBTree<StaticComboRecord_t>(StaticComboRecordLessFunc);
 	m_pDuplicateStaticComboRecords = new CUtlRBTree<StaticComboAliasRecord_t>(StaticComboAliasLessFunc);
 
-	m_ppShaderComboByteCode = NULL;
+	m_ppShaderComboHandles = NULL;
 	m_bIsVertexShader = false;
 }
 
 CVCSReader::~CVCSReader()
 {
-	if (m_ppShaderComboByteCode)
+	if (m_ppShaderComboHandles)
 	{
-		for (int i = 0; i < m_ShaderHeader.m_nTotalCombos; ++i)
+		for (unsigned int i = 0; i < m_ShaderHeader.m_nNumStaticCombos; ++i)
 		{
-			if (m_ppShaderComboByteCode[i])
-				free(m_ppShaderComboByteCode[i]);
+			if (m_ppShaderComboHandles[i])
+				free(m_ppShaderComboHandles[i]);
 		}
+		free(m_ppShaderComboHandles);
 	}
 
 	if (m_pStaticComboRecords)
@@ -91,7 +90,7 @@ CVCSReader::~CVCSReader()
 		delete m_pDuplicateStaticComboRecords;
 	}
 
-	m_ppShaderComboByteCode = NULL;
+	m_ppShaderComboHandles = NULL;
 }
 
 bool CVCSReader::InitReader(const char *pFileName, bool bIsVertexShader)
@@ -130,7 +129,7 @@ bool CVCSReader::InitReader(const char *pFileName, bool bIsVertexShader)
 	g_pFullFileSystem->Read(&m_ShaderHeader, sizeof(m_ShaderHeader), hVCSFile);
 
 	// Create byte code array
-	m_ppShaderComboByteCode = (char **)calloc(m_ShaderHeader.m_nTotalCombos, sizeof(char *));
+	m_ppShaderComboHandles = (ShaderHandle_t **)calloc(m_ShaderHeader.m_nNumStaticCombos, sizeof(ShaderHandle_t *));
 
 	Assert(m_ShaderHeader.m_nVersion == 6); // For now
 
@@ -150,7 +149,7 @@ bool CVCSReader::InitReader(const char *pFileName, bool bIsVertexShader)
 	// Read in the duplicate records
 	g_pFullFileSystem->Read(&m_nNumDuplicateStaticRecords, sizeof(m_nNumDuplicateStaticRecords), hVCSFile);
 
-	m_pStaticComboRecords->EnsureCapacity(m_nNumDuplicateStaticRecords);
+	m_pDuplicateStaticComboRecords->EnsureCapacity(m_nNumDuplicateStaticRecords);
 	for (int i = 0; i < m_nNumDuplicateStaticRecords; ++i)
 	{
 		StaticComboAliasRecord_t readCombo;
@@ -161,7 +160,30 @@ bool CVCSReader::InitReader(const char *pFileName, bool bIsVertexShader)
 		m_pDuplicateStaticComboRecords->Insert(readCombo);
 	}
 
+	g_pFullFileSystem->Close(hVCSFile);
+
 	return true;
+}
+
+uint32 CVCSReader::ResolveAliasCombo(uint32 aliasID)
+{
+	// There is definitely a better way to do this but we'll use this for now
+	StaticComboRecord_t lookup;
+	lookup.m_nStaticComboID = aliasID;
+
+	unsigned short nInd = m_pStaticComboRecords->Find(lookup);
+	if (m_pStaticComboRecords->IsValidIndex(nInd))
+		return m_pStaticComboRecords->Element(nInd).m_nStaticComboID;
+
+	StaticComboAliasRecord_t aliasLookup;
+	aliasLookup.m_nStaticComboID = aliasID;
+
+	nInd = m_pDuplicateStaticComboRecords->Find(aliasLookup);
+	if (m_pDuplicateStaticComboRecords->IsValidIndex(nInd))
+		return ResolveAliasCombo(m_pDuplicateStaticComboRecords->Element(nInd).m_nStaticComboID);
+
+	// EOF combo
+	return 0xFFFFFFFF;
 }
 
 static uint32 Next32(unsigned char * &pBuf)
@@ -174,15 +196,19 @@ static uint32 Next32(unsigned char * &pBuf)
 
 void CVCSReader::CreateShadersForStaticComboIfNeeded(int nStaticIndex)
 {
-	if (m_ppShaderComboByteCode[nStaticIndex * m_ShaderHeader.m_nDynamicCombos])
+	uint32 nActualStaticIndex = ResolveAliasCombo(nStaticIndex / m_ShaderHeader.m_nDynamicCombos);
+
+	if (m_ppShaderComboHandles[nActualStaticIndex])
 		return;
 
+	m_ppShaderComboHandles[nActualStaticIndex] = (ShaderHandle_t *)calloc(m_ShaderHeader.m_nDynamicCombos, sizeof(ShaderHandle_t));
+
 	uint32 nChunkSize = 0;
-	unsigned char *pChunk = GetComboChunk(nStaticIndex, nChunkSize);
+	unsigned char *pChunk = GetComboChunk(nActualStaticIndex, nChunkSize);
 	unsigned char pUncompressedChunk[MAX_SHADER_UNPACKED_BLOCK_SIZE];
 
 	bool bIsValid = true;
-	while (bIsValid)
+	for (int nDynamicIndex = 0;bIsValid && nDynamicIndex < m_ShaderHeader.m_nDynamicCombos;nDynamicIndex++)
 	{
 		uint32 nBlockHeader = Next32(pChunk);
 		if (nBlockHeader == 0xFFFFFFFF)
@@ -224,12 +250,18 @@ void CVCSReader::CreateShadersForStaticComboIfNeeded(int nStaticIndex)
 			/*uint32 nComboID = */Next32(pLocation);
 			uint32 nByteCodeSize = Next32(pLocation);
 
-			if (m_bIsVertexShader)
-				g_pShaderDeviceDX11->CreateVertexShader((char *)pLocation, (size_t)nByteCodeSize, "vs_5_0"); // TODO: Other shader versions?
-			else
-				g_pShaderDeviceDX11->CreatePixelShader((char *)pLocation, (size_t)nByteCodeSize, "ps_5_0");
-		}
+			ShaderHandle_t shader;
 
+			if (m_bIsVertexShader)
+				shader = g_pShaderDeviceDX11->CreateVertexShader((char *)pLocation, (size_t)nByteCodeSize, "vs_5_0"); // TODO: Other shader versions?
+			else
+				shader = g_pShaderDeviceDX11->CreatePixelShader((char *)pLocation, (size_t)nByteCodeSize, "ps_5_0");
+
+			Assert(shader != 0); // Invalid
+			m_ppShaderComboHandles[nActualStaticIndex][nDynamicIndex] = shader;
+
+			pLocation += nByteCodeSize;
+		}
 	}
 
 	free(pChunk);
@@ -238,46 +270,10 @@ void CVCSReader::CreateShadersForStaticComboIfNeeded(int nStaticIndex)
 uint32 CVCSReader::GetOffsetForStaticCombo(int nStaticIndex)
 {
 	StaticComboRecord_t lookupRecord;
-	lookupRecord.m_nStaticComboID = nStaticIndex;
+	lookupRecord.m_nStaticComboID = nStaticIndex; //ResolveAliasCombo(nStaticIndex); - This is ensured now
 
-	// Try to find the actual combo by default
 	unsigned short nStaticRecordIndex = m_pStaticComboRecords->Find(lookupRecord);
-	if (!m_pStaticComboRecords->IsValidIndex(nStaticRecordIndex))
-	{
-		StaticComboAliasRecord_t lookupAlias;
-		lookupAlias.m_nStaticComboID = nStaticIndex;
-
-		// Try to find a duplicate combo instead
-		nStaticRecordIndex = m_pDuplicateStaticComboRecords->Find(lookupAlias);
-
-		// If the combo does not exist, give the EOF offset
-		if (!m_pDuplicateStaticComboRecords->IsValidIndex(nStaticRecordIndex))
-		{
-			// Get end of file combo (ID = 0xFFFFFFFF)
-			lookupRecord.m_nStaticComboID = 0xFFFFFFFF;
-			nStaticRecordIndex = m_pStaticComboRecords->Find(lookupRecord);
-			if (!m_pStaticComboRecords->IsValidIndex(nStaticRecordIndex))
-			{
-				Assert(0);
-				Error(__FUNCTION__ ": Shader missing EOF combo ID = 0xFFFFFFFF!\n");
-				return 0xFFFFFFFF;
-			}
-
-			return m_pStaticComboRecords->Element(nStaticRecordIndex).m_nFileOffset;
-		}
-
-		// Set index back to 'master' index
-		// TODO: Does this require multiple index resolutions?
-		nStaticIndex = m_pDuplicateStaticComboRecords->Element(nStaticRecordIndex).m_nSourceStaticCombo;
-		nStaticRecordIndex = m_pStaticComboRecords->Find(lookupRecord);
-
-		if (!m_pStaticComboRecords->IsValidIndex(nStaticRecordIndex))
-		{
-			Assert(0);
-			Error(__FUNCTION__ ": Invalid static shader combo alias %d used!\n", nStaticIndex);
-			return 0xFFFFFFFF;
-		}
-	}
+	Assert(m_pStaticComboRecords->IsValidIndex(nStaticRecordIndex));
 
 	return m_pStaticComboRecords->Element(nStaticRecordIndex).m_nFileOffset;
 }
@@ -289,10 +285,12 @@ unsigned char *CVCSReader::GetComboChunk(int nStaticIndex, uint32 &nChunkSize)
 	FileHandle_t hVCSFile = g_pFullFileSystem->Open(m_pFileLocation, "rb", NULL); // TODO: Preferred path
 	g_pFullFileSystem->Seek(hVCSFile, nFileOffset, FILESYSTEM_SEEK_HEAD);
 
-	nChunkSize = GetOffsetForStaticCombo(nStaticIndex + 1) - nFileOffset;
+	nChunkSize = GetOffsetForStaticCombo(ResolveAliasCombo(nStaticIndex + 1)) - nFileOffset;
 
 	unsigned char *pOutBuf = (unsigned char *)malloc(nChunkSize);
 	g_pFullFileSystem->Read(pOutBuf, nChunkSize, hVCSFile);
+
+	g_pFullFileSystem->Close(hVCSFile);
 
 	return pOutBuf;
 }

@@ -2,8 +2,12 @@
 #include "shaderapidx11.h"
 #include "dx11global.h"
 
+#include "vcsreader.h"
+
 #include "shaderdevicedx11.h"
+#include "hardwareconfigdx11.h"
 #include "ishaderdevicemgrdx11.h"
+#include "shadershadowdx11.h"
 #include "materialdx11.h"
 #include "meshdx11.h"
 #include "ishaderutil.h"
@@ -435,14 +439,16 @@ void CShaderAPIDX11::SetBumpEnvMatrix(TextureStage_t textureStage, float m00, fl
 
 
 // Sets the vertex and pixel shaders
-void CShaderAPIDX11::SetVertexShaderIndex(int vshIndex)
+void CShaderAPIDX11::SetVertexShaderIndex(int vshIndex) // TODO: Invalid checking
 {
-	ALERT_NOT_IMPLEMENTED();
+	ShadowStateDX11 &shadowState = g_pShaderShadowDX11->GetShadowState();
+	BindVertexShader(VertexShaderHandle_t(CVCSReader::GetShader(shadowState.m_hStaticVertexShader, vshIndex)));
 }
 
 void CShaderAPIDX11::SetPixelShaderIndex(int pshIndex)
 {
-	ALERT_NOT_IMPLEMENTED();
+	ShadowStateDX11 &shadowState = g_pShaderShadowDX11->GetShadowState();
+	BindPixelShader(PixelShaderHandle_t(CVCSReader::GetShader(shadowState.m_hStaticPixelShader, pshIndex)));
 }
 
 
@@ -981,7 +987,7 @@ VertexFormat_t CShaderAPIDX11::ComputeVertexFormat(int numSnapshots, StateSnapsh
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
 	ALERT_NOT_IMPLEMENTED();
-	return VERTEX_FORMAT_UNKNOWN;
+	return m_DynamicState.m_VertexFormat; // FIXME FIXME
 }
 
 
@@ -991,7 +997,7 @@ VertexFormat_t CShaderAPIDX11::ComputeVertexUsage(int numSnapshots, StateSnapsho
 	AUTO_LOCK_FM(g_ShaderAPIMutex);
 
 	ALERT_NOT_IMPLEMENTED();
-	return VERTEX_FORMAT_UNKNOWN;
+	return m_DynamicState.m_VertexFormat; // FIXME FIXME
 }
 
 
@@ -1009,7 +1015,7 @@ void CShaderAPIDX11::RenderPass(int nPass, int nPassCount)
 
 	HandleStateChanges();
 
-	// g_pShaderDeviceDX11->GetDeviceContext()->DrawIndexed(m_pRenderMesh->IndexCount(), 0, 0);
+	g_pShaderDeviceDX11->GetDeviceContext()->DrawIndexed(m_pRenderMesh->IndexCount(), 0, 0);
 }
 
 
@@ -1922,6 +1928,51 @@ void CShaderAPIDX11::SetShadowDepthBiasFactors(float fShadowSlopeScaleDepthBias,
 	ALERT_NOT_IMPLEMENTED();
 }
 
+void CShaderAPIDX11::VertexShaderVertexFormat(unsigned int nFlags, int nTexCoordCount, int* pTexCoordDimensions, int nUserDataSize)
+{
+	VertexFormat_t fmt = nFlags & ~VERTEX_FORMAT_USE_EXACT_FORMAT;
+
+	if (g_pHardwareConfig->SupportsCompressedVertices() == VERTEX_COMPRESSION_NONE)
+	{
+		fmt &= ~VERTEX_FORMAT_COMPRESSED;
+	}
+
+	fmt |= VERTEX_USERDATA_SIZE(nUserDataSize);
+
+	nTexCoordCount = min(nTexCoordCount, VERTEX_MAX_TEXTURE_COORDINATES);
+	for (int i = 0; i < nTexCoordCount; ++i)
+	{
+		// A nullptr means 2 dimensions
+		int nDimensions = 2;
+
+		if (pTexCoordDimensions)
+		{
+			nDimensions = pTexCoordDimensions[i];
+		}
+
+		fmt |= VERTEX_TEXCOORD_SIZE(i, nDimensions);
+	}
+
+	if (m_DynamicState.m_VertexFormat != fmt)
+	{
+		m_DynamicState.m_VertexFormat = fmt;
+
+		m_StateChanges |= STATE_CHANGED_INPUT_LAYOUT;
+	}
+
+	VertexDesc_t fmtDesc;
+	ComputeVertexDesc(0, fmt, fmtDesc);
+
+	UINT bufStride = fmtDesc.m_ActualVertexSize;
+
+	if (m_DynamicState.m_VBStride != bufStride)
+	{
+		m_DynamicState.m_VBStride = bufStride;
+
+		m_StateChanges |= STATE_CHANGED_VERTEX_BUFFER;
+	}
+}
+
 
 // ------------ New Vertex/Index Buffer interface ----------------------------
 void CShaderAPIDX11::BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffer, int nOffsetInBytes, int nFirstVertex, int nVertexCount, VertexFormat_t fmt, int nRepetitions)
@@ -1933,7 +1984,7 @@ void CShaderAPIDX11::BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffe
 	if (pVertexBufferDX11)
 	{
 		pBuffer = pVertexBufferDX11->GetBuffer();
-		bufStride = pVertexBufferDX11->VertexSize();
+		bufStride = fmt == VERTEX_FORMAT_UNKNOWN ? m_DynamicState.m_VBStride : pVertexBufferDX11->VertexSize();
 	}
 
 	if (nOffsetInBytes < 0)
@@ -2056,7 +2107,7 @@ void CShaderAPIDX11::DrawMesh(IMesh *pMesh)
 
 	SetPrimitiveTopology(m_pRenderMesh->GetTopology());
 
-	BindVertexBuffer(0, m_pRenderMesh->GetVertexBuffer(), 0, 0, m_pRenderMesh->VertexCount(), m_pRenderMesh->GetVertexFormat());
+	BindVertexBuffer(0, m_pRenderMesh->GetVertexBuffer(), 0, 0, m_pRenderMesh->VertexCount(), m_pMaterial->GetVertexFormat());
 	BindIndexBuffer(m_pRenderMesh->GetIndexBuffer(), 0);
 
 	m_pMaterial->DrawElements(CompressionType(m_pRenderMesh->GetVertexFormat()));

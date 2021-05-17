@@ -8,6 +8,7 @@
 #include "filesystem.h"
 #include "materialsystem/shader_vcs_version.h"
 
+#include "dx11global.h"
 
 // Holds methods for handling VCS files
 class CVCSReader
@@ -20,7 +21,22 @@ public:
 	bool InitReader(const char *pFileName, bool bIsVertexShader);
 	void CreateShadersForStaticComboIfNeeded(int nStaticIndex);
 
+	inline StaticShaderHandle_t GetStaticShader(int nStaticIndex)
+	{
+		if (!m_ppShaderComboHandles)
+			return 0;
+
+		return m_ppShaderComboHandles[ResolveAliasCombo(nStaticIndex / m_ShaderHeader.m_nDynamicCombos)];
+	}
+
+	static inline ShaderHandle_t GetShader(StaticShaderHandle_t hStaticShader, int nDynamicIndex)
+	{
+		return hStaticShader[nDynamicIndex];
+	}
+
 private:
+
+	uint32 ResolveAliasCombo(uint32 aliasID);
 
 	// FREE AFTER USE
 	unsigned char *GetComboChunk(int nStaticIndex, uint32 &nChunkSize); 
@@ -38,7 +54,7 @@ private:
 	int m_nNumDuplicateStaticRecords;
 	CUtlRBTree<StaticComboAliasRecord_t> *m_pDuplicateStaticComboRecords;
 
-	char **m_ppShaderComboByteCode; // TODO: Might not be the best way to do this, investigate later
+	ShaderHandle_t **m_ppShaderComboHandles; // TODO: Might not be the best way to do this, investigate later
 
 };
 

@@ -3,6 +3,7 @@
 
 #include "shadershadowdx11.h"
 #include "ishaderdevicedx11.h"
+#include "shaderapidx11.h"
 
 #include "materialsystem/shader_vcs_version.h"
 #include "filesystem.h"
@@ -26,6 +27,11 @@ CShaderShadowDX11::CShaderShadowDX11() : m_ShadowState()
 
 CShaderShadowDX11::~CShaderShadowDX11()
 {
+	for (int i = 0; i < m_ShaderFiles.Count(); i++)
+	{
+		delete m_ShaderFiles[i].m_pVCSReader;
+	}
+
 	m_ShaderFiles.RemoveAll();
 }
 
@@ -167,14 +173,13 @@ void CShaderShadowDX11::EnableConstantColor(bool bEnable)
 void CShaderShadowDX11::VertexShaderVertexFormat(unsigned int nFlags,
 	int nTexCoordCount, int* pTexCoordDimensions, int nUserDataSize) 
 {
-	ALERT_NOT_IMPLEMENTED();
+	g_pShaderAPIDX11->VertexShaderVertexFormat(nFlags, nTexCoordCount, pTexCoordDimensions, nUserDataSize);
 }
 
 // Pixel and vertex shader methods
 void CShaderShadowDX11::SetVertexShader(const char* pFileName, int nStaticVshIndex)
 {
 	ALERT_INCOMPLETE();
-	// Incomplete as combos aren't used (static index)
 
 	m_ShadowState.m_hVertexShader = NULL;
 
@@ -187,18 +192,48 @@ void CShaderShadowDX11::SetVertexShader(const char* pFileName, int nStaticVshInd
 	VCSIndex_t VCSInd = m_ShaderFiles.Find(lookupFile);
 	if (!m_ShaderFiles.IsValidIndex(VCSInd))
 	{
-		lookupFile.m_VCSReader.InitReader(pFileName, true);
 		VCSInd = m_ShaderFiles.AddToTail(lookupFile);
+
+		m_ShaderFiles[VCSInd].m_pVCSReader = new CVCSReader();
+		m_ShaderFiles[VCSInd].m_pVCSReader->InitReader(pFileName, true);
 	}
 
 	VCSRep_t &shaderFile = m_ShaderFiles[VCSInd];
 
-	shaderFile.m_VCSReader.CreateShadersForStaticComboIfNeeded(nStaticVshIndex);
+	shaderFile.m_pVCSReader->CreateShadersForStaticComboIfNeeded(nStaticVshIndex);
+
+	m_ShadowState.m_hStaticVertexShader = shaderFile.m_pVCSReader->GetStaticShader(nStaticVshIndex);
+	m_ShadowState.m_hVertexShader = shaderFile.m_pVCSReader->GetShader(m_ShadowState.m_hStaticVertexShader, 0);
 }
 
 void CShaderShadowDX11::SetPixelShader(const char* pFileName, int nStaticPshIndex)
 {
-	ALERT_NOT_IMPLEMENTED();
+	ALERT_INCOMPLETE();
+
+	m_ShadowState.m_hPixelShader = NULL;
+
+	if (!pFileName)
+		return;
+
+	VCSRep_t lookupFile;
+	lookupFile.m_Name = pFileName;
+
+	VCSIndex_t VCSInd = m_ShaderFiles.Find(lookupFile);
+	if (!m_ShaderFiles.IsValidIndex(VCSInd))
+	{
+		VCSInd = m_ShaderFiles.AddToTail(lookupFile);
+
+		m_ShaderFiles[VCSInd].m_pVCSReader = new CVCSReader();
+		m_ShaderFiles[VCSInd].m_pVCSReader->InitReader(pFileName, false);
+	}
+
+	VCSRep_t &shaderFile = m_ShaderFiles[VCSInd];
+
+	shaderFile.m_pVCSReader->CreateShadersForStaticComboIfNeeded(nStaticPshIndex);
+
+	m_ShadowState.m_hStaticPixelShader = shaderFile.m_pVCSReader->GetStaticShader(nStaticPshIndex);
+	m_ShadowState.m_hPixelShader = shaderFile.m_pVCSReader->GetShader(m_ShadowState.m_hStaticPixelShader, 0);
+
 }
 
 

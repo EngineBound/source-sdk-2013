@@ -687,6 +687,8 @@ public:
 	void UnbindVertexShader(VertexShaderHandle_t hVertexShader);
 	void UnbindPixelShader(PixelShaderHandle_t hPixelShader);
 
+	void VertexShaderVertexFormat(unsigned int nFlags, int nTexCoordCount, int* pTexCoordDimensions, int nUserDataSize);
+
 private:
 
 	void HandleStateChanges();
