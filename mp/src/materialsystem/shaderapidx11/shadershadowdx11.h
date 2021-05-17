@@ -6,12 +6,21 @@
 #endif
 
 #include "ishadershadowdx11.h"
+#include "utlsymbol.h"
+#include "utllinkedlist.h"
+#include "vcsreader.h"
+
+#include "statesdx11.h"
 
 class CShaderShadowDX11;
 extern CShaderShadowDX11* g_pShaderShadowDX11;
 
 class CShaderShadowDX11 : public IShaderShadowDX11
 {
+public:
+	CShaderShadowDX11();
+	~CShaderShadowDX11();
+
 public:
 	// Sets the default *shadow* state
 	virtual void SetDefaultState();
@@ -128,6 +137,25 @@ public:
 	// More alpha blending state
 	virtual void BlendOp(ShaderBlendOp_t blendOp);
 	virtual void BlendOpSeparateAlpha(ShaderBlendOp_t blendOp);
+
+private:
+
+	ShadowStateDX11 m_ShadowState;
+
+	struct VCSRep_t
+	{
+		CUtlSymbol m_Name;
+		CVCSReader m_VCSReader;
+
+		bool operator==(const VCSRep_t& a) const
+		{
+			return m_Name == a.m_Name;
+		}
+	};
+
+	typedef CUtlFixedLinkedList<VCSRep_t>::IndexType_t VCSIndex_t;
+
+	CUtlFixedLinkedList<VCSRep_t> m_ShaderFiles;
 };
 
 #endif

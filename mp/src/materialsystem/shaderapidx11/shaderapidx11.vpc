@@ -39,6 +39,9 @@ $Project "ShaderApiDX11 (EngineBound)"
         $File	"dx11global.h"
         $File	"statesdx11.h"
         
+		$File   "vcsreader.h"
+        $File   "vcsreader.cpp"
+
         $File   "hardwareconfigdx11.h"
         $File   "hardwareconfigdx11.cpp"
         

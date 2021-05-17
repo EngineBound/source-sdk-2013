@@ -41,7 +41,8 @@ CShaderAPIDX11::CShaderAPIDX11() : m_DynamicState(), m_ShaderState()
 
 	m_StateChanges = STATE_CHANGED_PRIMITIVE_TOPOLOGY;
 
-	m_pMaterial = 0;
+	m_pMaterial = NULL;
+	m_pRenderMesh = NULL;
 }
 
 CShaderAPIDX11::~CShaderAPIDX11()
@@ -702,10 +703,16 @@ void CShaderAPIDX11::ExecuteCommandBuffer(uint8 *pCmdBuffer)
 {
 	for (;;)
 	{
-		int curCmd = *(pCmdBuffer++);
+		uint8 curCmd = *pCmdBuffer;
 
-		if (curCmd == CBCMD_END)
-			break;
+		switch (curCmd)
+		{
+		case CBCMD_END:
+			return;
+		default:
+			pCmdBuffer += sizeof(int);
+			break; // Lole
+		}
 	}
 }
 
@@ -998,7 +1005,11 @@ void CShaderAPIDX11::BeginPass(StateSnapshot_t snapshot)
 // Renders a single pass of a material
 void CShaderAPIDX11::RenderPass(int nPass, int nPassCount)
 {
-	ALERT_NOT_IMPLEMENTED();
+	ALERT_INCOMPLETE();
+
+	HandleStateChanges();
+
+	// g_pShaderDeviceDX11->GetDeviceContext()->DrawIndexed(m_pRenderMesh->IndexCount(), 0, 0);
 }
 
 
@@ -2041,14 +2052,16 @@ void CShaderAPIDX11::SetPrimitiveTopology(MaterialPrimitiveType_t primitiveType)
 
 void CShaderAPIDX11::DrawMesh(IMesh *pMesh)
 {
-	CMeshDX11 *pMeshDX11 = static_cast<CMeshDX11 *>(pMesh);
+	m_pRenderMesh = static_cast<CMeshDX11 *>(pMesh);
 
-	SetPrimitiveTopology(pMeshDX11->GetTopology());
+	SetPrimitiveTopology(m_pRenderMesh->GetTopology());
 
-	BindVertexBuffer(0, pMeshDX11->GetVertexBuffer(), 0, 0, pMesh->VertexCount(), pMesh->GetVertexFormat());
-	BindIndexBuffer(pMeshDX11->GetIndexBuffer(), 0);
+	BindVertexBuffer(0, m_pRenderMesh->GetVertexBuffer(), 0, 0, m_pRenderMesh->VertexCount(), m_pRenderMesh->GetVertexFormat());
+	BindIndexBuffer(m_pRenderMesh->GetIndexBuffer(), 0);
 
-	m_pMaterial->DrawElements(CompressionType(pMesh->GetVertexFormat()));
+	m_pMaterial->DrawElements(CompressionType(m_pRenderMesh->GetVertexFormat()));
+
+	m_pRenderMesh = NULL;
 }
 
 // ------------ End ----------------------------

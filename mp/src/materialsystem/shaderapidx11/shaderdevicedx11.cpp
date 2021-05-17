@@ -177,6 +177,9 @@ void CShaderDeviceDX11::Shutdown()
 
 	m_bDeviceInitialized = false;
 
+	m_VertexShaders.RemoveAll();
+	m_PixelShaders.RemoveAll();
+
 	g_pShaderAPIDX11->OnDeviceShutdown();
 }
 

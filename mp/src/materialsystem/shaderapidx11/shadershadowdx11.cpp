@@ -2,6 +2,12 @@
 #include "dx11global.h"
 
 #include "shadershadowdx11.h"
+#include "ishaderdevicedx11.h"
+
+#include "materialsystem/shader_vcs_version.h"
+#include "filesystem.h"
+
+#include "vcsreader.h"
 
 #include "memdbgon.h"
 
@@ -12,6 +18,16 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderShadowDX11, IShaderShadowDX11,
 	SHADERSHADOW_INTERFACE_VERSION, s_ShaderShadowDX11)
 
 IShaderShadowDX11* g_pShaderShadow = g_pShaderShadowDX11;
+
+CShaderShadowDX11::CShaderShadowDX11() : m_ShadowState()
+{
+
+}
+
+CShaderShadowDX11::~CShaderShadowDX11()
+{
+	m_ShaderFiles.RemoveAll();
+}
 
 // Sets the default *shadow* state
 void CShaderShadowDX11::SetDefaultState()
@@ -157,7 +173,27 @@ void CShaderShadowDX11::VertexShaderVertexFormat(unsigned int nFlags,
 // Pixel and vertex shader methods
 void CShaderShadowDX11::SetVertexShader(const char* pFileName, int nStaticVshIndex)
 {
-	ALERT_NOT_IMPLEMENTED();
+	ALERT_INCOMPLETE();
+	// Incomplete as combos aren't used (static index)
+
+	m_ShadowState.m_hVertexShader = NULL;
+
+	if (!pFileName)
+		return;
+
+	VCSRep_t lookupFile;
+	lookupFile.m_Name = pFileName;
+	
+	VCSIndex_t VCSInd = m_ShaderFiles.Find(lookupFile);
+	if (!m_ShaderFiles.IsValidIndex(VCSInd))
+	{
+		lookupFile.m_VCSReader.InitReader(pFileName, true);
+		VCSInd = m_ShaderFiles.AddToTail(lookupFile);
+	}
+
+	VCSRep_t &shaderFile = m_ShaderFiles[VCSInd];
+
+	shaderFile.m_VCSReader.CreateShadersForStaticComboIfNeeded(nStaticVshIndex);
 }
 
 void CShaderShadowDX11::SetPixelShader(const char* pFileName, int nStaticPshIndex)

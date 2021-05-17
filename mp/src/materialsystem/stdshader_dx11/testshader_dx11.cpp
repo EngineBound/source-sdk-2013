@@ -45,9 +45,7 @@ SHADER_DRAW
 		pShaderShadow->EnableTexture(SHADER_SAMPLER1, true);
 		pShaderShadow->EnableTexture(SHADER_SAMPLER2, true);
 
-		unsigned int flags = VERTEX_POSITION;
-		int numTexCoords = 1;
-		pShaderShadow->VertexShaderVertexFormat(flags, numTexCoords, 0, 0);
+		pShaderShadow->VertexShaderVertexFormat(VERTEX_POSITION, 1, 0, 0);
 
 		DECLARE_STATIC_VERTEX_SHADER(testshader_dx11_vs50);
 		SET_STATIC_VERTEX_SHADER(testshader_dx11_vs50);

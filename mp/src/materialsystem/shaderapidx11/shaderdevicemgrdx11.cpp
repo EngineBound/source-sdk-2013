@@ -3,6 +3,7 @@
 #include "dx11global.h"
 
 #include "ishaderutil.h"
+#include "filesystem.h"
 #include "shadershadowdx11.h"
 #include "shaderapidx11.h"
 #include "shaderdevicedx11.h"
@@ -22,6 +23,7 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CShaderDeviceMgrDX11, IShaderDeviceMgrDX11,
 
 IShaderDeviceMgrDX11 *g_pShaderDeviceMgr = g_pShaderDeviceMgrDX11;
 IShaderUtil *g_pShaderUtil;
+IFileSystem *g_pFullFileSystem; // We only want this for now so no tier 2
 
 // Here's where the app systems get to learn about each other 
 bool CShaderDeviceMgrDX11::Connect(CreateInterfaceFn factory)
@@ -34,8 +36,9 @@ bool CShaderDeviceMgrDX11::Connect(CreateInterfaceFn factory)
 	if (FAILED(hr))
 		return false;
 
-	// Get shaderutil
+	// Get shaderutil, filesystem
 	g_pShaderUtil = (IShaderUtil*)factory(SHADER_UTIL_INTERFACE_VERSION, NULL);
+	g_pFullFileSystem = (IFileSystem *)factory(FILESYSTEM_INTERFACE_VERSION, NULL);
 
 	return true;
 }

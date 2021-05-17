@@ -7,6 +7,8 @@
 
 #include "utlstack.h"
 
+#include "IShaderDevice.h" // Lol,,,
+
 #include <d3d11.h>
 #include <DirectXMath.h>
 
@@ -106,6 +108,16 @@ struct ShaderStateDX11 {
 			m_MatrixStacks[i].Top() = DirectX::XMMatrixIdentity();
 		}
 
+	}
+};
+
+struct ShadowStateDX11 {
+	VertexShaderHandle_t m_hVertexShader;
+	PixelShaderHandle_t m_hPixelShader;
+
+	ShadowStateDX11()
+	{
+		V_memset(this, 0, sizeof(*this));
 	}
 };
 

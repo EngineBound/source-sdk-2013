@@ -15,6 +15,7 @@ class CShaderAPIDX11;
 extern CShaderAPIDX11* g_pShaderAPIDX11;
 
 class CMaterialDX11;
+class CMeshDX11;
 
 class CShaderAPIDX11 : public IShaderAPIDX11, public IDebugTextureInfoDX11
 {
@@ -720,13 +721,13 @@ private:
 
 	IMeshDX11 *m_pDynamicMesh;
 
-
 	CUtlVector<CAPITextureDX11> m_vTextures;
 	ShaderAPITextureHandle_t m_ModifyTextureHandle;
 
 	ShaderAPITextureHandle_t m_BackBufferHandle;
 
 	CMaterialDX11 *m_pMaterial;
+	CMeshDX11 *m_pRenderMesh;
 };
 
 #endif
