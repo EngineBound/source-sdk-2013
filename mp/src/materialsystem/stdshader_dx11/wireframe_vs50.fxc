@@ -1,0 +1,21 @@
+struct VS_INPUT
+{
+    float4 vPos : POSITION;
+    float4 vColor : COLOR;
+};
+
+struct VS_OUTPUT
+{
+    float4 projPos : SV_POSITION;
+    float4 vColor : COLOR;
+};
+
+VS_OUTPUT main( const VS_INPUT v )
+{
+    VS_OUTPUT o = ( VS_OUTPUT )0;
+    
+    o.projPos = v.vPos; // FIXME
+    
+    o.vColor = v.vColor;
+    return o;
+}

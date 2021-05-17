@@ -56,7 +56,8 @@ $Project "STDShader_DX11 (EngineBound)"
         $File   "bypass_crc_check.cpp"
     
 		$File	"BaseVSShader.cpp"
-		$File	"testshader_dx11.cpp"
+		$File	"bik_dx11.cpp"
+		$File	"wireframe_dx11.cpp"
 	}
 
 	$Folder	"Header Files"

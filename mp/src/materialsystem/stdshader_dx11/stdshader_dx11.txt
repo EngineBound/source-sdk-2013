@@ -1,2 +1,5 @@
-testshader_dx11_ps50.fxc
-testshader_dx11_vs50.fxc
+bik_ps50.fxc
+bik_vs50.fxc
+
+wireframe_ps50.fxc
+wireframe_vs50.fxc

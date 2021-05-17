@@ -1,10 +1,10 @@
 
 #include "BaseVSShader.h"
 
-#include "testshader_dx11_ps50.inc"
-#include "testshader_dx11_vs50.inc"
+#include "bik_ps50.inc"
+#include "bik_vs50.inc"
 
-BEGIN_VS_SHADER(Bik, "") // Lole
+BEGIN_VS_SHADER(Bik, "")
 
 BEGIN_SHADER_PARAMS
 SHADER_PARAM(YTEXTURE, SHADER_PARAM_TYPE_TEXTURE, "shadertest/BaseTexture", "Y Bink Texture")
@@ -47,11 +47,11 @@ SHADER_DRAW
 
 		pShaderShadow->VertexShaderVertexFormat(VERTEX_POSITION, 1, 0, 0);
 
-		DECLARE_STATIC_VERTEX_SHADER(testshader_dx11_vs50);
-		SET_STATIC_VERTEX_SHADER(testshader_dx11_vs50);
+		DECLARE_STATIC_VERTEX_SHADER(bik_vs50);
+		SET_STATIC_VERTEX_SHADER(bik_vs50);
 
-		DECLARE_STATIC_PIXEL_SHADER(testshader_dx11_ps50);
-		SET_STATIC_PIXEL_SHADER(testshader_dx11_ps50);
+		DECLARE_STATIC_PIXEL_SHADER(bik_ps50);
+		SET_STATIC_PIXEL_SHADER(bik_ps50);
 
 		pShaderShadow->EnableSRGBWrite(false);
 	}
@@ -62,11 +62,11 @@ SHADER_DRAW
 		BindTexture(SHADER_SAMPLER1, CRTEXTURE, FRAME);
 		BindTexture(SHADER_SAMPLER2, CBTEXTURE, FRAME);
 
-		DECLARE_DYNAMIC_VERTEX_SHADER(testshader_dx11_vs50);
-		SET_DYNAMIC_VERTEX_SHADER(testshader_dx11_vs50);
+		DECLARE_DYNAMIC_VERTEX_SHADER(bik_vs50);
+		SET_DYNAMIC_VERTEX_SHADER(bik_vs50);
 
-		DECLARE_DYNAMIC_PIXEL_SHADER(testshader_dx11_ps50);
-		SET_DYNAMIC_PIXEL_SHADER(testshader_dx11_ps50);
+		DECLARE_DYNAMIC_PIXEL_SHADER(bik_ps50);
+		SET_DYNAMIC_PIXEL_SHADER(bik_ps50);
 	}
 
 	Draw();
