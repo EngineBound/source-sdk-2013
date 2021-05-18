@@ -753,20 +753,171 @@ void CShaderAPIDX11::MarkUnusedVertexFields(unsigned int nFlags, int nTexCoordCo
 	ALERT_NOT_IMPLEMENTED();
 }
 
-
+#define INTERPRET_DATA(_type, _ptr) (*(reinterpret_cast<_type const *>(_ptr)))
 
 void CShaderAPIDX11::ExecuteCommandBuffer(uint8 *pCmdBuffer)
 {
 	for (;;)
 	{
 		uint8 curCmd = *pCmdBuffer;
+		pCmdBuffer += sizeof(int);
 
 		switch (curCmd)
 		{
 		case CBCMD_END:
 			return;
-		default:
+		case CBCMD_JUMP:
+		{
+			pCmdBuffer = INTERPRET_DATA(uint8 *, pCmdBuffer);
+		}
+		break;
+
+		case CBCMD_JSR:
+		{
+			ExecuteCommandBuffer(INTERPRET_DATA(uint8 *, pCmdBuffer));
+			pCmdBuffer += sizeof(uint8 *);
+		}
+		break;
+
+		case CBCMD_SET_PIXEL_SHADER_FLOAT_CONST:
+		{
+			int first_reg = INTERPRET_DATA(int, pCmdBuffer);
 			pCmdBuffer += sizeof(int);
+			int nregs = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+			float *values = INTERPRET_DATA(float *, pCmdBuffer);
+			pCmdBuffer += sizeof(float) * nregs * 4;
+
+			SetPixelShaderConstant(first_reg, values, nregs, false); // maybe true
+		}
+		break;
+
+		case CBCMD_SET_VERTEX_SHADER_FLOAT_CONST:
+		{
+			int first_reg = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+			int nregs = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+			float *values = INTERPRET_DATA(float *, pCmdBuffer);
+			pCmdBuffer += sizeof(float) * nregs * 4;
+
+			SetVertexShaderConstant(first_reg, values, nregs, false); // maybe true
+		}
+		break;
+
+		case CBCMD_SETPIXELSHADERFOGPARAMS:
+		{
+			int regdest = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+
+			SetPixelShaderFogParams(regdest);
+		}
+		break;
+
+		case CBCMD_COMMITPIXELSHADERLIGHTING:
+		{
+			int regdest = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+
+			CommitPixelShaderLighting(regdest);
+		}
+		break;
+
+		case CBCMD_SETPIXELSHADERSTATEAMBIENTLIGHTCUBE:
+		{
+			int regdest = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+
+			SetPixelShaderStateAmbientLightCube(regdest);
+		}
+		break;
+
+		case CBCMD_SETAMBIENTCUBEDYNAMICSTATEVERTEXSHADER:
+		{
+			SetVertexShaderStateAmbientLightCube();
+		}
+		break;
+
+		case CBCMD_SET_DEPTH_FEATHERING_CONST:
+		{
+			int constReg = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+
+			float blendScale = INTERPRET_DATA(float, pCmdBuffer);
+			pCmdBuffer += sizeof(float);
+
+			SetDepthFeatheringPixelShaderConstant(constReg, blendScale);
+		}
+		break;
+
+		case CBCMD_BIND_STANDARD_TEXTURE:
+		{
+			Sampler_t sampler = INTERPRET_DATA(Sampler_t, pCmdBuffer);
+			pCmdBuffer += sizeof(Sampler_t);
+			
+			StandardTextureId_t texID = INTERPRET_DATA(StandardTextureId_t, pCmdBuffer);
+			pCmdBuffer += sizeof(StandardTextureId_t);
+
+			BindStandardTexture(sampler, texID);
+		}
+		break;
+
+		case CBCMD_BIND_SHADERAPI_TEXTURE_HANDLE:
+		{
+			Sampler_t sampler = INTERPRET_DATA(Sampler_t, pCmdBuffer);
+			pCmdBuffer += sizeof(Sampler_t);
+
+			ShaderAPITextureHandle_t hTex = INTERPRET_DATA(ShaderAPITextureHandle_t, pCmdBuffer);
+			pCmdBuffer += sizeof(ShaderAPITextureHandle_t);
+
+			BindTexture(sampler, hTex);
+		}
+		break;
+
+		case CBCMD_SET_PSHINDEX:
+		{
+			int shaderInd = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+
+			SetPixelShaderIndex(shaderInd);
+		}
+		break;
+
+		case CBCMD_SET_VSHINDEX:
+		{
+			int shaderInd = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+
+			SetVertexShaderIndex(shaderInd);
+		}
+		break;
+
+		case CBCMD_SET_VERTEX_SHADER_FLASHLIGHT_STATE:
+		case CBCMD_STORE_EYE_POS_IN_PSCONST:
+		{
+			pCmdBuffer += sizeof(int);
+		}
+		break;
+		case CBCMD_SET_VERTEX_SHADER_FLOAT_CONST_REF:
+		{
+			//int first_reg = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+			int nregs = INTERPRET_DATA(int, pCmdBuffer);
+			pCmdBuffer += sizeof(int);
+			//float *values = INTERPRET_DATA(float *, pCmdBuffer);
+			pCmdBuffer += sizeof(float) * nregs * 4;
+		}
+		break;
+
+		case CBCMD_SET_PIXEL_SHADER_FLASHLIGHT_STATE:
+		{
+			pCmdBuffer += sizeof(int) * 3 + sizeof(Sampler_t);
+		}
+		break;
+
+		case CBCMD_SET_PIXEL_SHADER_UBERLIGHT_STATE:
+		case CBCMD_SET_VERTEX_SHADER_NEARZFARZ_STATE:
+		default:
 			break; // Lole
 		}
 	}
