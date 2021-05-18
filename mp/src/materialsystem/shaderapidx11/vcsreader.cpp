@@ -205,12 +205,13 @@ void CVCSReader::CreateShadersForStaticComboIfNeeded(int nStaticIndex)
 
 	uint32 nChunkSize = 0;
 	unsigned char *pChunk = GetComboChunk(nActualStaticIndex, nChunkSize);
+	unsigned char *pChunkRead = pChunk; // Ensure pChunk is not changed
 	unsigned char pUncompressedChunk[MAX_SHADER_UNPACKED_BLOCK_SIZE];
 
 	bool bIsValid = true;
 	for (int nDynamicIndex = 0;bIsValid && nDynamicIndex < m_ShaderHeader.m_nDynamicCombos;nDynamicIndex++)
 	{
-		uint32 nBlockHeader = Next32(pChunk);
+		uint32 nBlockHeader = Next32(pChunkRead);
 		if (nBlockHeader == 0xFFFFFFFF)
 			break; // Reached end of chunk
 
@@ -219,16 +220,16 @@ void CVCSReader::CreateShadersForStaticComboIfNeeded(int nStaticIndex)
 		{
 			case 0x80000000: // Uncompressed
 			{
-				V_memcpy(pUncompressedChunk, pChunk, nBlockSize);
-				pChunk += nBlockSize;
+				V_memcpy(pUncompressedChunk, pChunkRead, nBlockSize);
+				pChunkRead += nBlockSize;
 
 			}
 			break;
 
 			case 0x40000000: // LZMA
 			{
-				size_t nUncompressedSize = CLZMA::Uncompress(pChunk, pUncompressedChunk);
-				pChunk += nBlockSize;
+				size_t nUncompressedSize = CLZMA::Uncompress(pChunkRead, pUncompressedChunk);
+				pChunkRead += nBlockSize;
 				nBlockSize = nUncompressedSize;
 
 			}
