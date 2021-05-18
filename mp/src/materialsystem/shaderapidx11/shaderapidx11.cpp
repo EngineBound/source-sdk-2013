@@ -79,7 +79,9 @@ void CShaderAPIDX11::HandleStateChanges()
 	if (m_StateChanges & STATE_CHANGED_CONSTANT_BUFFER)
 	{
 		// TODO: VERTEX CONSTANTS
-		pDeviceContext->PSSetConstantBuffers(0, 1, &m_DynamicState.m_pConstantBuffer);
+		LoadMatConstantBuffer();
+
+		pDeviceContext->PSSetConstantBuffers(0, 1, m_DynamicState.m_ppPSConstantBuffers);
 	}
 
 	if (m_StateChanges & STATE_CHANGED_PRIMITIVE_TOPOLOGY)
@@ -135,6 +137,31 @@ void CShaderAPIDX11::HandleStateChanges()
 
 
 
+}
+
+struct MatrixCBuffers_t // TODO: Only view matrix is required to be reset here
+{
+	DirectX::XMFLOAT4X4 mModelViewProj;
+};
+
+void CShaderAPIDX11::LoadMatConstantBuffer()
+{
+	MatrixCBuffers_t matBuffer;
+
+	DirectX::XMMATRIX modelViewProj = m_ShaderState.m_MatrixStacks[MATERIAL_PROJECTION].Top()
+		* m_ShaderState.m_MatrixStacks[MATERIAL_VIEW].Top()
+		* m_ShaderState.m_MatrixStacks[MATERIAL_MODEL].Top();
+
+	XMStoreFloat4x4(&matBuffer.mModelViewProj, modelViewProj);
+
+	ConstantDesc_t constDesc;
+	m_pMatrixConstBuffer->Lock(sizeof(MatrixCBuffers_t), false, constDesc);
+	V_memcpy(constDesc.m_pData, &matBuffer, sizeof(MatrixCBuffers_t));
+	m_pMatrixConstBuffer->Unlock(sizeof(MatrixCBuffers_t));
+
+	BindConstantBufferEx(m_pMatrixConstBuffer, 0, 0, true);
+
+	g_pShaderDeviceDX11->GetDeviceContext()->VSSetConstantBuffers(0, 1, m_DynamicState.m_ppVSConstantBuffers);
 }
 
 // ------------------------------------------------------- //
@@ -239,24 +266,32 @@ void CShaderAPIDX11::PopMatrix()
 	m_ShaderState.m_MatrixStacks[m_MatrixMode].Pop();
 
 	m_pCurMatrix = &m_ShaderState.m_MatrixStacks[m_MatrixMode].Top();
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::LoadMatrix(float *m)
 {
 	DirectX::XMFLOAT4X4 inMat(m);
 	*m_pCurMatrix = DirectX::XMLoadFloat4x4(&inMat);
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::MultMatrix(float *m)
 {
 	DirectX::XMFLOAT4X4 inMat(m);
 	*m_pCurMatrix = DirectX::XMMatrixMultiply(*m_pCurMatrix, DirectX::XMLoadFloat4x4(&inMat));
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::MultMatrixLocal(float *m)
 {
 	DirectX::XMFLOAT4X4 inMat(m);
 	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&inMat), *m_pCurMatrix);
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::GetMatrix(MaterialMatrixMode_t matrixMode, float *dst)
@@ -269,6 +304,8 @@ void CShaderAPIDX11::GetMatrix(MaterialMatrixMode_t matrixMode, float *dst)
 void CShaderAPIDX11::LoadIdentity(void)
 {
 	*m_pCurMatrix = DirectX::XMMatrixIdentity();
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::LoadCameraToWorld(void)
@@ -285,6 +322,7 @@ void CShaderAPIDX11::LoadCameraToWorld(void)
 
 	*m_pCurMatrix = invView;
 
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::Ortho(double left, double right, double bottom, double top, double zNear, double zFar)
@@ -292,6 +330,8 @@ void CShaderAPIDX11::Ortho(double left, double right, double bottom, double top,
 	DirectX::XMMATRIX orthoMat = DirectX::XMMatrixOrthographicOffCenterRH(left, right, bottom, top, zNear, zFar);
 
 	*m_pCurMatrix = DirectX::XMMatrixMultiply(orthoMat, *m_pCurMatrix);
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::PerspectiveX(double fovx, double aspect, double zNear, double zFar)
@@ -301,6 +341,8 @@ void CShaderAPIDX11::PerspectiveX(double fovx, double aspect, double zNear, doub
 
 	DirectX::XMMATRIX perspMat = DirectX::XMMatrixPerspectiveRH(width, height, zNear, zFar);
 	*m_pCurMatrix = DirectX::XMMatrixMultiply(perspMat, *m_pCurMatrix);
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::PickMatrix(int x, int y, int width, int height)
@@ -314,21 +356,29 @@ void CShaderAPIDX11::Rotate(float angle, float x, float y, float z)
 	rotAxis = DirectX::XMVectorSet(x, y, z, 0);
 
 	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationAxis(rotAxis, angle * M_PI / 180.0), *m_pCurMatrix);
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::Translate(float x, float y, float z)
 {
 	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslation(x, y, z), *m_pCurMatrix);
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::Scale(float x, float y, float z)
 {
 	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(x, y, z), *m_pCurMatrix);
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 void CShaderAPIDX11::ScaleXY(float x, float y)
 {
 	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(x, y, 1.f), *m_pCurMatrix);
+
+	m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
 }
 
 
@@ -2035,6 +2085,11 @@ void CShaderAPIDX11::BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBy
 
 void CShaderAPIDX11::BindConstantBuffer(IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes)
 {
+	BindConstantBufferEx(pConstantBuffer, nOffsetInBytes, 0, false);
+}
+
+void CShaderAPIDX11::BindConstantBufferEx(IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes, int nChannel, bool bIsVertexCBuffer) // TODO: CLEAN THIS UP A MILLION TIMES
+{
 	CConstantBufferDX11 *pConstantBufferDX11 = static_cast<CConstantBufferDX11*>(pConstantBuffer);
 	ID3D11Buffer *pBuffer = NULL;
 	UINT nOffset = nOffsetInBytes;
@@ -2043,13 +2098,28 @@ void CShaderAPIDX11::BindConstantBuffer(IConstantBufferDX11 *pConstantBuffer, in
 		pBuffer = pConstantBufferDX11->GetBuffer();
 	}
 
-	if (m_DynamicState.m_pConstantBuffer != pBuffer || m_DynamicState.m_CBOffset != nOffset)
+	if (bIsVertexCBuffer)
 	{
-		m_DynamicState.m_pConstantBuffer = pBuffer;
-		m_DynamicState.m_CBOffset = nOffset;
+		if (m_DynamicState.m_ppVSConstantBuffers[nChannel] != pBuffer || m_DynamicState.m_pVSCBOffsets[nChannel] != nOffset)
+		{
+			m_DynamicState.m_ppVSConstantBuffers[nChannel] = pBuffer;
+			m_DynamicState.m_pVSCBOffsets[nChannel] = nOffset;
 
-		m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
+			m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
+		}
 	}
+	else
+	{
+		if (m_DynamicState.m_ppPSConstantBuffers[nChannel] != pBuffer || m_DynamicState.m_pPSCBOffsets[nChannel] != nOffset)
+		{
+			m_DynamicState.m_ppPSConstantBuffers[nChannel] = pBuffer;
+			m_DynamicState.m_pPSCBOffsets[nChannel] = nOffset;
+
+			m_StateChanges |= STATE_CHANGED_CONSTANT_BUFFER;
+		}
+	}
+
+	
 }
 
 void CShaderAPIDX11::Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount)
@@ -2409,6 +2479,8 @@ void CShaderAPIDX11::OnDeviceInitialised()
 	pBackBufferTex->InitRenderTarget(w, h, pBackBuffer, g_pShaderDevice->GetBackBufferFormat());
 
 	m_StateChanges |= STATE_CHANGED_RENDER_TARGETS;
+
+	m_pMatrixConstBuffer = g_pShaderDevice->CreateConstantBuffer(SHADER_BUFFER_TYPE_DYNAMIC, sizeof(MatrixCBuffers_t), "");
 }
 
 void CShaderAPIDX11::OnDeviceShutdown()

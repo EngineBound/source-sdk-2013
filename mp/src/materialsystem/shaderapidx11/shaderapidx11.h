@@ -695,6 +695,10 @@ private:
 
 	void SetPrimitiveTopology(MaterialPrimitiveType_t primitiveType);
 
+	void LoadMatConstantBuffer();
+
+	void BindConstantBufferEx(IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes, int nChannel = 0, bool bIsVertexCBuffer = false);
+
 private:
 
 	enum StateChangeFlags {
@@ -730,6 +734,8 @@ private:
 
 	CMaterialDX11 *m_pMaterial;
 	CMeshDX11 *m_pRenderMesh;
+
+	IConstantBufferDX11 *m_pMatrixConstBuffer;
 };
 
 #endif

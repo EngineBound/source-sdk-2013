@@ -15,6 +15,7 @@
 
 #define MAX_DX11_VIEWPORTS 16
 #define MAX_DX11_SAMPLERS 16
+#define MAX_DX11_CBUFFERS 2
 
 struct DynamicStateDX11 {
 	int m_nViewportCount;
@@ -36,8 +37,11 @@ struct DynamicStateDX11 {
 	DXGI_FORMAT m_IBFmt;
 	UINT m_IBOffset;
 
-	ID3D11Buffer* m_pConstantBuffer;
-	UINT m_CBOffset;
+	ID3D11Buffer* m_ppVSConstantBuffers[MAX_DX11_CBUFFERS];
+	UINT m_pVSCBOffsets[MAX_DX11_CBUFFERS];
+
+	ID3D11Buffer* m_ppPSConstantBuffers[MAX_DX11_CBUFFERS];
+	UINT m_pPSCBOffsets[MAX_DX11_CBUFFERS];
 
 	D3D11_PRIMITIVE_TOPOLOGY m_PrimitiveTopology;
 
@@ -69,8 +73,14 @@ struct DynamicStateDX11 {
 		m_IBFmt = DXGI_FORMAT_UNKNOWN;
 		m_IBOffset = 0;
 
-		m_pConstantBuffer = NULL;
-		m_CBOffset = 0;
+		for (int i = 0; i < MAX_DX11_SAMPLERS; ++i)
+		{
+			m_ppVSConstantBuffers[i] = NULL;
+			m_pVSCBOffsets[i] = 0;
+
+			m_ppPSConstantBuffers[i] = NULL;
+			m_pPSCBOffsets[i] = 0;
+		}
 
 		for (int i = 0; i < MAX_DX11_SAMPLERS; ++i)
 		{
