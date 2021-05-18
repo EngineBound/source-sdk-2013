@@ -251,6 +251,15 @@ void CVCSReader::CreateShadersForStaticComboIfNeeded(int nStaticIndex)
 			/*uint32 nComboID = */Next32(pLocation);
 			uint32 nByteCodeSize = Next32(pLocation);
 
+			if (*(pLocation + 77) != 0x5)
+			{
+				free(pChunk);
+				free(m_ppShaderComboHandles[nActualStaticIndex]);
+
+				Warning("Incorrect shader model supplied to game when sm50 required!\n");
+				return;
+			}
+
 			ShaderHandle_t shader;
 
 			if (m_bIsVertexShader)
