@@ -12,7 +12,7 @@
 abstract_class IShaderAPIDX11 : public IShaderAPI
 {
 public:
-	virtual void BindConstantBuffer(IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes) = 0;
+	virtual void BindConstantBuffer(ConstantBufferType_t type, IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes, int nChannel = 0) = 0;
 };
 
 abstract_class IDebugTextureInfoDX11 : public IDebugTextureInfo

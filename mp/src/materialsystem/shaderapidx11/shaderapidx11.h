@@ -567,7 +567,7 @@ public:
 	// ------------ New Vertex/Index Buffer interface ----------------------------
 	virtual void BindVertexBuffer(int nStreamID, IVertexBuffer *pVertexBuffer, int nOffsetInBytes, int nFirstVertex, int nVertexCount, VertexFormat_t fmt, int nRepetitions = 1);
 	virtual void BindIndexBuffer(IIndexBuffer *pIndexBuffer, int nOffsetInBytes);
-	virtual void BindConstantBuffer(IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes);
+	virtual void BindConstantBuffer(ConstantBufferType_t type, IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes, int nChannel = 0);
 	virtual void Draw(MaterialPrimitiveType_t primitiveType, int nFirstIndex, int nIndexCount);
 	void DrawMesh(IMesh *pMesh);
 	// ------------ End ----------------------------
@@ -697,8 +697,6 @@ private:
 
 	void LoadMatConstantBuffer();
 
-	void BindConstantBufferEx(IConstantBufferDX11 *pConstantBuffer, int nOffsetInBytes, int nChannel = 0, bool bIsVertexCBuffer = false);
-
 private:
 
 	enum StateChangeFlags {
@@ -715,6 +713,7 @@ private:
 		STATE_CHANGED_TEXTURES = 0x200,
 		STATE_CHANGED_SAMPLERS = 0x400,
 		STATE_CHANGED_CONSTANT_BUFFER = 0x800,
+		STATE_CHANGED_MATRICES = 0x1000,
 	};
 
 	unsigned int m_StateChanges;

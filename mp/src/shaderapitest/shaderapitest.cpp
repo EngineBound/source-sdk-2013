@@ -526,7 +526,7 @@ void CShaderAPITest::RunDynamicBufferTest(bool bTestFallback, bool bUseTexCoord,
 		m_pShaderAPI->BindIndexBuffer(pIndexBuffer, indexBuilder.Offset());
 
 		if (bTestConstantBuffer)
-			m_pShaderAPI->BindConstantBuffer(pConstantBuffer, 0);
+			m_pShaderAPI->BindConstantBuffer(CBUFFER_PIXEL_SHADER, pConstantBuffer, 0);
 
 		m_pShaderAPI->Draw(MATERIAL_TRIANGLES, indexBuilder.GetFirstIndex(), indexBuilder.TotalIndexCount());
 	}
@@ -719,7 +719,7 @@ void CShaderAPITest::RunLightingTest()
 		V_memcpy(constDesc.m_pData, &lightData, sizeof(lightData_t));
 		pConstantBuffer->Unlock(sizeof(lightData_t));
 
-		m_pShaderAPI->BindConstantBuffer(pConstantBuffer, 0);
+		m_pShaderAPI->BindConstantBuffer(CBUFFER_PIXEL_SHADER, pConstantBuffer, 0);
 		m_pShaderAPI->Draw(MATERIAL_TRIANGLES, indexBuilder.GetFirstIndex(), indexBuilder.TotalIndexCount());
 		m_pShaderDevice->Present();
 	}

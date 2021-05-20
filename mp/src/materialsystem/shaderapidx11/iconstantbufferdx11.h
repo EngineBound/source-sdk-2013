@@ -9,6 +9,17 @@
 
 #define DYNAMIC_CONSTANT_BUFFER_MEMORY (1024 * 1024)
 
+enum ConstantBufferType_t
+{
+	CBUFFER_PIXEL_SHADER,
+	CBUFFER_VERTEX_SHADER,
+};
+
+FORCEINLINE bool IsVertexShaderType(ConstantBufferType_t type)
+{
+	return type == CBUFFER_VERTEX_SHADER;
+}
+
 struct ConstantDesc_t
 {
 	unsigned char *m_pData;

@@ -118,7 +118,6 @@ struct ShaderStateDX11 {
 			m_MatrixStacks[i].Push();
 			m_MatrixStacks[i].Top() = DirectX::XMMatrixIdentity();
 		}
-
 	}
 };
 
