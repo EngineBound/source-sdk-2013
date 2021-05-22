@@ -2628,6 +2628,26 @@ void CShaderAPIDX11::OnDeviceInitialised()
 	m_StateChanges |= STATE_CHANGED_RENDER_TARGETS;
 
 	m_pMatrixConstBuffer = g_pShaderDevice->CreateConstantBuffer(SHADER_BUFFER_TYPE_DYNAMIC, sizeof(MatrixCBuffers_t), "");
+
+	// TODO: Move this to state change
+	D3D11_BLEND_DESC blendDesc;
+	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.IndependentBlendEnable = FALSE;
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_DEST_ALPHA;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	ID3D11BlendState *blendState = NULL; // Check if this is a mem leak
+	hr = g_pShaderDeviceDX11->GetDevice()->CreateBlendState(&blendDesc, &blendState);
+	Assert(!FAILED(hr));
+
+	g_pShaderDeviceDX11->GetDeviceContext()->OMSetBlendState(blendState, NULL, 0xFFFFFF);
 }
 
 void CShaderAPIDX11::OnDeviceShutdown()

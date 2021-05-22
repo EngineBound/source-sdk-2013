@@ -44,6 +44,11 @@ SHADER_DRAW
 
 	DYNAMIC_STATE
 	{
+		if (params[BASETEXTURE]->IsDefined())
+		{
+			BindTexture(SHADER_SAMPLER0, BASETEXTURE, 0);
+		}
+
 		DECLARE_DYNAMIC_VERTEX_SHADER(unlitgeneric_vs50);
 		SET_DYNAMIC_VERTEX_SHADER(unlitgeneric_vs50);
 
