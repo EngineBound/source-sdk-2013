@@ -162,7 +162,7 @@ bool CVertexBufferDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 		}
 
 		// ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		HRESULT hr = g_pShaderDeviceDX11->GetDeviceContext()->Map(m_pD3DBuffer, 0, bAppend ? D3D11_MAP_WRITE_NO_OVERWRITE : D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		HRESULT hr = g_pShaderDeviceDX11->GetDeviceContext()->Map(m_pD3DBuffer, 0, map, 0, &mappedResource);
 		if (FAILED(hr))
 		{
 			Assert(0);
@@ -410,7 +410,7 @@ bool CIndexBufferDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 		}
 
 		// ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		HRESULT hr = g_pShaderDeviceDX11->GetDeviceContext()->Map(m_pD3DBuffer, 0, bAppend ? D3D11_MAP_WRITE_NO_OVERWRITE : D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		HRESULT hr = g_pShaderDeviceDX11->GetDeviceContext()->Map(m_pD3DBuffer, 0, map, 0, &mappedResource);
 		if (FAILED(hr))
 		{
 			Assert(0);

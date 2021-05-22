@@ -151,9 +151,9 @@ void CShaderAPIDX11::LoadMatConstantBuffer()
 {
 	MatrixCBuffers_t matBuffer;
 
-	DirectX::XMMATRIX modelViewProj = m_ShaderState.m_MatrixStacks[MATERIAL_PROJECTION].Top()
+	DirectX::XMMATRIX modelViewProj = DirectX::XMMatrixTranspose(m_ShaderState.m_MatrixStacks[MATERIAL_PROJECTION].Top()
 		* m_ShaderState.m_MatrixStacks[MATERIAL_VIEW].Top()
-		* m_ShaderState.m_MatrixStacks[MATERIAL_MODEL].Top();
+		* m_ShaderState.m_MatrixStacks[MATERIAL_MODEL].Top());
 
 	XMStoreFloat4x4(&matBuffer.mModelViewProj, modelViewProj);
 

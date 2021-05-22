@@ -4,8 +4,6 @@
 #include "wireframe_ps50.inc"
 #include "wireframe_vs50.inc"
 
-DEFINE_FALLBACK_SHADER(UnlitGeneric, Wireframe);
-
 BEGIN_VS_SHADER(Wireframe, "")
 
 BEGIN_SHADER_PARAMS

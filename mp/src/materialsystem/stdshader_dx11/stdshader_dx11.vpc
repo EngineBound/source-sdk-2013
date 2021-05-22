@@ -58,6 +58,7 @@ $Project "STDShader_DX11 (EngineBound)"
 		$File	"BaseVSShader.cpp"
 		$File	"bik_dx11.cpp"
 		$File	"wireframe_dx11.cpp"
+		$File	"unlitgeneric_dx11.cpp"
 	}
 
 	$Folder	"Header Files"
@@ -71,8 +72,9 @@ $Project "STDShader_DX11 (EngineBound)"
 		$Lib	shaderlib
 	}
 
+	$File	"buildhl2mpshaders.bat"
 	$File	"buildsdkshaders.bat"
 	$File	"buildshaders.bat"
 
-//	$Shaders	"stdshader_dx11.txt"
+	$Shaders	"stdshader_dx11.txt"
 }

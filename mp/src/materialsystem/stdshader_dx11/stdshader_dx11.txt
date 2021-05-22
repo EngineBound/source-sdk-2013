@@ -3,3 +3,6 @@ bik_vs50.fxc
 
 wireframe_ps50.fxc
 wireframe_vs50.fxc
+
+unlitgeneric_ps50.fxc
+unlitgeneric_vs50.fxc
