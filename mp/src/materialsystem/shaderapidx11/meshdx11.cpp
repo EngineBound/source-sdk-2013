@@ -551,6 +551,8 @@ CMeshDX11::CMeshDX11(bool bIsDynamic, VertexFormat_t fmt)
 		m_pVertexBufferDX11->CreateBuffer();
 		m_pIndexBufferDX11->CreateBuffer();
 	}
+
+	m_bRequiresIndexUnlock = false;
 }
 
 CMeshDX11::~CMeshDX11()
@@ -608,7 +610,7 @@ void CMeshDX11::BeginCastBuffer(VertexFormat_t format)
 
 bool CMeshDX11::Lock(int nVertexCount, bool bAppend, VertexDesc_t &desc)
 {
-	//g_ShaderAPIMutex.Lock();
+	g_ShaderAPIMutex.Lock();
 
 	if (!m_pVertexBufferDX11)
 	{
@@ -624,7 +626,7 @@ void CMeshDX11::Unlock(int nVertexCount, VertexDesc_t &desc)
 {
 	m_pVertexBufferDX11->Unlock(nVertexCount, desc);
 
-	//g_ShaderAPIMutex.Unlock();
+	g_ShaderAPIMutex.Unlock();
 }
 
 
@@ -668,7 +670,7 @@ void CMeshDX11::BeginCastBuffer(MaterialIndexFormat_t format)
 // Locks, unlocks the index buffer
 bool CMeshDX11::Lock(int nMaxIndexCount, bool bAppend, IndexDesc_t &desc)
 {
-	//g_ShaderAPIMutex.Lock();
+	g_ShaderAPIMutex.Lock();
 
 	if (!m_pIndexBufferDX11)
 	{
@@ -684,7 +686,7 @@ void CMeshDX11::Unlock(int nWrittenIndexCount, IndexDesc_t &desc)
 {
 	m_pIndexBufferDX11->Unlock(nWrittenIndexCount, desc);
 
-	//g_ShaderAPIMutex.Unlock();
+	g_ShaderAPIMutex.Unlock();
 }
 
 
@@ -784,11 +786,19 @@ void CMeshDX11::ValidateData(int nVertexCount, int nIndexCount, const MeshDesc_t
 // nIndexCount of -1 means don't lock the index buffer...
 void CMeshDX11::LockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
-	//g_ShaderAPIMutex.Lock();
+	g_ShaderAPIMutex.Lock();
 
-	Lock(nVertexCount, false, static_cast<VertexDesc_t &>(desc));
+	Lock(nVertexCount, false, static_cast<VertexDesc_t&>(desc));
 	if (nIndexCount > -1)
-		Lock(nIndexCount, false, static_cast<IndexDesc_t &>(desc));
+	{
+		Lock(nIndexCount, false, static_cast<IndexDesc_t&>(desc));
+
+		m_bRequiresIndexUnlock = true;
+	}
+	else
+	{
+		m_bRequiresIndexUnlock = false;
+	}
 }
 
 void CMeshDX11::ModifyBegin(int nFirstVertex, int nVertexCount, int nFirstIndex, int nIndexCount, MeshDesc_t& desc)
@@ -803,10 +813,13 @@ void CMeshDX11::ModifyEnd(MeshDesc_t& desc)
 
 void CMeshDX11::UnlockMesh(int nVertexCount, int nIndexCount, MeshDesc_t &desc)
 {
-	Unlock(nVertexCount, static_cast<VertexDesc_t &>(desc));
-	Unlock(nIndexCount, static_cast<IndexDesc_t &>(desc));
+	Unlock(nVertexCount, static_cast<VertexDesc_t&>(desc));
+	if (m_bRequiresIndexUnlock)
+		Unlock(nIndexCount, static_cast<IndexDesc_t&>(desc));
 
-	//g_ShaderAPIMutex.Unlock();
+	m_bRequiresIndexUnlock = false;
+
+	g_ShaderAPIMutex.Unlock();
 }
 
 

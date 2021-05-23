@@ -296,7 +296,7 @@ void CAPITextureDX11::LoadImage2D(
 	box.right = box.left + width;
 	box.top = yOffset;
 	box.bottom = yOffset + height;
-	box.front = zOffset;
+	box.front = 0;// zOffset;
 	box.back = box.front + 1;
 
 	UINT subResource = D3D11CalcSubresource(level, cubeFaceID, m_nNumMipLevels);

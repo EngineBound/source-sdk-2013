@@ -179,7 +179,7 @@ uint32 CVCSReader::ResolveAliasCombo(uint32 aliasID)
 	aliasLookup.m_nStaticComboID = aliasID;
 
 	nInd = m_pDuplicateStaticComboRecords->Find(aliasLookup);
-	if (m_pDuplicateStaticComboRecords->IsValidIndex(nInd))
+	if (m_pDuplicateStaticComboRecords->IsValidIndex(nInd) && m_pDuplicateStaticComboRecords->Element(nInd).m_nStaticComboID != aliasID)
 		return ResolveAliasCombo(m_pDuplicateStaticComboRecords->Element(nInd).m_nStaticComboID);
 
 	// EOF combo

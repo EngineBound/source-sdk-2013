@@ -4,11 +4,6 @@
 #include "unlitgeneric_ps50.inc"
 #include "unlitgeneric_vs50.inc"
 
-DEFINE_FALLBACK_SHADER(LightmappedGeneric, UnlitGeneric);
-DEFINE_FALLBACK_SHADER(Sprite, UnlitGeneric);
-DEFINE_FALLBACK_SHADER(VertexLitGeneric, UnlitGeneric);
-DEFINE_FALLBACK_SHADER(Cable, UnlitGeneric);
-
 BEGIN_VS_SHADER(UnlitGeneric, "")
 
 BEGIN_SHADER_PARAMS

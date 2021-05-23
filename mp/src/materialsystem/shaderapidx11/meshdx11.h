@@ -475,6 +475,8 @@ public:
 private:
 	bool m_bIsDynamic;
 
+	bool m_bRequiresIndexUnlock;
+
 	CVertexBufferDX11 *m_pVertexBufferDX11;
 	CIndexBufferDX11 *m_pIndexBufferDX11;
 

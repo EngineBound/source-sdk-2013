@@ -4,7 +4,9 @@
 #include "wireframe_ps50.inc"
 #include "wireframe_vs50.inc"
 
-BEGIN_VS_SHADER(Wireframe, "")
+DEFINE_FALLBACK_SHADER(Wireframe, Wireframe_DX11);
+
+BEGIN_VS_SHADER(Wireframe_DX11, "")
 
 BEGIN_SHADER_PARAMS
 END_SHADER_PARAMS
