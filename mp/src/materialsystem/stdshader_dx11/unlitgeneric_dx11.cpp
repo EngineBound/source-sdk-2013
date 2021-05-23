@@ -4,6 +4,11 @@
 #include "unlitgeneric_ps50.inc"
 #include "unlitgeneric_vs50.inc"
 
+DEFINE_FALLBACK_SHADER(LightmappedGeneric, UnlitGeneric);
+DEFINE_FALLBACK_SHADER(Sprite, UnlitGeneric);
+DEFINE_FALLBACK_SHADER(VertexLitGeneric, UnlitGeneric);
+DEFINE_FALLBACK_SHADER(Cable, UnlitGeneric);
+
 BEGIN_VS_SHADER(UnlitGeneric, "")
 
 BEGIN_SHADER_PARAMS
@@ -31,11 +36,28 @@ SHADER_DRAW
 {
 	SHADOW_STATE
 	{
-		pShaderShadow->EnableTexture(SHADER_SAMPLER0, true);
+		unsigned int flags = VERTEX_POSITION;
+		int nTexCoordCount = 0;
 
-		pShaderShadow->VertexShaderVertexFormat(VERTEX_POSITION, 1, 0, 0 /*to pad out the vertex for now*/);
+		bool bVertexColor = false;
+
+		if (IS_FLAG_SET(MATERIAL_VAR_VERTEXCOLOR) || IS_FLAG_SET(MATERIAL_VAR_VERTEXALPHA))
+		{
+			flags |= VERTEX_COLOR;
+
+			bVertexColor = true;
+		}
+
+		if (params[BASETEXTURE]->IsDefined())
+		{
+			pShaderShadow->EnableTexture(SHADER_SAMPLER0, true);
+			++nTexCoordCount;
+		}
+
+		pShaderShadow->VertexShaderVertexFormat(flags, nTexCoordCount, 0, 0);
 
 		DECLARE_STATIC_VERTEX_SHADER(unlitgeneric_vs50);
+		SET_STATIC_VERTEX_SHADER_COMBO(VERTEXCOLOR, bVertexColor);
 		SET_STATIC_VERTEX_SHADER(unlitgeneric_vs50);
 
 		DECLARE_STATIC_PIXEL_SHADER(unlitgeneric_ps50);

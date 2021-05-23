@@ -1,15 +1,21 @@
+// STATIC: "VERTEXCOLOR" "0..1"
+
 #include "common_vs_fxc.h"
 
 struct VS_INPUT
 {
     float4 vPos : POSITION;
     float2 vTexCoord0 : TEXCOORD0;
+#if VERTEXCOLOR == 1
+    float4 vColor : COLOR;
+#endif
 };
 
 struct VS_OUTPUT
 {
     float4 vProjPos : SV_POSITION;
     float2 vTexCoord0 : TEXCOORD0;
+    float4 vColor : COLOR;
 };
 
 VS_OUTPUT main(const VS_INPUT v)
@@ -17,6 +23,12 @@ VS_OUTPUT main(const VS_INPUT v)
     VS_OUTPUT o = (VS_OUTPUT) 0;
     
     o.vProjPos = mul(float4(v.vPos.xyz, 1), cMVPMatrix);
+    
+#if VERTEXCOLOR == 1
+    o.vColor = v.vColor;
+#else
+    o.vColor = float4(1, 1, 1, 1);
+#endif
     
     o.vTexCoord0 = v.vTexCoord0;
     return o;

@@ -2,6 +2,7 @@ struct PS_INPUT
 {
     float4 vProjPos : SV_POSITION;
     float2 vTexCoord0 : TEXCOORD0;
+    float4 vColor : COLOR;
 };
 
 sampler baseTexSampler : register(s0);
@@ -9,5 +10,8 @@ Texture2D baseTexture : register(t0);
 
 float4 main(PS_INPUT i) : SV_TARGET
 {
-    return baseTexture.Sample(baseTexSampler, i.vTexCoord0.xy).rgba;
+    float4 finalColor = baseTexture.Sample(baseTexSampler, i.vTexCoord0.xy).rgba;
+    finalColor *= i.vColor;
+    
+    return finalColor;
 }
