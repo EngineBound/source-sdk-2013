@@ -2082,7 +2082,7 @@ void CShaderAPIDX11::DisableAlphaToCoverage()
 // Computes the vertex buffer pointers 
 void CShaderAPIDX11::ComputeVertexDescription(unsigned char* pBuffer, VertexFormat_t vertexFormat, MeshDesc_t& desc) const
 {
-	ALERT_NOT_IMPLEMENTED();
+	ComputeVertexDesc(pBuffer, vertexFormat, desc);
 }
 
 
