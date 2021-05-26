@@ -9,16 +9,16 @@ struct VS_INPUT
 
 struct VS_OUTPUT
 {
-    float4 projPos : SV_POSITION;
-    float2 texCoord0 : TEXCOORD0;
+    float4 vProjPos : SV_POSITION;
+    float2 vTexCoord0 : TEXCOORD0;
 };
 
 VS_OUTPUT main( const VS_INPUT v )
 {
     VS_OUTPUT o = ( VS_OUTPUT )0;
     
-    o.projPos = mul( float4(v.vPos.xyz, 1), cMVPMatrix);
+    o.vProjPos = ProjectPosition(v.vPos.xyz);
     
-    o.texCoord0 = v.vTexCoord0.xy;
+    o.vTexCoord0 = v.vTexCoord0.xy;
     return o;
 }

@@ -72,6 +72,11 @@ $Project "STDShader_DX11 (EngineBound)"
 		$Lib	shaderlib
 	}
 
+	$Folder "Shader Source"
+	{
+		$File	"common_vs_fxc.h"
+	}
+
 	$File	"buildhl2mpshaders.bat"
 	$File	"buildsdkshaders.bat"
 	$File	"buildshaders.bat"

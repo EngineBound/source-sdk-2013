@@ -1,6 +1,6 @@
 struct PS_INPUT
 {
-    float4 projPos : SV_POSITION;
+    float4 vProjPos : SV_POSITION;
     float4 vColor : COLOR;
 };
 

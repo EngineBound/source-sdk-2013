@@ -144,18 +144,25 @@ void CShaderAPIDX11::HandleStateChanges()
 
 struct MatrixCBuffers_t // TODO: Only view matrix is required to be reset here
 {
-	DirectX::XMFLOAT4X4 mModelViewProj;
+	DirectX::XMFLOAT4X4 mModel;
+	DirectX::XMFLOAT4X4 mView;
+	DirectX::XMFLOAT4X4 mProj;
 };
 
 void CShaderAPIDX11::LoadMatConstantBuffer()
 {
 	MatrixCBuffers_t matBuffer;
 
-	DirectX::XMMATRIX modelViewProj = DirectX::XMMatrixTranspose(m_ShaderState.m_MatrixStacks[MATERIAL_PROJECTION].Top()
-		* m_ShaderState.m_MatrixStacks[MATERIAL_VIEW].Top()
-		* m_ShaderState.m_MatrixStacks[MATERIAL_MODEL].Top());
+	DirectX::XMMATRIX modelMat, viewMat, projMat;
+	modelMat = DirectX::XMMatrixTranspose(m_ShaderState.m_MatrixStacks[MATERIAL_MODEL].Top());
+	viewMat = DirectX::XMMatrixTranspose(m_ShaderState.m_MatrixStacks[MATERIAL_VIEW].Top());
+	projMat = DirectX::XMMatrixTranspose(m_ShaderState.m_MatrixStacks[MATERIAL_PROJECTION].Top());
 
-	XMStoreFloat4x4(&matBuffer.mModelViewProj, modelViewProj);
+	//DirectX::XMMATRIX modelViewProj = DirectX::XMMatrixTranspose(projMat * viewMat * modelMat);
+
+	XMStoreFloat4x4(&matBuffer.mModel, modelMat);
+	XMStoreFloat4x4(&matBuffer.mView, viewMat);
+	XMStoreFloat4x4(&matBuffer.mProj, projMat);
 
 	ConstantDesc_t constDesc;
 	m_pMatrixConstBuffer->Lock(sizeof(MatrixCBuffers_t), false, constDesc);
@@ -365,6 +372,11 @@ void CShaderAPIDX11::Rotate(float angle, float x, float y, float z)
 
 void CShaderAPIDX11::Translate(float x, float y, float z)
 {
+	if (m_MatrixMode == MATERIAL_MODEL)
+	{
+		DebuggerBreak();
+	}
+
 	*m_pCurMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixTranslation(x, y, z), *m_pCurMatrix);
 
 	m_StateChanges |= STATE_CHANGED_MATRICES;
@@ -624,7 +636,24 @@ float CShaderAPIDX11::GetLightMapScaleFactor(void) const
 
 void CShaderAPIDX11::LoadBoneMatrix(int boneIndex, const float *m)
 {
-	ALERT_NOT_IMPLEMENTED();
+	ALERT_INCOMPLETE();
+
+	if (boneIndex == 0)
+	{
+		MatrixMode(MATERIAL_MODEL);
+
+		// Load the 3x4 matrix into a 4x4
+		DirectX::XMFLOAT4X4 inMat(m);
+		inMat._41 = 0.f;
+		inMat._42 = 0.f;
+		inMat._43 = 0.f;
+		inMat._44 = 1.f;
+
+		*m_pCurMatrix = XMMatrixTranspose(DirectX::XMLoadFloat4x4(&inMat));
+
+		m_StateChanges |= STATE_CHANGED_MATRICES;
+	}
+
 }
 
 

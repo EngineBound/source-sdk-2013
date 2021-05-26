@@ -22,7 +22,7 @@ VS_OUTPUT main(const VS_INPUT v)
 {
     VS_OUTPUT o = (VS_OUTPUT) 0;
     
-    o.vProjPos = mul(float4(v.vPos.xyz, 1), cMVPMatrix);
+    o.vProjPos = ProjectPosition(v.vPos.xyz);
     
 #if VERTEXCOLOR == 1
     o.vColor = v.vColor;
